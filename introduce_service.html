@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="한양에너지 서비스 소개 - 태양광 에너지 투자 플랫폼 동행으로 안전하고 안정적인 수익을 창출하세요">
+    <meta name="keywords" content="태양광,태양광발전사업,태양열,태양광투자,신재생에너지,고수익,안정적인투자,안전한투자,1억투자,한양에너지,조합원,제테크,동행">
+    <meta name="author" content="한양에너지">
+    
+    <!-- Open Graph 메타 태그 -->
+    <meta property="og:url" content="https://hanyang-energy.com/introduce_service.html">
+    <meta property="og:title" content="한양에너지 - 서비스 소개">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://hanyang-energy.com/img/preview.jpg">
+    <meta property="og:description" content="누구나 쉽고 안전하게 태양광 에너지에 투자할 수 있는 플랫폼 동행을 소개합니다">
+    
+    <title>한양에너지 - 서비스 소개</title>
+    
+    <!-- 파비콘 -->
+    <link rel="icon" href="img/favi.ico" type="image/jpeg">
+    
+    <!-- 폰트 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" href="css/global.css?v=1754221270">
+    <link rel="stylesheet" href="css/header.css?v=1754221270">
+    <link rel="stylesheet" href="css/utilities.css?v=1754221270">
+    
+    <style>
+        /* 기본 스타일 */
+        body {
+            font-family: 'Pretendard', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            margin-top: 100px; /* 헤더 고정 높이만큼 추가 */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 배너 스타일 */
+        .intro-banner {
+            width: 100%;
+            height: 330px;
+            max-width: 1200px;
+            margin: 50px 0;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .intro-banner .text-box {
+            width: 100%;
+            height: 330px;
+            text-align: left;
+            padding-left: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .intro-banner .banner-img {
+            height: 530px;
+            position: absolute;
+            bottom: -200px;
+            right: 150px;
+            opacity: 0.8;
+        }
+
+        .intro-banner .banner-title {
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 56px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .intro-banner .banner-desc {
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 32px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .intro-banner .banner-desc-m {
+            display: none;
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .intro-banner .point {
+            color: #FEE500;
+            font-weight: 700;
+        }
+
+        /* 소개 섹션 */
+        .intro-contents {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .intro-content-box {
+            display: grid;
+            grid-template-columns: 1fr;
+            margin-bottom: 30px;
+        }
+
+        .intro-content-box .content {
+            position: relative;
+            padding: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            text-align: left;
+            cursor: pointer;
+            transition: all 500ms ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .intro-content-box .close {
+            height: 310px;
+        }
+
+        .intro-content-box .close .picture {
+            height: 230px;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .intro-content-box:nth-child(2) .close .picture,
+        .intro-content-box:nth-child(3) .close .picture,
+        .intro-content-box:nth-child(5) .close .picture {
+            right: 40px;
+        }
+
+        .intro-content-box .close .desc {
+            display: none;
+        }
+
+        .intro-content-box .open {
+            height: 700px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .intro-content-box .open img {
+            display: none;
+        }
+
+        .intro-content-box .open .sub-title {
+            display: none;
+        }
+
+        .intro-content-box .open .desc {
+            display: block;
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 32px;
+            color: #444c57;
+            padding-top: 16px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .intro-content-box .desc .point {
+            font-weight: 700;
+            font-size: 22px;
+            color: #0215bf;
+        }
+
+        /* 소개 1 */
+        .intro-content-box:nth-child(1) {
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .intro-content-box:nth-child(1) .content:nth-child(1) {
+            background: linear-gradient(135deg, #cdf5f6 0%, #a8e6e7 100%);
+        }
+
+        .intro-content-box:nth-child(1) .content:nth-child(2) {
+            background: linear-gradient(135deg, #eff9da 0%, #d4ed9c 100%);
+        }
+
+        /* 소개 2 */
+        .intro-content-box:nth-child(2) .content {
+            background: linear-gradient(135deg, #cbe4f9 0%, #a1d0f5 100%);
+        }
+
+        /* 소개 3 */
+        .intro-content-box:nth-child(3) .content {
+            background: linear-gradient(135deg, #f9ebdf 0%, #f2d7b3 100%);
+        }
+
+        /* 소개 4 */
+        .intro-content-box:nth-child(4) {
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .intro-content-box:nth-child(4) .content:nth-child(1) {
+            background: linear-gradient(135deg, #f9d8d6 0%, #f0b7b3 100%);
+        }
+
+        .intro-content-box:nth-child(4) .content:nth-child(2) {
+            background: linear-gradient(135deg, #c0c4d0 0%, #9ca3b5 100%);
+        }
+
+        /* 소개 5 */
+        .intro-content-box:nth-child(5) .content {
+            background: linear-gradient(135deg, #d6cdea 0%, #c3b5e0 100%);
+        }
+
+        .intro-contents .intro-content-box .content .title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 36px;
+            color: #2c3e50;
+        }
+
+        .intro-contents .intro-content-box .content .sub-title {
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 32px;
+            color: #444c57;
+            padding-top: 16px;
+        }
+
+        .intro-contents .intro-content-box .content .arrow {
+            width: 32px;
+            height: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .intro-contents .intro-content-box .content:hover .arrow {
+            transform: translateY(5px);
+        }
+
+        /* 파트너 로고 섹션 */
+        .intro-partner-logo {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+            padding: 0 20px;
+        }
+
+        .intro-partner-logo .partner-logo-title {
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 30px;
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 56px;
+            color: #2c3e50;
+        }
+
+        .intro-partner-logo .partner-logo-wrapper {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            place-items: center;
+            padding: 10px 0;
+        }
+
+        .intro-partner-logo .partner-logo-wrapper .partner-logo {
+            width: 216px;
+            height: 100px;
+            background-color: #fbfbfb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .intro-partner-logo .partner-logo-wrapper .partner-logo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .intro-partner-logo .partner-logo-wrapper .partner-logo img {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+        }
+
+        /* 이자금 섹션 */
+        .interest-section {
+            background: linear-gradient(135deg, #f6f6f6 0%, #e9ecef 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 80px 20px 120px 20px;
+            margin-top: 50px;
+        }
+
+        .interest-section img {
+            width: 180px;
+            height: 144px;
+            animation: bounce 2s infinite;
+        }
+
+        .interest-section .interest-title {
+            display: flex;
+            flex-direction: column;
+            color: #444c57;
+            margin-top: 20px;
+            gap: 16px;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 36px;
+            text-align: center;
+        }
+
+        .interest-section .interest-number {
+            color: #0215bf;
+            font-size: 56px;
+            font-weight: 800;
+            line-height: normal;
+            margin: 20px 0;
+        }
+
+        .interest-section a {
+            margin-top: 60px;
+            width: 328px;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 600;
+            height: 64px;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(45deg, #ff3300, #e62900);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 51, 0, 0.3);
+        }
+
+        .interest-section a:hover {
+            background: linear-gradient(45deg, #d12a00, #b82400);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 51, 0, 0.4);
+        }
+
+        /* 푸터 스타일 */
+        .modern-footer {
+            margin-top: 100px;
+            background-color: #535353;
+            color: #ecf0f1;
+            font-family: 'Pretendard', sans-serif;
+            padding: 40px 20px 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .modern-footer .footer-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 30px;
+        }
+
+        .modern-footer .footer-section {
+            flex: 1;
+            min-width: 220px;
+            margin-bottom: 20px;
+        }
+
+        .modern-footer .logo-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modern-footer .footer-logo {
+            margin-bottom: 15px;
+        }
+
+        .modern-footer .logo-img {
+            max-width: 100%;
+            width: 270px;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        .modern-footer .sns-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .modern-footer .sns-links a {
+            color: #ecf0f1;
+            font-size: 20px;
+            transition: color 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .modern-footer .sns-links a:hover {
+            color: #3498db;
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .modern-footer .links-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .modern-footer .links-section h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #3498db;
+        }
+
+        .modern-footer .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modern-footer .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .modern-footer .footer-links a {
+            text-decoration: none;
+            color: #bdc3c7;
+            transition: all 0.3s;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .modern-footer .footer-links a:hover {
+            color: #3498db;
+            padding-left: 5px;
+        }
+
+        .modern-footer .contact-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .modern-footer .contact-section h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #3498db;
+        }
+
+        .modern-footer .contact-info {
+            margin-bottom: 20px;
+        }
+
+        .modern-footer .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .modern-footer .contact-icon {
+            margin-right: 12px;
+            color: #3498db;
+            font-size: 16px;
+            margin-top: 3px;
+            min-width: 16px;
+        }
+
+        .modern-footer .contact-text {
+            flex: 1;
+            word-break: keep-all;
+        }
+
+        .modern-footer .footer-bottom {
+            text-align: center;
+            font-size: 13px;
+            color: #bdc3c7;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        /* 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* 반응형 스타일 */
+        @media (max-width: 1100px) {
+            .intro-banner .banner-title {
+                font-size: 32px;
+                font-weight: 700;
+                line-height: 46px;
+                margin-bottom: 20px;
+            }
+
+            .intro-banner .banner-desc {
+                font-size: 17px;
+                font-weight: 500;
+                line-height: 26px;
+            }
+
+            .intro-banner .banner-img {
+                height: 330px;
+                bottom: 0;
+                right: 0;
+                padding-right: 30px;
+            }
+
+            .intro-content-box .close .picture {
+                height: 180px;
+            }
+
+            .intro-content-box:nth-child(2) .close .picture,
+            .intro-content-box:nth-child(3) .close .picture,
+            .intro-content-box:nth-child(5) .close .picture {
+                right: 0px;
+            }
+
+            .intro-content-box .content .title {
+                font-size: 22px;
+                line-height: 30px;
+            }
+
+            .intro-content-box .content .sub-title {
+                font-size: 16px;
+                line-height: 24px;
+            }
+
+            .intro-content-box .content .desc {
+                font-size: 16px;
+                line-height: 24px;
+            }
+
+            .intro-content-box .content .point {
+                font-size: 18px;
+            }
+
+            .intro-partner-logo .partner-logo-title {
+                font-size: 32px;
+                font-weight: 700;
+                line-height: 46px;
+            }
+
+            .intro-partner-logo .partner-logo-wrapper {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .intro-banner {
+                height: 420px;
+                margin: 20px;
+                border-radius: 15px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .intro-banner .banner-title {
+                font-size: 24px;
+                line-height: 34px;
+            }
+
+            .intro-banner .text-box {
+                height: 100px;
+                padding-left: 20px;
+            }
+
+            .intro-banner .banner-desc {
+                display: none;
+            }
+
+            .intro-banner .banner-desc-m {
+                display: block;
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 2;
+                padding: 20px;
+                color: white;
+                border-radius: 0 0 15px 15px;
+            }
+
+            .intro-content-box .close .picture {
+                height: 130px;
+            }
+
+            .intro-content-box:nth-child(1),
+            .intro-content-box:nth-child(4) {
+                grid-template-columns: 1fr;
+            }
+
+            .intro-partner-logo .partner-logo-title {
+                font-size: 24px;
+                line-height: 34px;
+            }
+
+            .intro-partner-logo .partner-logo-wrapper {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .interest-section img {
+                width: 124px;
+                height: 100px;
+            }
+
+            .interest-section .interest-title {
+                margin-top: 16px;
+                font-size: 22px;
+                line-height: 30px;
+            }
+
+            .interest-section .interest-number {
+                font-size: 36px;
+            }
+
+            .interest-section a {
+                width: 280px;
+                border-radius: 12px;
+                height: 48px;
+                font-size: 16px;
+                margin-top: 40px;
+            }
+
+            .modern-footer .footer-section {
+                min-width: calc(50% - 15px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .intro-content-box .open {
+                height: 1000px;
+            }
+
+            .intro-partner-logo .partner-logo-wrapper {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .intro-content-box .close .picture {
+                height: 80px;
+                right: 20px;
+                bottom: 20px;
+            }
+
+            .intro-content-box:nth-child(2) .close .picture,
+            .intro-content-box:nth-child(3) .close .picture,
+            .intro-content-box:nth-child(5) .close .picture {
+                right: 20px;
+            }
+
+            .modern-footer {
+                padding: 30px 15px 20px;
+            }
+            
+            .modern-footer .footer-section {
+                min-width: 100%;
+                margin-bottom: 25px;
+            }
+            
+            .modern-footer .footer-container {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .modern-footer .links-section {
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .modern-footer .footer-links a {
+                padding: 8px 0;
+            }
+            
+            .modern-footer .logo-img {
+                width: 220px;
+            }
+            
+            .modern-footer .footer-bottom {
+                font-size: 12px;
+                padding-top: 15px;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hy-header">
+    <div class="hy-container">
+        <!-- 로고 영역 -->
+        <div class="hy-logo">
+            <a href="index.html">
+                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+            </a>
+        </div>
+
+        <!-- 데스크탑 네비게이션 -->
+        <nav class="hy-desktop-nav">
+            <ul class="hy-main-menu">
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="ceo_message.html">회사소개</a>
+                    <ul class="hy-submenu">
+                        <li><a href="ceo_message.html">인사말</a></li>
+                        <li><a href="history.html">연혁</a></li>
+                    </ul>
+                </li>
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="introduce_service.html">서비스 소개</a>
+                    <ul class="hy-submenu">
+                        <li><a href="introduce_service.html">서비스 소개</a></li>
+                        <li><a href="project_gallery.html">발전소 현황</a></li>
+                    </ul>
+                </li>
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="introduce_product.html">조합상품</a>
+                    <ul class="hy-submenu">
+                        <li><a href="introduce_product.html">조합상품안내</a></li>
+                        <li><a href="product_list.html">조합원 상품신청</a></li>
+                        <li><a href="my_investments.html">조합원 출자현황</a></li>
+                        <li><a href="withdraw_request.html">조합원 입금/출금</a></li>
+                    </ul>
+                </li>
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="announcements.html">고객센터</a>
+                    <ul class="hy-submenu">
+                        <li><a href="announcements.html">공지사항</a></li>
+                        <li><a href="faq.html">자주 묻는 질문</a></li>
+                        <li><a href="inquiry_list.html">1:1문의신청</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 사용자 인증 영역 -->
+        <div class="hy-auth-area">
+            <a href="login.html" class="hy-auth-link">로그인</a>
+            <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+        </div>
+
+        <!-- 모바일 메뉴 토글 버튼 -->
+        <button class="hy-mobile-toggle" aria-label="메뉴 열기">
+            <span class="hy-toggle-bar"></span>
+            <span class="hy-toggle-bar"></span>
+            <span class="hy-toggle-bar"></span>
+        </button>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="hy-mobile-menu">
+        <div class="hy-mobile-container">
+            <div class="hy-mobile-header">
+                <button class="hy-mobile-close" aria-label="메뉴 닫기">✕</button>
+            </div>
+            
+            <div class="hy-mobile-auth">
+                <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
+                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+            </div>
+
+            <nav class="hy-mobile-nav">
+                <ul>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">회사소개</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="ceo_message.html">인사말</a></li>
+                            <li><a href="history.html">연혁</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">서비스 소개</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="introduce_service.html">서비스 소개</a></li>
+                            <li><a href="project_gallery.html">발전소 현황</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">조합상품</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="introduce_product.html">조합상품안내</a></li>
+                            <li><a href="product_list.html">조합원 상품신청</a></li>
+                            <li><a href="my_investments.html">조합원 출자현황</a></li>
+                            <li><a href="withdraw_request.html">조합원 입금/출금</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">고객센터</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="announcements.html">공지사항</a></li>
+                            <li><a href="faq.html">자주 묻는 질문</a></li>
+                            <li><a href="inquiry_list.html">1:1문의신청</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- 배너 섹션 -->
+    <section class="intro-banner">
+        <div class="text-box">
+            <p class="banner-title">누구나 쉽고 안전하게 <br>태양광 에너지에 투자 할 수 있도록</p>
+            <p class="banner-desc">소수의 발전 사업자만이 누리던 <span class="point">태양광 에너지 수익</span>을 <br><span class="point">누구나</span> 에너지 시장 투자를 가능하도록 만들어 <br><span class="point">안정적으로</span> 수익을 얻을 수 있도록 돕고 있어요.</p>
+        </div>
+        <img class="banner-img" src="img/banner_human.png" alt="사람" onerror="this.style.display='none'">
+        <div class="banner-desc-m">
+            <p>소수의 발전 사업자만이 누리던 <span class="point">태양광 에너지 수익</span>을 <span class="point">누구나</span> 에너지 시장 투자를 가능하도록 만들어 <span class="point">안정적으로</span> 수익을 얻을 수 있도록 돕고 있어요.</p>
+        </div>
+    </section>
+
+    <!-- 소개 섹션 -->
+    <section class="intro-contents">
+        <div class="intro-content-box">
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">동행이 무엇인가요?</p>
+                    <p class="sub-title">
+                        동행은 태양광 에너지에 투자하고<br>
+                        수익을 가져가는 서비스에요.
+                    </p>
+                    <div class="desc">
+                        동행은 개인이 태양광 에너지 시장에 직접 투자하고,<br>
+                        그 수익을 나누어 가지는 서비스에요.<br><br>
+
+                        동행은 투자금을 모아 태양광 발전소를 건설하고,한전,전력거래소,<br>
+                        한전 자회사에 전력을 판매하여 얻은 수익으로 투자자분들께 매월 발전 수익금을 이자로 돌려드려요.<br><br>
+
+                        발전소의 건설,운영,관리는 동행의 운영사인 한양에너지가 맡아<br>
+                        안정적인 운영과 리스크 관리를 책임지고 있어요.
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service1.png" alt="소개1" onerror="this.style.display='none'">
+            </div>
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">동행은 어떻게 수익을 내나요?</p>
+                    <p class="sub-title">
+                        동행은 크게 2가지 방법으로<br>
+                        발전 수익을 내고 있어요.
+                    </p>
+                    <div class="desc">
+                        생산한 전력은 크게 2가지 형태로 판매가 돼요.<br><br>
+
+                        첫번째는 SMP(계통한계가격)로 한국전력이 발전사업자로부터 전력을 구입하는 가격이에요. 국제유가 변동과 밀접한 연관을 맺고 있으며, 연료비가 급등하면 SMP 가격이 높아져요.<br><br>
+
+                        두번째는 REC(재생에너지공급인증서) 로 신재생에너지 공급을 증명하는 인증서에요. REC는 온실가스 감축 이행 의무가 있는 공급의무자들에게 전력거래소의 현물 입찰 시장을 통해 판매하고 있어요.<br><br>
+
+                        또한 REC는 한전 자회사(동서발전,남부발전 등) 들과 20년간 고정가격 체결을 맺어 판매하고 있는데 이를 통해 에너지 가격이 떨어졌을때 손실을 최소화하고 있어요.<br><br>
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service2.png" alt="소개2" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="intro-content-box">
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">왜 태양광 에너지에 투자해야 하나요?</p>
+                    <p class="sub-title">
+                        2050년이 되면 전 세계 에너지의 50% 이상이 태양광에너지로 나올거라고 해요.
+                    </p>
+                    <div class="desc">
+                        <span class="point">글로벌 흐름</span><br>
+                        2025년 EU 탄소 국경 조정 제도 도입, 구글, 애플 등 글로벌 기업의 RE100 요구,AI데이터센터의 전력 수급 문제 등으로 재생에너지로의 전환은 기후 문제를 넘어 국가와 기업의 생존의 문제가 되고 있어요.<br><br>
+
+                        <span class="point">재생에너지 보급을 위한 정부 정책 확대</span><br>
+                        국가 온실가스 감축 목표 4차 기본계획(24년도)에 따르면 2030년까지 재생에너지의 발전 비중을 현재의 3배 이상 확대할 계획이라고 해요. 또한 산업통상자원부의 제11차 전력 수급기본 계획에 따르면 2050년까지 태양광 풍력을 전체 에너지 발전 비중의 62%까지 확대해 나갈 계획이라고 해요.<br><br>
+
+                        <span class="point">미래 에너지로 각광받는 태양광</span><br>
+                        에너지원별 평균 건설 기간은 원전14년, 해상 풍력 5년, 태양광은 1년으로 기후 위기를 해결할 가장 빠른 에너지원으로 주목받고 있어요.<br><br>
+
+                        또한 1Mwh 당 발전단가는 해상 풍력 159$, 태양광 77$로 저렴한 발전단가로 각광받고 있어요.<br><br>
+
+                        태양광은 현재 가장 즉각적이고 확장 가능한 에너지원으로 전 세계적으로 막대한 투자를 통해 규모가 빠르게 확장되고 있어요. 2050년이 되면 전 세계 에너지의 50% 이상이 태양광에너지로 나올거라고 해요.
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service3.png" alt="소개3" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="intro-content-box">
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">개인 투자자들을 모집하는 이유는 무엇인가요?</p>
+                    <p class="sub-title">
+                        과감한 재생에너지 전환을 위해서는 시장 참여자들을 많이 확보하는 것이 중요해요.
+                    </p>
+                    <div class="desc">
+                        한국의 재생에너지의 발전 비중은8%대로,2023년 기준OECD 38개국 중 37위에요. (OECD 평균 발전 비중은 34%)<br><br>
+
+                        우리나라는 왜 재생에너지 발전 비율이 이렇게 낮은 걸까요?<br>
+                        동행은 그 이유를 크게 3가지로 생각했어요.<br><br>
+
+                        하나, 좁은 국토로 인한 재생에너지 전환이 늦어졌어요.<br>
+                        둘, 각종 규제와 허가 절차가 까다로워요.<br>
+                        셋, 재생에너지에 대한 부정적 인식이 많아요.<br><br>
+
+                        특히 과감한 재생에너지 전환을 위해서는 사회적 합의를 모으고, 시장 참여자들을 많이 확보하는 것이 중요하다고 생각했어요.<br><br>
+
+                        동행은 플랫폼을 통해 태양광 에너지 시장의 접근성을 높이고, 옥상에 태양광 패널을 설치하여 국토 문제를 해결하고, 복잡한 운영과 관리를 대신하여 대규모 재생에너지 확보에 힘쓰고 있어요.
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service4.png" alt="소개4" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="intro-content-box">
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">협동조합 형태로 운영하면<br>어떤 장점이 있나요?</p>
+                    <p class="sub-title">
+                        동행은 협동조합의 안정성에 주목했어요.
+                    </p>
+                    <div class="desc">
+                        안정적으로 사업을 운영하고, 조합원들에게 최대의 이익을 돌려드리기 위함이에요.<br><br>
+
+                        협동조합 기본법 제 23조에 따라 협동조합의 조합원들은 모두가 동등하게 1인 1의결권을 가지고 권리를 행사할 수 있기 때문에 특정인이 조합의 자금을 남용할 수가 없어요.<br><br>
+
+                        또한 협동조합 형태는 외부자본이 아닌 조합원들의 투자금으로만 사업을 진행하여 발생한 수익이 오로지 조합원들에게만 돌아간다는 장점이 있어요.
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service5.png" alt="소개5" onerror="this.style.display='none'">
+            </div>
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">왜 지상 대신 옥상에 발전소를<br>건설하나요?</p>
+                    <p class="sub-title">
+                        옥상 태양광 발전소는 여러 장점이 있어요.
+                    </p>
+                    <div class="desc">
+                        동행은 전국의 유휴 옥상에 소규모 태양광 발전소를 짓고 있어요.<br>
+                        이는 환경 훼손 없이 설치가 가능하며 높은 수익까지 얻을 수 있기 때문이에요.<br><br>
+
+                        옥상 태양광 발전소는 태양광 발전소의 문제점으로 지적되는 산림훼손과 경관 파괴가 없을뿐 아니라 신재생에너지 공급 의무화 제도에 따라 전력 판매 시 1.5배의 가중치를 받아 높은 수익을 얻을수 있어요.<br><br>
+
+                        또한 토지 태양광에 비해 허가와 관련된 규제가 적고, 설비가 적게 필요하기 때문에 신속하게 설치하거나 확장할 수 있는 탄력성을 제공할수 있어요.
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service6.png" alt="소개6" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="intro-content-box">
+            <div class="content close" onclick="introduceOpen(this)">
+                <div>
+                    <p class="title">사업 안정성은 어떻게 보장하나요?</p>
+                    <p class="sub-title">
+                        동행이 다양한 리스크에 어떻게 대비하고 있는지 설명해드릴게요.
+                    </p>
+                    <div class="desc">
+                        <span class="point">발전소 운영</span><br>
+                        동행의 발전소는 전국 각지에 소규모 형태로 설치되어 있어 하나의 발전소에 문제가 생기더라도 전체 발전소에 영향을 주지 않아 손실을 최소화할 수있는 구조를 갖추고 있어요.<br><br>
+
+                        <span class="point">에너지 가격 변동</span><br>
+                        동행의 발전소는 한국전력과 20년간 SMP 전력판매 계약을 체결하고 있어 안정적인 판매처가 확보되어 있어요.<br><br>
+
+                        REC의 경우 전력거래소의 현물 입찰 시장을 통해 거래하고 있어요.<br>
+                        단, 에너지 가격이 낮아질 경우를 대비해서 한전 자회사(동서발전,남부발전 등)들과 20년 간 고정 가격 체결을 맺어 판매하고 있어요.<br><br>
+
+                        이를 통해 에너지 가격이 떨어졌을 때 손실을 최소화 할 수 있어요.<br><br>
+
+                        <span class="point">자연재해, 화재, 파손 대비</span><br>
+                        자연재해와 화재,파손 등의 사고에 대비해 다섯 개의 손해보험사를 통한 태양광 발전소 종합보험에 가입되어 있어 사고로 인한 손실을 신속히 복구할수 있는 대비책을 갖추고 있어요.
+                    </div>
+                </div>
+                <img class="arrow" src="img/introduce_service/down_arrow.svg" alt="아래화살표" onerror="this.style.display='none'">
+                <img class="picture" src="img/introduce_service/service7.png" alt="소개7" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <!-- 파트너 로고 섹션 -->
+    <section class="intro-partner-logo">
+        <p class="partner-logo-title">
+            동행은 유수의 파트너와 함께 <br> 에너지 시장을 선도하고 있어요.
+        </p>
+        <div class="partner-logo-wrapper">
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo1.png" alt="파트너 로고 1" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo2.png" alt="파트너 로고 2" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo3.png" alt="파트너 로고 3" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo4.png" alt="파트너 로고 4" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo5.png" alt="파트너 로고 5" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo6.png" alt="파트너 로고 6" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo7.png" alt="파트너 로고 7" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo8.png" alt="파트너 로고 8" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo9.png" alt="파트너 로고 9" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo10.png" alt="파트너 로고 10" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo11.png" alt="파트너 로고 11" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo12.png" alt="파트너 로고 12" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo13.png" alt="파트너 로고 13" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo14.png" alt="파트너 로고 14" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo15.png" alt="파트너 로고 15" onerror="this.style.display='none'">
+            </div>
+            <div class="partner-logo">
+                <img src="img/introduce_service/logo16.png" alt="파트너 로고 16" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <!-- 이자금 섹션 -->
+    <section class="interest-section">
+        <img src="img/introduce_service/money.png" alt="동전" onerror="this.style.display='none'">
+        <p class="interest-title">지금까지 동행이 지급한 이자금</p>
+        <div class="interest-number">
+            <span class="status-number" data-target="4269157130">0</span><span> 원</span>
+        </div>
+        <a href="product_list.html">상품신청 바로가기</a>
+    </section>
+</div>
+
+<!-- Footer -->
+<footer class="modern-footer">
+    <div class="footer-container">
+        <!-- 왼쪽: 로고 및 SNS -->
+        <div class="footer-section logo-section">
+            <div class="footer-logo">
+                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+            </div>
+            <p>청정에너지로 만드는 지속가능한 미래</p>
+            
+            <div class="sns-links">
+                <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="인스타그램"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
+                <a href="#" aria-label="블로그"><i class="fab fa-blogger-b"></i></a>
+            </div>
+        </div>
+
+        <!-- 중앙: 통합 링크 섹션 -->
+        <div class="footer-section links-section">
+            <h4>바로가기</h4>
+            <ul class="footer-links">
+                <li><a href="ceo_message.html">인사말</a></li>
+                <li><a href="history.html">연혁</a></li>
+                <li><a href="introduce_service.html">서비스 소개</a></li>
+                <li><a href="announcements.html">공지사항</a></li>
+                <li><a href="faq.html">자주 묻는 질문</a></li>
+            </ul>
+        </div>
+
+        <!-- 오른쪽: 연락처 섹션 -->
+        <div class="footer-section contact-section">
+            <h4>연락처</h4>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="contact-text">
+                        전라남도 보성군 보성읍 구교길2-1
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="contact-text">
+                        hanenergy@example.com
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409  | © 2023 주식회사 한양에너지. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<!-- JavaScript -->
+<script src="js/main.js"></script>
+
+<script>
+    function introduceOpen(item) {
+        if(item.classList.contains('close')) {
+            item.classList.remove('close');
+            item.classList.add('open');
+        } else {
+            item.classList.remove('open');
+            item.classList.add('close');
+        }
+    }
+
+    // 숫자 카운팅 효과 함수 및 Intersection Observer 설정
+    document.addEventListener("DOMContentLoaded", () => {
+        const counters = document.querySelectorAll(".status-number");
+
+        const updateCount = (counter) => {
+            const target = parseFloat(counter.getAttribute("data-target"));
+            const increment = target / 100;
+            let count = 0;
+
+            const counting = () => {
+                count += increment;
+                if (count < target) {
+                    counter.innerText = Math.ceil(count).toLocaleString();
+                    setTimeout(counting, 20);
+                } else {
+                    counter.innerText = target.toLocaleString(); // 목표 값으로 설정
+                }
+            };
+
+            counting();
+        };
+
+        const resetCounters = () => {
+            counters.forEach(counter => counter.innerText = "0"); // 숫자를 초기화
+        };
+
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    resetCounters(); // 카운터 초기화
+                    entry.target.querySelectorAll(".status-number").forEach(counter => {
+                        updateCount(counter); // 다시 카운팅 시작
+                    });
+                }
+            });
+        }, observerOptions);
+
+        const statusSection = document.querySelector(".interest-section");
+        if (statusSection) {
+            observer.observe(statusSection);
+        }
+    });
+</script>
+
+<!-- 채널톡 -->
+<script>
+    (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
+
+    ChannelIO('boot', {
+        "pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
+    });
+</script>
+
+</body>
+</html>

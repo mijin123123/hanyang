@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - 자주 묻는 질문 | 한양에너지</title>
+    
+    <!-- 파비콘 -->
+    <link rel="icon" href="img/favi.ico" type="image/jpeg">
+    
+    <!-- 폰트 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" href="css/global.css?v=1754220183">
+    <link rel="stylesheet" href="css/header.css?v=1754220183">
+    <link rel="stylesheet" href="css/footer.css">
+    <style>
+        /* FAQ 페이지 전용 스타일 */
+        :root {
+            --primary: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary: #3f37c9;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            background-color: #f5f7ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 0;
+            padding: 0 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .customer-service {
+            width: 100%;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--box-shadow);
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .service-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .service-contact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .service-image {
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .service-image img {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--danger));
+            border-radius: 2px;
+        }
+
+        .faq-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .toggle-all-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .toggle-all-btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+        }
+
+        .faq-list {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .faq-item {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-question {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background-color: var(--white);
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background-color: var(--light);
+        }
+
+        .faq-question-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--dark);
+        }
+
+        .faq-question-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-chevron {
+            color: var(--gray);
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-chevron {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 24px 24px;
+            border-top: 1px solid var(--light);
+            line-height: 1.7;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        .faq-answer-content {
+            padding: 16px;
+            background-color: var(--light);
+            border-radius: 8px;
+            color: var(--dark);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .no-faqs {
+            text-align: center;
+            padding: 40px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .no-faqs i {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-faqs p {
+            font-size: 1.1rem;
+            color: var(--gray);
+        }
+
+        /* 반응형 스타일 */
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 80px;
+                padding: 0 15px;
+            }
+
+            .customer-service {
+                flex-direction: column;
+                text-align: center;
+                padding: 24px;
+            }
+
+            .service-info {
+                margin-bottom: 20px;
+            }
+
+            .service-title {
+                font-size: 1.5rem;
+            }
+
+            .service-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .faq-question {
+                padding: 16px 20px;
+            }
+
+            .faq-answer {
+                padding: 0 20px 20px;
+            }
+
+            .faq-actions {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .faq-question {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .faq-question-text {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="hy-header">
+        <div class="hy-container">
+            <!-- 로고 영역 -->
+            <div class="hy-logo">
+                <a href="index.html">
+                    <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                </a>
+            </div>
+
+            <!-- 데스크탑 네비게이션 -->
+            <nav class="hy-desktop-nav">
+                <ul class="hy-main-menu">
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="ceo_message.html">회사소개</a>
+                        <ul class="hy-submenu">
+                            <li><a href="ceo_message.html">인사말</a></li>
+                            <li><a href="history.html">연혁</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="introduce_service.html">서비스 소개</a>
+                        <ul class="hy-submenu">
+                            <li><a href="introduce_service.html">서비스 소개</a></li>
+                            <li><a href="project_gallery.html">발전소 현황</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="introduce_product.html">조합상품</a>
+                        <ul class="hy-submenu">
+                            <li><a href="introduce_product.html">조합상품안내</a></li>
+                            <li><a href="product_list.html">조합원 상품신청</a></li>
+                            <li><a href="my_investments.html">조합원 출자현황</a></li>
+                            <li><a href="withdraw_request.html">조합원 입금/출금</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="announcements.html">고객센터</a>
+                        <ul class="hy-submenu">
+                            <li><a href="announcements.html">공지사항</a></li>
+                            <li><a href="faq.html">자주 묻는 질문</a></li>
+                            <li><a href="inquiry_list.html">1:1문의신청</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- 사용자 인증 영역 -->
+            <div class="hy-auth-area">
+                <a href="login.html" class="hy-auth-link">로그인</a>
+                <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+            </div>
+
+            <!-- 모바일 메뉴 토글 버튼 -->
+            <button class="hy-mobile-toggle" aria-label="메뉴 열기">
+                <span class="hy-toggle-bar"></span>
+                <span class="hy-toggle-bar"></span>
+                <span class="hy-toggle-bar"></span>
+            </button>
+        </div>
+
+        <!-- 모바일 메뉴 -->
+        <div class="hy-mobile-menu">
+            <div class="hy-mobile-container">
+                <div class="hy-mobile-header">
+                    <button class="hy-mobile-close" aria-label="메뉴 닫기">✕</button>
+                </div>
+                
+                <div class="hy-mobile-auth">
+                    <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
+                    <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                </div>
+
+                <nav class="hy-mobile-nav">
+                    <ul>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">회사소개</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="ceo_message.html">인사말</a></li>
+                                <li><a href="history.html">연혁</a></li>
+                            </ul>
+                        </li>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">서비스 소개</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="introduce_service.html">서비스 소개</a></li>
+                                <li><a href="project_gallery.html">발전소 현황</a></li>
+                            </ul>
+                        </li>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">조합상품</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="introduce_product.html">조합상품안내</a></li>
+                                <li><a href="product_list.html">조합원 상품신청</a></li>
+                                <li><a href="my_investments.html">조합원 출자현황</a></li>
+                                <li><a href="withdraw_request.html">조합원 입금/출금</a></li>
+                            </ul>
+                        </li>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">고객센터</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="announcements.html">공지사항</a></li>
+                                <li><a href="faq.html">자주 묻는 질문</a></li>
+                                <li><a href="inquiry_list.html">1:1문의신청</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="customer-service">
+            <div class="service-info">
+                <h2 class="service-title">한양에너지 고객센터</h2>
+                <p class="service-subtitle">평일 10:00 ~ 19:00 (점심시간 13:00 ~ 14:00)</p>
+                <div class="service-contact">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>1588-0000</span>
+                </div>
+            </div>
+            <div class="service-image">
+                <img src="img/announcements/question.png" alt="고객센터">
+            </div>
+        </div>
+
+        <h1 class="page-title">자주 묻는 질문</h1>
+
+        <div class="faq-actions">
+            <button id="toggle-all" class="toggle-all-btn">
+                <i class="fas fa-expand"></i> 
+                <span>모두 펼치기</span>
+            </button>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item" data-faq-id="15">
+                <div class="faq-question" onclick="toggleFaq(15)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원 출자금(원금) 회수가 가능한가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-15" class="faq-answer">
+                    <div class="faq-answer-content">
+                        한양에너지는 태양광패널 확장사업을 위해 조합원을 모집하는 것으로, 조합원 계약기간 1년 만기시 재계약 또는 해지시 출자금(원금) 회수가 가능합니다.<br><br>
+                        안정적인 사업 운영과 리스크 대비를 통해 지금까지 한양에너지는 100% 이자 지급과 원금 상환을 안전하게 드리고 있습니다.<br><br>
+                        자세한 사항은 고객센터로 문의 바랍니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="7">
+                <div class="faq-question" onclick="toggleFaq(7)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원의 세금은 얼마나 되나요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-7" class="faq-answer">
+                    <div class="faq-answer-content">
+                        (주)한양에너지 태양광 패널을 통하여 생산되는 전력은 한국전력을 통해 판매가 이뤄지며, 전력 판매시 세금은 현행 소득세법 제129조 제1항 제1호에 따라 이자소득세 25%와 지방세 2.5%, 총 27.5% 과세되지만,<br><br>
+                        한양에너지 조합원의 출자금(원금)의 경우 예치금의 형식이 아닌 (주)한양에너지 태양광 패널 임대확장 사업자금으로 활용되기에, (주)한양에너지에서 조합원의 과세를 부담해드리고 있습니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="10">
+                <div class="faq-question" onclick="toggleFaq(10)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원 상품은 중도 해지가 가능한가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-10" class="faq-answer">
+                    <div class="faq-answer-content">
+                        (주)한양에너지 태양광 조합상품은 중도해지가 불가능한 상품으로,<br>
+                        조합원의 자격상실, 사망, 조합해산 등의 사유에 한해서만 가능합니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="14">
+                <div class="faq-question" onclick="toggleFaq(14)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원 상품은 만기시(1년) 연장이 가능한가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-14" class="faq-answer">
+                    <div class="faq-answer-content">
+                        (주)한양에너지 조합원 상품의 경우 만기시(1년) 조합원 의사에 따라 연장이 가능합니다.<br>
+                        단, 태양광 패널의 임대 수용량이 부족할 경우 재계약이 불가능할 수 있습니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="16">
+                <div class="faq-question" onclick="toggleFaq(16)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>출자금과 지원금이 무엇인가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-16" class="faq-answer">
+                    <div class="faq-answer-content">
+                        한양에너지는 협동조합의 형태로 영위가 이뤄지기에 출자금 = 원금, 지원금 = 이자라고 생각하시면 됩니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="17">
+                <div class="faq-question" onclick="toggleFaq(17)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>협동조합이 무엇인가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-17" class="faq-answer">
+                    <div class="faq-answer-content">
+                        협동조합이란 재화 또는 용역의 구매·생산·판매·제공 등을 협동으로 영위함으로써 조합원의 권익을 향상하고 지역사회에 공헌하는 사업조직을 말합니다. (협동조합기본법 제2조 제1호)<br><br>
+                        한양에너지를 통해 모집한 협동조합원들은 태양광 발전소를 공동으로 소유하고, 전력 판매 수익금을 나눠가지며, 지역사회의 친환경 재생에너지 확보에 공헌하게 됩니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="5">
+                <div class="faq-question" onclick="toggleFaq(5)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원 상품 가입 후 추가 출자금(원금) 납입이 가능한가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-5" class="faq-answer">
+                    <div class="faq-answer-content">
+                        태양광 전력 생산의 경우 초, 분, 시간 단위로 생산되는 전력량이 다르기 때문에 조합원 상품 가입 후 추가 출자금(원금) 납입을 원하실 경우 고객센터로 문의 주세요.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="6">
+                <div class="faq-question" onclick="toggleFaq(6)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원 최소 출자금(원금)은 얼마인가요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-6" class="faq-answer">
+                    <div class="faq-answer-content">
+                        최소 100kw 300만원부터 출자(투자) 가능합니다.<br><br>
+                        전체 조합원들의 평균 출자(투자)금액은 3,000만원입니다.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item" data-faq-id="8">
+                <div class="faq-question" onclick="toggleFaq(8)">
+                    <div class="faq-question-text">
+                        <i class="fas fa-question-circle faq-question-icon"></i>
+                        <span>조합원 지원금(이자) 지급은 언제되나요?</span>
+                    </div>
+                    <i class="fas fa-chevron-down faq-chevron"></i>
+                </div>
+                <div id="faq-answer-8" class="faq-answer">
+                    <div class="faq-answer-content">
+                        태양광 패널 임대사업 조합원 계약시 일, 주, 월(선택사항) 단위로 계약 체결 후 정해진 날짜에 조합원 지원금(이자)이 지급됩니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <!-- 왼쪽: 로고 및 SNS -->
+            <div class="footer-section logo-section">
+                <div class="footer-logo">
+                    <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                </div>
+                <p>청정에너지로 만드는 지속가능한 미래</p>
+                
+                <div class="sns-links">
+                    <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="인스타그램"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="블로그"><i class="fab fa-blogger-b"></i></a>
+                </div>
+            </div>
+
+            <!-- 중앙: 통합 링크 섹션 -->
+            <div class="footer-section links-section">
+                <h4>바로가기</h4>
+                <ul class="footer-links">
+                    <li><a href="ceo_message.html">인사말</a></li>
+                    <li><a href="history.html">연혁</a></li>
+                    <li><a href="introduce_service.html">서비스 소개</a></li>
+                    <li><a href="announcements.html">공지사항</a></li>
+                    <li><a href="faq.html">자주 묻는 질문</a></li>
+                </ul>
+            </div>
+
+            <!-- 오른쪽: 연락처 섹션 -->
+            <div class="footer-section contact-section">
+                <h4>연락처</h4>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="contact-text">
+                            전라남도 보성군 보성읍 구교길2-1
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="contact-text">
+                            hanenergy@example.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409 | © 2024 주식회사 한양에너지. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 스크립트 -->
+    <script src="js/main.js"></script>
+    <script>
+        // FAQ 토글 기능
+        function toggleFaq(id) {
+            const faqItem = document.querySelector(`[data-faq-id="${id}"]`);
+            const answer = document.getElementById(`faq-answer-${id}`);
+            const chevron = faqItem.querySelector('.faq-chevron');
+            
+            if (answer.classList.contains('show')) {
+                answer.classList.remove('show');
+                faqItem.classList.remove('active');
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+            } else {
+                answer.classList.add('show');
+                faqItem.classList.add('active');
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+            }
+        }
+
+        // 모두 펼치기/접기 기능
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleAllBtn = document.getElementById('toggle-all');
+            const allAnswers = document.querySelectorAll('.faq-answer');
+            const allItems = document.querySelectorAll('.faq-item');
+            const allChevrons = document.querySelectorAll('.faq-chevron');
+            let allExpanded = false;
+
+            toggleAllBtn.addEventListener('click', () => {
+                allExpanded = !allExpanded;
+                
+                allAnswers.forEach((answer, index) => {
+                    const item = allItems[index];
+                    const chevron = allChevrons[index];
+                    
+                    if (allExpanded) {
+                        answer.classList.add('show');
+                        item.classList.add('active');
+                        chevron.classList.remove('fa-chevron-down');
+                        chevron.classList.add('fa-chevron-up');
+                    } else {
+                        answer.classList.remove('show');
+                        item.classList.remove('active');
+                        chevron.classList.remove('fa-chevron-up');
+                        chevron.classList.add('fa-chevron-down');
+                    }
+                });
+
+                const btnText = toggleAllBtn.querySelector('span');
+                const btnIcon = toggleAllBtn.querySelector('i');
+                
+                if (allExpanded) {
+                    btnText.textContent = '모두 접기';
+                    btnIcon.classList.remove('fa-expand');
+                    btnIcon.classList.add('fa-compress');
+                } else {
+                    btnText.textContent = '모두 펼치기';
+                    btnIcon.classList.remove('fa-compress');
+                    btnIcon.classList.add('fa-expand');
+                }
+            });
+
+            // 페이지 로드 시 첫 번째 FAQ 펼치기
+            const firstFaqId = document.querySelector('.faq-item').getAttribute('data-faq-id');
+            if (firstFaqId) {
+                toggleFaq(firstFaqId);
+            }
+        });
+    </script>
+
+    <!-- 채널톡 -->
+    <script>
+      (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
+
+      ChannelIO('boot', {
+        "pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
+      });
+    </script>
+</body>
+</html>

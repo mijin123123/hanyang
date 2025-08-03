@@ -1,0 +1,689 @@
+/* 조합상품안내 페이지 전용 스타일 */
+
+/* 기본 스타일 */
+body {
+    font-family: 'Pretendard', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    padding-top: 80px; /* 헤더 높이만큼 상단 여백 */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.section_title {
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+/* 배경 이미지와 제목 섹션 */
+.hero-section {
+    background: url('../img/banner1.jpg') no-repeat center bottom;
+    background-size: cover;
+    padding: 120px 0;
+    text-align: center;
+    color: white;
+    position: relative;
+    height: 346px;
+}
+.hero-cover {
+    position: absolute;
+    background-color: rgba(0,0,0,0.2);
+    width: 100%;
+    height: 346px;
+    top: 0;
+}
+
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    padding: 0 20px;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+}
+
+/* 사업구도 섹션 */
+.structure_section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 50px 0;
+    padding: 0 20px;
+    margin-bottom: 100px;
+}
+.structure_section .structure_wrapper {
+    width: 100%;
+    max-width: 1200px;
+    overflow-x: auto;
+}
+.structure_section .structure_wrapper img {
+    width: 100%;
+    min-width: 600px;
+}
+
+/* 사업절차 섹션 - 모바일 최적화 */
+.process_section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 50px 0;
+    padding: 0 20px;
+    margin-bottom: 100px;
+}
+.process_section .process_wrapper {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+}
+.process_section .process_wrapper .process {
+    height: 200px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    text-align: center;
+    margin-bottom: 40px;
+}
+.process_section .process_wrapper .process:last-child {
+    margin-bottom: 0;
+}
+.process_section .process_wrapper .process:after {
+    content: "";
+    display: block;
+    width: 32px;
+    height: 32px;
+    background: url(../img/introduce_product/arrow.png) 50% 50% no-repeat;
+    position: absolute;
+    left: 50%;
+    bottom: -36px;
+    transform: translateX(-50%) rotate(90deg);
+    z-index: 1;
+}
+.process_section .process_wrapper .process:last-child:after {
+    display: none;
+}
+.process_section .process_wrapper .process .text_box {
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+.process_section .process_wrapper .process .text_box .text_title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.5em;
+    color: #fff;
+    margin-bottom: 13px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+.process_section .process_wrapper .process .text_box .text_desc {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.7em;
+    color: #fff;
+    padding: 20px 0 0 0;
+    position: relative;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+.process_section .process_wrapper .process .text_box .text_desc:before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 3px;
+    background: #fff;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    margin: auto;
+}
+.bg1 {background-image: url(../img/introduce_product/img25.jpg)}
+.bg2 {background-image: url(../img/introduce_product/img26.jpg)}
+.bg3 {background-image: url(../img/introduce_product/img27.jpg)}
+.bg4 {background-image: url(../img/introduce_product/img28.jpg)}
+.bg5 {background-image: url(../img/introduce_product/img29.jpg)}
+.bg6 {background-image: url(../img/introduce_product/img30.jpg)}
+
+/* 테이블 섹션 - 모바일 최적화 */
+.product_table_section {
+    width: 100%;
+    padding: 50px 20px;
+    background-color: #fff8f0;
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 0 auto 50px;
+    font-family: 'Pretendard', sans-serif;
+    overflow-x: auto;
+}
+
+.custom_profit_table {
+    width: 100%;
+    min-width: 500px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ffe1c4;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table_header {
+    display: flex;
+    background-color: #FFE7D1;
+    font-weight: bold;
+    color: #E67E22;
+    padding: 15px 10px;
+    text-align: center;
+}
+
+.table_row {
+    display: flex;
+    border-top: 1px solid #f3f3f3;
+    padding: 15px 10px;
+    text-align: center;
+    background-color: #fff;
+}
+
+.table_header > div,
+.table_row > div {
+    flex: 1;
+    min-width: 100px;
+    padding: 5px;
+}
+
+.table_row:nth-child(even) {
+    background-color: #fffaf3;
+}
+
+.product_table_desc {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 필요서류 섹션 */
+.required_section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 50px;
+}
+.required_section .required_title {
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.required_section .required_subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
+}
+.required_section .required_content {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+}
+.required_section .required_content p {
+    padding: 15px;
+    text-align: center;
+}
+.required_section .required_content p:first-child {
+    background-color: #E67E22;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 투자 수익률 계산기 스타일 */
+.profit-calculator {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 30px 20px;
+    background-color: #fffdf9;
+    border: 1px solid #f3e2d1;
+    border-radius: 12px;
+    font-family: 'Pretendard', sans-serif;
+    color: #333;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.pc-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #E67E22;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.pc-subtitle {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.calc__input {
+    margin-bottom: 20px;
+}
+
+.q-field__control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 15px;
+}
+
+.q-field__control input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 18px;
+}
+
+.q-field__suffix {
+    font-size: 16px;
+    color: #999;
+    margin-left: 10px;
+}
+
+.amount-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.amount-buttons button {
+    flex: 1 1 40%;
+    background-color: #fff0e6;
+    color: #E67E22;
+    font-weight: 600;
+    border: 1px solid #ffdbbd;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.amount-buttons button:hover {
+    background-color: #ffe6cc;
+}
+
+.reset-text {
+    text-align: right;
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.result-box {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.result-box span {
+    color: #E67E22;
+    font-weight: bold;
+}
+
+.apply-button-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.apply-button {
+    display: inline-block;
+    padding: 14px 28px;
+    background-color: #E67E22;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+}
+
+.apply-button:hover {
+    background-color: #d35400;
+}
+
+/* 푸터 스타일 */
+.modern-footer {
+    margin-top: 100px;
+    background-color: #535353;
+    color: #ecf0f1;
+    font-family: 'Pretendard', sans-serif;
+    padding: 40px 20px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.modern-footer .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 30px;
+}
+
+.modern-footer .footer-section {
+    flex: 1;
+    min-width: 220px;
+    margin-bottom: 20px;
+}
+
+.modern-footer .logo-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.modern-footer .footer-logo {
+    margin-bottom: 15px;
+}
+
+.modern-footer .logo-img {
+    max-width: 100%;
+    width: 270px;
+    height: auto;
+    filter: brightness(0) invert(1);
+}
+
+.modern-footer .sns-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.modern-footer .sns-links a {
+    color: #ecf0f1;
+    font-size: 20px;
+    transition: color 0.3s;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.modern-footer .sns-links a:hover {
+    color: #3498db;
+    background-color: rgba(255,255,255,0.2);
+}
+
+.modern-footer .links-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .links-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modern-footer .footer-links li {
+    margin-bottom: 12px;
+}
+
+.modern-footer .footer-links a {
+    text-decoration: none;
+    color: #bdc3c7;
+    transition: all 0.3s;
+    display: block;
+    padding: 5px 0;
+}
+
+.modern-footer .footer-links a:hover {
+    color: #3498db;
+    padding-left: 5px;
+}
+
+.modern-footer .contact-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .contact-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .contact-info {
+    margin-bottom: 20px;
+}
+
+.modern-footer .contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.modern-footer .contact-icon {
+    margin-right: 12px;
+    color: #3498db;
+    font-size: 16px;
+    margin-top: 3px;
+    min-width: 16px;
+}
+
+.modern-footer .contact-text {
+    flex: 1;
+    word-break: keep-all;
+}
+
+.modern-footer .footer-bottom {
+    text-align: center;
+    font-size: 13px;
+    color: #bdc3c7;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* 반응형 스타일 (모바일) */
+@media (max-width: 768px) {  
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .section_title {
+        font-size: 22px;
+        margin-bottom: 30px;
+    }
+    
+    .process_section .process_wrapper .process {
+        height: 180px;
+        margin-bottom: 50px;
+    }
+    
+    .process_section .process_wrapper .process .text_box .text_title {
+        font-size: 18px;
+    }
+    
+    .process_section .process_wrapper .process .text_box .text_desc {
+        font-size: 14px;
+        padding-top: 15px;
+    }
+    
+    .required_section .required_title {
+        font-size: 22px;
+    }
+    
+    .required_section .required_subtitle {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .profit-calculator {
+        padding: 20px;
+        margin: 20px 10px;
+    }
+
+    .amount-buttons button {
+        flex: 1 1 45%;
+    }
+
+    .pc-title {
+        font-size: 20px;
+    }
+
+    .pc-subtitle {
+        font-size: 13px;
+    }
+
+    .modern-footer .footer-section {
+        min-width: calc(50% - 15px);
+    }
+    
+    .modern-footer .footer-container {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .modern-footer {
+        padding: 30px 15px 20px;
+    }
+    
+    .modern-footer .footer-section {
+        min-width: 100%;
+        margin-bottom: 25px;
+    }
+    
+    .modern-footer .footer-container {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .modern-footer .links-section {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .modern-footer .footer-links a {
+        padding: 8px 0;
+    }
+    
+    .modern-footer .logo-img {
+        width: 220px;
+    }
+    
+    .modern-footer .footer-bottom {
+        font-size: 12px;
+        padding-top: 15px;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-title {
+        font-size: 1.7rem;
+    }
+    
+    .section_title {
+        font-size: 20px;
+    }
+    
+    .process_section .process_wrapper .process {
+        height: 150px;
+    }
+    
+    .process_section .process_wrapper .process .text_box .text_title {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .process_section .process_wrapper .process .text_box .text_desc {
+        font-size: 13px;
+        padding-top: 10px;
+    }
+    
+    .table_header {
+        padding: 12px 5px;
+        font-size: 14px;
+    }
+    
+    .table_row {
+        padding: 12px 5px;
+        font-size: 13px;
+    }
+    
+    .required_section .required_title {
+        font-size: 20px;
+    }
+    
+    .required_section .required_subtitle {
+        font-size: 15px;
+    }
+}

@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="한전과 20년 고정계약 체결, 안전한 태양광 수익 설계, 매월 이자수익 세전 최대 30% 지급">
+    <meta name="keywords" content="태양광,태양광발전사업,태양열,태양광투자,신재생에너지,고수익,안정적인투자,안전한투자,1억투자,한양에너지,조합원,제테크">
+    <meta name="author" content="한양에너지">
+    <link rel="icon" href="img/favi.ico" type="image/jpeg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/global.css?v=1754220183">
+    <link rel="stylesheet" href="css/header.css?v=1754220183">
+    <link rel="stylesheet" href="css/main-sections.css?v=1754220183">
+    <link rel="stylesheet" href="css/utilities.css?v=1754220183">
+    <title>조합원 상품신청 | 한양에너지</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --white: #ffffff;
+            --border-radius: 16px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .investment-section {
+            max-width: 1280px;
+            margin: 50px auto;
+            padding: 40px 20px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 2px;
+        }
+
+        /* 카드 그리드 및 크기 조정 */
+        .investment-card-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 55px;
+            padding: 0;
+        }
+
+        .investment-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+
+        /* 카드 사이즈 조정 */
+        .investment-card {
+            position: relative;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+            transition: var(--transition);
+            height: 100%;
+            border-top: 4px solid var(--primary);
+        }
+
+        .investment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(67, 97, 238, 0.15);
+        }
+
+        /* 나머지 스타일은 동일하게 유지 */
+        .ribbon {
+            position: absolute;
+            top: 16px;
+            right: -8px;
+            background: var(--danger);
+            color: var(--white);
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(247, 37, 133, 0.3);
+            z-index: 1;
+        }
+
+        .ribbon::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: -8px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid var(--danger);
+            border-top: 8px solid var(--danger);
+            border-bottom: 8px solid transparent;
+            transform: rotate(-45deg);
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge i {
+            font-size: 10px;
+        }
+
+        .badge.gray {
+            background: #f1f3f5;
+            color: var(--gray);
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 6px 0 4px;
+            line-height: 1.4;
+        }
+
+        .yield {
+            font-size: 14px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .yield .rate {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .profit-details {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .profit-details p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: var(--dark);
+        }
+
+        .profit-details strong {
+            color: var(--primary);
+        }
+
+        .minimum-amount {
+            font-size: 13px;
+            color: var(--gray);
+            margin: 6px 0;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin: 16px 0 8px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .progress-percent {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .progress-bar-container {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .invest-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            width: 100%;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .invest-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+
+        .invest-btn i {
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .investment-section {
+                padding: 30px 15px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .investment-card-list {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .investment-card {
+                padding: 20px;
+            }
+        }
+
+        /* 개선된 푸터 스타일 */
+        .modern-footer {
+            margin-top: 100px;
+            background-color: #535353;
+            color: #ecf0f1;
+            font-family: 'Pretendard', sans-serif;
+            padding: 40px 20px 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 푸터 컨테이너 */
+        .modern-footer .footer-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 30px;
+        }
+
+        /* 섹션 스타일 */
+        .modern-footer .footer-section {
+            flex: 1;
+            min-width: 220px;
+            margin-bottom: 20px;
+        }
+
+        /* 로고 및 SNS 섹션 */
+        .modern-footer .logo-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modern-footer .footer-logo {
+            margin-bottom: 15px;
+        }
+
+        .modern-footer .logo-img {
+            max-width: 100%;
+            width: 270px;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        .modern-footer .sns-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .modern-footer .sns-links a {
+            color: #ecf0f1;
+            font-size: 20px;
+            transition: color 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .modern-footer .sns-links a:hover {
+            color: #3498db;
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        /* 링크 스타일 */
+        .modern-footer .links-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .modern-footer .links-section h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #3498db;
+        }
+
+        .modern-footer .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modern-footer .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .modern-footer .footer-links a {
+            text-decoration: none;
+            color: #bdc3c7;
+            transition: all 0.3s;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .modern-footer .footer-links a:hover {
+            color: #3498db;
+            padding-left: 5px;
+        }
+
+        /* 연락처 섹션 */
+        .modern-footer .contact-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .modern-footer .contact-section h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #3498db;
+        }
+
+        .modern-footer .contact-info {
+            margin-bottom: 20px;
+        }
+
+        .modern-footer .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .modern-footer .contact-icon {
+            margin-right: 12px;
+            color: #3498db;
+            font-size: 16px;
+            margin-top: 3px;
+            min-width: 16px;
+        }
+
+        .modern-footer .contact-text {
+            flex: 1;
+            word-break: keep-all;
+        }
+
+        .modern-footer .footer-phone {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin: 15px 0;
+        }
+
+        /* 하단 저작권 */
+        .modern-footer .footer-bottom {
+            text-align: center;
+            font-size: 13px;
+            color: #bdc3c7;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        /* 반응형 디자인 - 태블릿 */
+        @media (max-width: 900px) {
+            .modern-footer .footer-section {
+                min-width: calc(50% - 15px);
+            }
+            
+            .modern-footer .footer-container {
+                gap: 20px;
+            }
+        }
+
+        /* 반응형 디자인 - 모바일 */
+        @media (max-width: 600px) {
+            .modern-footer {
+                padding: 30px 15px 20px;
+            }
+            
+            .modern-footer .footer-section {
+                min-width: 100%;
+                margin-bottom: 25px;
+            }
+            
+            .modern-footer .footer-container {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .modern-footer .links-section {
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .modern-footer .footer-links a {
+                padding: 8px 0;
+            }
+            
+            .modern-footer .logo-img {
+                width: 220px;
+            }
+            
+            .modern-footer .footer-bottom {
+                font-size: 12px;
+                padding-top: 15px;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hy-header">
+    <div class="hy-container">
+        <!-- 로고 영역 -->
+        <div class="hy-logo">
+            <a href="index.html">
+                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+            </a>
+        </div>
+
+        <!-- 데스크탑 네비게이션 -->
+        <nav class="hy-desktop-nav">
+            <ul class="hy-main-menu">
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="ceo_message.html">회사소개</a>
+                    <ul class="hy-submenu">
+                        <li><a href="ceo_message.html">인사말</a></li>
+                        <li><a href="history.html">연혁</a></li>
+                    </ul>
+                </li>
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="introduce_service.html">서비스 소개</a>
+                    <ul class="hy-submenu">
+                        <li><a href="introduce_service.html">서비스 소개</a></li>
+                        <li><a href="project_gallery.html">발전소 현황</a></li>
+                    </ul>
+                </li>
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="introduce_product.html">조합상품</a>
+                    <ul class="hy-submenu">
+                        <li><a href="introduce_product.html">조합상품안내</a></li>
+                        <li><a href="product_list.html">조합원 상품신청</a></li>
+                        <li><a href="my_investments.html">조합원 출자현황</a></li>
+                        <li><a href="withdraw_request.html">조합원 입금/출금</a></li>
+                    </ul>
+                </li>
+                <li class="hy-menu-item hy-has-dropdown">
+                    <a href="announcements.html">고객센터</a>
+                    <ul class="hy-submenu">
+                        <li><a href="announcements.html">공지사항</a></li>
+                        <li><a href="faq.html">자주 묻는 질문</a></li>
+                        <li><a href="inquiry_list.html">1:1문의신청</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 사용자 인증 영역 -->
+        <div class="hy-auth-area">
+            <a href="login.html" class="hy-auth-link">로그인</a>
+            <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+        </div>
+
+        <!-- 모바일 메뉴 토글 버튼 -->
+        <button class="hy-mobile-toggle" aria-label="메뉴 열기">
+            <span class="hy-toggle-bar"></span>
+            <span class="hy-toggle-bar"></span>
+            <span class="hy-toggle-bar"></span>
+        </button>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="hy-mobile-menu">
+        <div class="hy-mobile-container">
+            <div class="hy-mobile-header">
+                <button class="hy-mobile-close" aria-label="메뉴 닫기">✕</button>
+            </div>
+            
+            <div class="hy-mobile-auth">
+                <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
+                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+            </div>
+
+            <nav class="hy-mobile-nav">
+                <ul>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">회사소개</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="ceo_message.html">인사말</a></li>
+                            <li><a href="history.html">연혁</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">서비스 소개</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="introduce_service.html">서비스 소개</a></li>
+                            <li><a href="project_gallery.html">발전소 현황</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">조합상품</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="introduce_product.html">조합상품안내</a></li>
+                            <li><a href="product_list.html">조합원 상품신청</a></li>
+                            <li><a href="my_investments.html">조합원 출자현황</a></li>
+                            <li><a href="withdraw_request.html">조합원 입금/출금</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-mobile-dropdown">
+                        <button class="hy-mobile-menu-btn">고객센터</button>
+                        <ul class="hy-mobile-submenu">
+                            <li><a href="announcements.html">공지사항</a></li>
+                            <li><a href="faq.html">자주 묻는 질문</a></li>
+                            <li><a href="inquiry_list.html">1:1문의신청</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<script type="text/javascript" async="" src="https://cdn.channel.io/plugin/ch-plugin-web.js"></script>
+
+<div class="investment-section">
+    <h2 class="section-title">조합원 상품신청</h2>
+
+    <div class="investment-card-list">
+        
+        <a href="product_detail.html?id=47" class="investment-card-link">
+            <div class="investment-card">
+                <div class="ribbon">HOT</div>
+                
+                <div class="badge-container">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
+                    <span class="badge">
+                        <i class="fas fa-check-circle"></i> 
+                        모집 중
+                    </span>
+                </div>
+
+                <h3 class="product-title">[100KW] 다함께 동행 베이직</h3>
+                
+                <div class="yield">일일 수익률 <span class="rate">0.05%</span></div>
+                
+                <div class="profit-details">
+                    <p><strong>예상 수익</strong></p>
+                    <p>일 1,500원</p>
+                    <p>월 45,000원</p>
+                    <p>연 547,500원</p>
+                </div>
+                
+                <div class="minimum-amount">
+                    <i class="fas fa-won-sign"></i> 최소 투자 금액: 3,000,000원
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">모집 진행률</span>
+                        <span class="progress-percent">89.0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 89%;"></div>
+                    </div>
+                </div>
+                
+                <button class="invest-btn">
+                    <i class="fas fa-arrow-right"></i> 상품 신청하기
+                </button>
+            </div>
+        </a>
+                      
+        <a href="product_detail.html?id=46" class="investment-card-link">
+            <div class="investment-card">
+                <div class="ribbon">HOT</div>
+                
+                <div class="badge-container">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
+                    <span class="badge">
+                        <i class="fas fa-check-circle"></i> 
+                        모집 중
+                    </span>
+                </div>
+
+                <h3 class="product-title">[300KW] 다함께 동행 뉴베이직</h3>
+                
+                <div class="yield">일일 수익률 <span class="rate">0.06%</span></div>
+                
+                <div class="profit-details">
+                    <p><strong>예상 수익</strong></p>
+                    <p>일 3,000원</p>
+                    <p>월 90,000원</p>
+                    <p>연 1,095,000원</p>
+                </div>
+                
+                <div class="minimum-amount">
+                    <i class="fas fa-won-sign"></i> 최소 투자 금액: 5,000,000원
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">모집 진행률</span>
+                        <span class="progress-percent">98.0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 98%;"></div>
+                    </div>
+                </div>
+                
+                <button class="invest-btn">
+                    <i class="fas fa-arrow-right"></i> 상품 신청하기
+                </button>
+            </div>
+        </a>
+                      
+        <a href="product_detail.html?id=45" class="investment-card-link">
+            <div class="investment-card">
+                <div class="ribbon">HOT</div>
+                
+                <div class="badge-container">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
+                    <span class="badge">
+                        <i class="fas fa-check-circle"></i> 
+                        모집 중
+                    </span>
+                </div>
+
+                <h3 class="product-title">[500KW] 다함께 동행 프리미엄</h3>
+                
+                <div class="yield">일일 수익률 <span class="rate">0.13%</span></div>
+                
+                <div class="profit-details">
+                    <p><strong>예상 수익</strong></p>
+                    <p>일 13,000원</p>
+                    <p>월 390,000원</p>
+                    <p>연 4,745,000원</p>
+                </div>
+                
+                <div class="minimum-amount">
+                    <i class="fas fa-won-sign"></i> 최소 투자 금액: 10,000,000원
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">모집 진행률</span>
+                        <span class="progress-percent">77.3%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 77.25%;"></div>
+                    </div>
+                </div>
+                
+                <button class="invest-btn">
+                    <i class="fas fa-arrow-right"></i> 상품 신청하기
+                </button>
+            </div>
+        </a>
+                      
+        <a href="product_detail.html?id=44" class="investment-card-link">
+            <div class="investment-card">
+                <div class="ribbon">HOT</div>
+                
+                <div class="badge-container">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
+                    <span class="badge">
+                        <i class="fas fa-check-circle"></i> 
+                        모집 중
+                    </span>
+                </div>
+
+                <h3 class="product-title">[700KW] 다함께 동행 프리미엄 플러스</h3>
+                
+                <div class="yield">일일 수익률 <span class="rate">0.16%</span></div>
+                
+                <div class="profit-details">
+                    <p><strong>예상 수익</strong></p>
+                    <p>일 48,000원</p>
+                    <p>월 1,440,000원</p>
+                    <p>연 17,520,000원</p>
+                </div>
+                
+                <div class="minimum-amount">
+                    <i class="fas fa-won-sign"></i> 최소 투자 금액: 30,000,000원
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">모집 진행률</span>
+                        <span class="progress-percent">52.6%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 52.56%;"></div>
+                    </div>
+                </div>
+                
+                <button class="invest-btn">
+                    <i class="fas fa-arrow-right"></i> 상품 신청하기
+                </button>
+            </div>
+        </a>
+                      
+        <a href="product_detail.html?id=43" class="investment-card-link">
+            <div class="investment-card">
+                <div class="ribbon">HOT</div>
+                
+                <div class="badge-container">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
+                    <span class="badge">
+                        <i class="fas fa-check-circle"></i> 
+                        모집 중
+                    </span>
+                </div>
+
+                <h3 class="product-title">[1MW] 다함께 동행 메가</h3>
+                
+                <div class="yield">일일 수익률 <span class="rate">0.20%</span></div>
+                
+                <div class="profit-details">
+                    <p><strong>예상 수익</strong></p>
+                    <p>일 130,000원</p>
+                    <p>월 3,900,000원</p>
+                    <p>연 47,450,000원</p>
+                </div>
+                
+                <div class="minimum-amount">
+                    <i class="fas fa-won-sign"></i> 최소 투자 금액: 65,000,000원
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">모집 진행률</span>
+                        <span class="progress-percent">61.0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 61%;"></div>
+                    </div>
+                </div>
+                
+                <button class="invest-btn">
+                    <i class="fas fa-arrow-right"></i> 상품 신청하기
+                </button>
+            </div>
+        </a>
+                      
+        <a href="product_detail.html?id=42" class="investment-card-link">
+            <div class="investment-card">
+                <div class="ribbon">HOT</div>
+                
+                <div class="badge-container">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
+                    <span class="badge">
+                        <i class="fas fa-check-circle"></i> 
+                        모집 중
+                    </span>
+                </div>
+
+                <h3 class="product-title">[2MW] 다함께 동행 메가 플러스</h3>
+                
+                <div class="yield">일일 수익률 <span class="rate">0.24%</span></div>
+                
+                <div class="profit-details">
+                    <p><strong>예상 수익</strong></p>
+                    <p>일 312,000원</p>
+                    <p>월 9,360,000원</p>
+                    <p>연 113,880,000원</p>
+                </div>
+                
+                <div class="minimum-amount">
+                    <i class="fas fa-won-sign"></i> 최소 투자 금액: 130,000,000원
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">모집 진행률</span>
+                        <span class="progress-percent">48.0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 48%;"></div>
+                    </div>
+                </div>
+                
+                <button class="invest-btn">
+                    <i class="fas fa-arrow-right"></i> 상품 신청하기
+                </button>
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer class="modern-footer">
+    <div class="footer-container">
+        <!-- 왼쪽: 로고 및 SNS -->
+        <div class="footer-section logo-section">
+            <div class="footer-logo">
+                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+            </div>
+            <p>청정에너지로 만드는 지속가능한 미래</p>
+            
+            <div class="sns-links">
+                <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="인스타그램"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
+                <a href="#" aria-label="블로그"><i class="fab fa-blogger-b"></i></a>
+            </div>
+        </div>
+
+        <!-- 중앙: 통합 링크 섹션 -->
+        <div class="footer-section links-section">
+            <h4>바로가기</h4>
+            <ul class="footer-links">
+                <li><a href="ceo_message.html">인사말</a></li>
+                <li><a href="history.html">연혁</a></li>
+                <li><a href="introduce_service.html">서비스 소개</a></li>
+                <li><a href="announcements.html">공지사항</a></li>
+                <li><a href="faq.html">자주 묻는 질문</a></li>
+            </ul>
+        </div>
+
+        <!-- 오른쪽: 연락처 섹션 -->
+        <div class="footer-section contact-section">
+            <h4>연락처</h4>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="contact-text">
+                        전라남도 보성군 보성읍 구교길2-1
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="contact-text">
+                        hanenergy@example.com
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409 | © 2023 주식회사 한양에너지. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<script>
+(function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
+
+ChannelIO('boot', {
+"pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
+});
+</script>
+
+<script src="js/header.js"></script>
+
+</body>
+</html>

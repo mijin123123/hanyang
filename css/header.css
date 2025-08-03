@@ -1,0 +1,294 @@
+/* 헤더 스타일 */
+.hy-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.hy-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+}
+
+/* 로고 영역 */
+.hy-logo img {
+    height: 40px;
+    width: auto;
+}
+
+/* 데스크탑 네비게이션 */
+.hy-desktop-nav {
+    display: flex;
+    align-items: center;
+}
+
+.hy-main-menu {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.hy-menu-item {
+    position: relative;
+}
+
+.hy-menu-item > a {
+    display: block;
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.hy-menu-item > a:hover {
+    color: #E67E22;
+}
+
+/* 드롭다운 메뉴 */
+.hy-submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    padding: 10px 0;
+    display: none;
+    z-index: 1001;
+}
+
+.hy-submenu li {
+    margin: 0;
+}
+
+.hy-submenu a {
+    display: block;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.hy-submenu a:hover {
+    background: #f8f9fa;
+    color: #E67E22;
+    padding-left: 25px;
+}
+
+/* 사용자 인증 영역 */
+.hy-auth-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.hy-auth-link {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.hy-auth-link:hover {
+    color: #E67E22;
+    border-color: #E67E22;
+}
+
+.hy-auth-link.hy-signup {
+    background: #E67E22;
+    color: white;
+    border-color: #E67E22;
+}
+
+.hy-auth-link.hy-signup:hover {
+    background: #d35400;
+    color: white;
+}
+
+/* 모바일 토글 버튼 */
+.hy-mobile-toggle {
+    display: none;
+    flex-direction: column;
+    width: 24px;
+    height: 24px;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.hy-toggle-bar {
+    width: 100%;
+    height: 3px;
+    background: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* 모바일 메뉴 */
+.hy-mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 1002;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+.hy-mobile-menu.hy-show {
+    right: 0;
+}
+
+.hy-mobile-container {
+    padding: 20px;
+}
+
+.hy-mobile-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.hy-mobile-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.hy-mobile-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.hy-mobile-auth-btn {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.hy-mobile-auth-btn.hy-signup {
+    background: #E67E22;
+    color: white;
+    border-color: #E67E22;
+}
+
+.hy-mobile-auth-btn:hover {
+    background: #f8f9fa;
+}
+
+.hy-mobile-auth-btn.hy-signup:hover {
+    background: #d35400;
+}
+
+/* 모바일 네비게이션 */
+.hy-mobile-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hy-mobile-dropdown {
+    border-bottom: 1px solid #eee;
+}
+
+.hy-mobile-menu-btn {
+    width: 100%;
+    padding: 15px 0;
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    position: relative;
+}
+
+.hy-mobile-menu-btn::after {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.hy-mobile-menu-btn.hy-open::after {
+    transform: rotate(180deg);
+}
+
+.hy-mobile-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: #f8f9fa;
+    margin: 0 -20px;
+    padding: 0 20px;
+}
+
+.hy-mobile-submenu li {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.hy-mobile-submenu li:last-child {
+    border-bottom: none;
+}
+
+.hy-mobile-submenu a {
+    display: block;
+    padding: 12px 0 12px 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .hy-container {
+        height: 60px;
+        padding: 0 16px;
+    }
+    
+    .hy-logo img {
+        height: 32px;
+    }
+    
+    .hy-desktop-nav,
+    .hy-auth-area {
+        display: none;
+    }
+    
+    .hy-mobile-toggle {
+        display: flex;
+    }
+}
+
+@media (max-width: 480px) {
+    .hy-mobile-menu {
+        width: 280px;
+    }
+}

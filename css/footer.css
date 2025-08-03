@@ -1,0 +1,274 @@
+/* 개선된 푸터 스타일 */
+.modern-footer {
+    margin-top: 100px;
+    background-color: #535353;
+    color: #ecf0f1;
+    font-family: 'Pretendard', sans-serif;
+    padding: 40px 20px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 푸터 컨테이너 */
+.modern-footer .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 30px;
+}
+
+/* 섹션 스타일 */
+.modern-footer .footer-section {
+    flex: 1;
+    min-width: 220px;
+    margin-bottom: 20px;
+}
+
+/* 로고 및 SNS 섹션 */
+.modern-footer .logo-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.modern-footer .footer-logo {
+    margin-bottom: 15px;
+}
+
+.modern-footer .logo-img {
+    max-width: 100%;
+    width: 270px;
+    height: auto;
+    filter: brightness(0) invert(1);
+}
+
+.modern-footer .sns-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.modern-footer .sns-links a {
+    color: #ecf0f1;
+    font-size: 20px;
+    transition: color 0.3s;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.modern-footer .sns-links a:hover {
+    color: #3498db;
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* 링크 스타일 */
+.modern-footer .links-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .links-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modern-footer .footer-links li {
+    margin-bottom: 12px;
+}
+
+.modern-footer .footer-links a {
+    text-decoration: none;
+    color: #bdc3c7;
+    transition: all 0.3s;
+    display: block;
+    padding: 5px 0;
+}
+
+.modern-footer .footer-links a:hover {
+    color: #3498db;
+    padding-left: 5px;
+}
+
+/* 연락처 섹션 */
+.modern-footer .contact-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .contact-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .contact-info {
+    margin-bottom: 20px;
+}
+
+.modern-footer .contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.modern-footer .contact-icon {
+    margin-right: 12px;
+    color: #3498db;
+    font-size: 16px;
+    margin-top: 3px;
+    min-width: 16px;
+}
+
+.modern-footer .contact-text {
+    flex: 1;
+    word-break: keep-all;
+}
+
+.modern-footer .footer-phone {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ecf0f1;
+    margin: 15px 0;
+}
+
+/* 카카오톡 상담 버튼 */
+.modern-footer .kakao-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FEE500;
+    color: #3A1D1D;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 15px;
+    transition: all 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modern-footer .kakao-btn:hover {
+    background-color: #ffeb3b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.modern-footer .kakao-btn i {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+/* 하단 저작권 */
+.modern-footer .footer-bottom {
+    text-align: center;
+    font-size: 13px;
+    color: #bdc3c7;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* 반응형 디자인 - 태블릿 */
+@media (max-width: 900px) {
+    .modern-footer .footer-section {
+        min-width: calc(50% - 15px);
+    }
+    
+    .modern-footer .footer-container {
+        gap: 20px;
+    }
+}
+
+/* QR 코드 영역 */
+.modern-footer .kakao-qr {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.modern-footer .kakao-qr img {
+    width: 120px;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.modern-footer .kakao-qr p {
+    font-size: 13px;
+    color: #bdc3c7;
+    margin: 0;
+}
+
+/* 반응형 디자인 - 모바일 */
+@media (max-width: 600px) {
+    .modern-footer {
+        padding: 30px 15px 20px;
+    }
+    
+    .modern-footer .footer-section {
+        min-width: 100%;
+        margin-bottom: 25px;
+    }
+    
+    .modern-footer .footer-container {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .modern-footer .links-section {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .modern-footer .footer-links a {
+        padding: 8px 0;
+    }
+    
+    .modern-footer .logo-img {
+        width: 220px;
+    }
+    
+    .modern-footer .kakao-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+    
+    .modern-footer .footer-bottom {
+        font-size: 12px;
+        padding-top: 15px;
+        margin-top: 20px;
+    }
+}
