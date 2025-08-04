@@ -29,6 +29,9 @@
     <link rel="stylesheet" href="css/main-sections.css?v=1754220183">
     <link rel="stylesheet" href="css/utilities.css?v=1754220183">
     
+    <!-- JavaScript 파일 -->
+    <script src="js/auth.js"></script>
+    
     <style>
         /* 팝업 스타일 */
         .popup {
@@ -138,7 +141,9 @@
         <!-- 로고 영역 -->
         <div class="hy-logo">
             <a href="index.html">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </a>
         </div>
 
@@ -181,8 +186,7 @@
 
         <!-- 사용자 인증 영역 -->
         <div class="hy-auth-area">
-            <a href="login.html" class="hy-auth-link">로그인</a>
-            <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+            <!-- JavaScript로 동적 생성됨 -->
         </div>
 
         <!-- 모바일 메뉴 토글 버튼 -->
@@ -201,8 +205,7 @@
             </div>
             
             <div class="hy-mobile-auth">
-                <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
-                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <nav class="hy-mobile-nav">
@@ -244,13 +247,16 @@
     </div>
 </header>
 
-<!-- 메인 비디오 섹션 -->
+<!-- 메인 히어로 섹션 -->
 <section class="video-visual-section">
-    <video class="video-background" autoplay muted playsinline loop preload="none">
-        <img src="img/eco-fallback.jpg" alt="비디오 대체 이미지">
-        <source src="videos/eco-background.webm" type="video/webm">
-        <source src="videos/eco-background.mp4" type="video/mp4">
-    </video>
+    <div class="hero-background">
+        <img src="img/solar-wind-hero.jpeg" 
+             srcset="img/solar-wind-hero.jpeg 1x"
+             alt="태양광 패널과 풍력 발전기" 
+             class="hero-image"
+             loading="eager"
+             decoding="sync">
+    </div>
 
     <div class="video-overlay"></div>
 
@@ -270,9 +276,9 @@
         <div class="slider">
             <div class="slide">
                 <div class="image-container">
-                    <img src="img/t1.jpg" alt="신뢰 이미지 1" class="active">
-                    <img src="img/t2.jpg" alt="신뢰 이미지 2">
-                    <img src="img/t3.jpg" alt="신뢰 이미지 3">
+                    <img src="img/t1.jpeg" alt="매일마다 받는 수익 화면" class="active">
+                    <img src="img/t2.jpeg" alt="올케어 세금 관리 서비스">
+                    <img src="img/t3.jpeg" alt="선착순 공모 태양광 발전소 투자">
                 </div>
                 
                 <div class="text-block">
@@ -313,28 +319,28 @@
         </div>
         <div class="status-items">
             <div class="status-item">
-                <img src="images/1.png" alt="투자자 수" class="status-icon">
+                <img src="images/1.jpeg" alt="함께한 동행인 아이콘" class="status-icon">
                 <div class="status-text">
                     <span class="status-number" data-target="63267">0</span><span class="status-unit">명</span>
                 </div>
                 <p class="status-label">함께한 동행인</p>
             </div>
             <div class="status-item">
-                <img src="images/2.png" alt="누적 출자 금액" class="status-icon">
+                <img src="images/2.jpeg" alt="누적 출자금액 상승 아이콘" class="status-icon">
                 <div class="status-text">
                     <span class="status-number" data-target="1279">0</span><span class="status-unit">억 원</span>
                 </div>
                 <p class="status-label">누적 출자금액</p>
             </div>
             <div class="status-item">
-                <img src="images/3.png" alt="태양열 발전소" class="status-icon">
+                <img src="images/3.jpeg" alt="태양광 발전소 아이콘" class="status-icon">
                 <div class="status-text">
                     <span class="status-number" data-target="732">0</span><span class="status-unit">개</span>
                 </div>
                 <p class="status-label">동행 발전소</p>
             </div>
             <div class="status-item">
-                <img src="images/4.png" alt="수익 지급률" class="status-icon">
+                <img src="images/4.jpeg" alt="100% 이자 지급률 아이콘" class="status-icon">
                 <div class="status-text">
                     <span class="status-number" data-target="100">0</span><span class="status-unit">%</span>
                 </div>
@@ -417,16 +423,16 @@
 
     <div class="slider-wrapper">
         <div class="slider-track">
-            <img src="img/powerstation1.jpg" alt="">
-            <img src="img/powerstation2.jpg" alt="">
-            <img src="img/powerstation3.jpg" alt="">
-            <img src="img/powerstation4.jpg" alt="">
-            <img src="img/powerstation5.jpg" alt="">
-            <img src="img/powerstation1.jpg" alt="">
-            <img src="img/powerstation2.jpg" alt="">
-            <img src="img/powerstation3.jpg" alt="">
-            <img src="img/powerstation4.jpg" alt="">
-            <img src="img/powerstation5.jpg" alt="">
+            <img src="img/powerstation1.jpeg" alt="한양에너지 발전소 1">
+            <img src="img/powerstation2.jpeg" alt="한양에너지 발전소 2">
+            <img src="img/powerstation3.jpeg" alt="한양에너지 발전소 3">
+            <img src="img/powerstation4.jpeg" alt="한양에너지 발전소 4">
+            <img src="img/powerstation5.jpeg" alt="한양에너지 발전소 5">
+            <img src="img/powerstation1.jpeg" alt="한양에너지 발전소 1">
+            <img src="img/powerstation2.jpeg" alt="한양에너지 발전소 2">
+            <img src="img/powerstation3.jpeg" alt="한양에너지 발전소 3">
+            <img src="img/powerstation4.jpeg" alt="한양에너지 발전소 4">
+            <img src="img/powerstation5.jpeg" alt="한양에너지 발전소 5">
         </div>
     </div>
 </section>
@@ -436,7 +442,7 @@
     <div class="container">
         <div class="video-container">
             <video controls autoplay muted>
-                <source src="/uploads/videos/sample_video.mp4" type="video/mp4">
+                <source src="videos/company_intro.mp4" type="video/mp4">
                 브라우저가 동영상을 지원하지 않습니다.
             </video>
         </div>
@@ -459,7 +465,9 @@
         <!-- 왼쪽: 로고 및 SNS -->
         <div class="footer-section logo-section">
             <div class="footer-logo">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </div>
             <p>청정에너지로 만드는 지속가능한 미래</p>
             
@@ -536,6 +544,10 @@
 <script src="js/main.js"></script>
 
 <!-- 채널톡 -->
+<!-- JavaScript -->
+<script src="js/auth.js"></script>
+<script src="js/header.js"></script>
+
 <script>
     (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
 

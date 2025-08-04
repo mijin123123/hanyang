@@ -1,0 +1,660 @@
+/* 마이페이지 전용 CSS */
+
+/* 헤더 스타일 - 메인페이지와 동일 */
+.hy-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.hy-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+}
+
+/* 로고 영역 */
+.hy-logo img {
+    height: 40px;
+    width: auto;
+}
+
+/* 데스크탑 네비게이션 */
+.hy-desktop-nav {
+    display: flex;
+    align-items: center;
+}
+
+.hy-main-menu {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.hy-menu-item {
+    position: relative;
+}
+
+.hy-menu-item > a {
+    display: block;
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.hy-menu-item > a:hover {
+    color: #E67E22;
+}
+
+/* 드롭다운 메뉴 */
+.hy-submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    padding: 10px 0;
+    display: none;
+    z-index: 1001;
+}
+
+.hy-submenu li {
+    margin: 0;
+}
+
+.hy-submenu a {
+    display: block;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.hy-submenu a:hover {
+    background: #f8f9fa;
+    color: #E67E22;
+    padding-left: 25px;
+}
+
+/* 사용자 인증 영역 */
+.hy-auth-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 로그인 상태 - 사용자 이름 스타일 */
+.hy-username {
+    color: #333 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    background: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.hy-username::before {
+    display: none !important;
+}
+
+/* 사용자 정보 영역 */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 6px 8px;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.user-name {
+    color: #0056a3;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 0 8px;
+}
+
+/* 로그아웃 버튼 스타일 */
+.logout-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.logout-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+.hy-auth-link {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    text-decoration: none;
+    color: #666;
+}
+
+.hy-auth-link:hover {
+    color: #E67E22;
+    border-color: #E67E22;
+    background: rgba(230, 126, 34, 0.1);
+    transform: translateY(-1px);
+}
+
+.hy-auth-link.hy-signup {
+    background: #E67E22;
+    color: white;
+    border-color: #E67E22;
+}
+
+.hy-auth-link.hy-signup:hover {
+    background: #d35400;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+}
+
+/* 모바일 토글 버튼 */
+.hy-mobile-toggle {
+    display: none;
+    flex-direction: column;
+    width: 24px;
+    height: 24px;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.hy-toggle-bar {
+    width: 100%;
+    height: 3px;
+    background: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* 모바일 메뉴 */
+.hy-mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 1002;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+.hy-mobile-menu.hy-show {
+    right: 0;
+}
+
+.hy-mobile-container {
+    padding: 20px;
+}
+
+.hy-mobile-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.hy-mobile-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.hy-mobile-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+/* 모바일 사용자 정보 */
+.hy-mobile-auth .user-info {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.hy-mobile-auth .user-name {
+    color: #0056a3;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.hy-mobile-auth .logout-btn {
+    width: 100%;
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hy-mobile-auth .logout-btn:hover {
+    background: #c82333;
+}
+
+.hy-mobile-auth-btn {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+}
+
+.hy-mobile-auth-btn:hover {
+    background: #f8f9fa;
+    border-color: #0056a3;
+    color: #0056a3;
+}
+
+.hy-mobile-auth-btn.hy-signup {
+    background: #E67E22;
+    color: white;
+    border-color: #E67E22;
+}
+
+.hy-mobile-auth-btn.hy-signup:hover {
+    background: #d35400;
+}
+
+/* 모바일 네비게이션 */
+.hy-mobile-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hy-mobile-dropdown {
+    border-bottom: 1px solid #eee;
+}
+
+.hy-mobile-menu-btn {
+    width: 100%;
+    padding: 15px 0;
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    position: relative;
+}
+
+.hy-mobile-menu-btn:after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.hy-mobile-menu-btn.hy-open:after {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.hy-mobile-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: #f8f9fa;
+}
+
+.hy-mobile-submenu a {
+    display: block;
+    padding: 10px 20px;
+    color: #666;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.hy-mobile-submenu a:hover {
+    color: #E67E22;
+}
+
+@media (max-width: 768px) {
+    .hy-desktop-nav {
+        display: none;
+    }
+    
+    .hy-mobile-toggle {
+        display: flex;
+    }
+    
+    .hy-auth-area {
+        display: none;
+    }
+}
+
+/* 푸터 스타일 */
+.modern-footer {
+    margin-top: 100px;
+    background-color: #535353;
+    color: #ecf0f1;
+    font-family: 'Pretendard', sans-serif;
+    padding: 40px 20px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 푸터 컨테이너 */
+.modern-footer .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 30px;
+}
+
+/* 섹션 스타일 */
+.modern-footer .footer-section {
+    flex: 1;
+    min-width: 220px;
+    margin-bottom: 20px;
+}
+
+/* 로고 및 SNS 섹션 */
+.modern-footer .logo-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.modern-footer .footer-logo {
+    margin-bottom: 15px;
+}
+
+.modern-footer .logo-img {
+    max-width: 100%;
+    width: 270px;
+    height: auto;
+    filter: brightness(0) invert(1);
+}
+
+.modern-footer .sns-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.modern-footer .sns-links a {
+    color: #ecf0f1;
+    font-size: 20px;
+    transition: color 0.3s;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.modern-footer .sns-links a:hover {
+    color: #3498db;
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* 링크 스타일 */
+.modern-footer .links-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .links-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modern-footer .footer-links li {
+    margin-bottom: 12px;
+}
+
+.modern-footer .footer-links a {
+    text-decoration: none;
+    color: #bdc3c7;
+    transition: all 0.3s;
+    display: block;
+    padding: 5px 0;
+}
+
+.modern-footer .footer-links a:hover {
+    color: #3498db;
+    padding-left: 5px;
+}
+
+/* 연락처 섹션 */
+.modern-footer .contact-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .contact-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .contact-info {
+    margin-bottom: 20px;
+}
+
+.modern-footer .contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.modern-footer .contact-icon {
+    margin-right: 12px;
+    color: #3498db;
+    font-size: 16px;
+    margin-top: 3px;
+    min-width: 16px;
+}
+
+.modern-footer .contact-text {
+    flex: 1;
+    word-break: keep-all;
+}
+
+.modern-footer .footer-phone {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ecf0f1;
+    margin: 15px 0;
+}
+
+/* 카카오톡 상담 버튼 */
+.modern-footer .kakao-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FEE500;
+    color: #3A1D1D;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 15px;
+    transition: all 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modern-footer .kakao-btn:hover {
+    background-color: #ffeb3b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.modern-footer .kakao-btn i {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+/* 하단 저작권 */
+.modern-footer .footer-bottom {
+    text-align: center;
+    font-size: 13px;
+    color: #bdc3c7;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* QR 코드 영역 */
+.modern-footer .kakao-qr {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.modern-footer .kakao-qr img {
+    width: 120px;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.modern-footer .kakao-qr p {
+    font-size: 13px;
+    color: #bdc3c7;
+    margin: 0;
+}
+
+/* 반응형 디자인 - 태블릿 */
+@media (max-width: 900px) {
+    .modern-footer .footer-section {
+        min-width: calc(50% - 15px);
+    }
+    
+    .modern-footer .footer-container {
+        gap: 20px;
+    }
+}
+
+/* 반응형 디자인 - 모바일 */
+@media (max-width: 600px) {
+    .modern-footer {
+        padding: 30px 15px 20px;
+    }
+    
+    .modern-footer .footer-section {
+        min-width: 100%;
+        margin-bottom: 25px;
+    }
+    
+    .modern-footer .footer-container {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .modern-footer .links-section {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .modern-footer .footer-links a {
+        padding: 8px 0;
+    }
+    
+    .modern-footer .logo-img {
+        width: 220px;
+    }
+    
+    .modern-footer .kakao-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+    
+    .modern-footer .footer-bottom {
+        font-size: 12px;
+        padding-top: 15px;
+        margin-top: 20px;
+    }
+}

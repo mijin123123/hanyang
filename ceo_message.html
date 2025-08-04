@@ -29,6 +29,9 @@
     <link rel="stylesheet" href="css/utilities.css?v=1754221048">
     <link rel="stylesheet" href="css/ceo-message.css?v=1754221048">
     
+    <!-- JavaScript 파일 -->
+    <script src="js/auth.js"></script>
+    
     <style>
         /* 인사말 페이지 전용 스타일 */
         body {
@@ -40,21 +43,23 @@
 
         /* 히어로 섹션 */
         .hero-section {
-            background: url('img/banner1.jpg') no-repeat center bottom;
+            background: url('./img/ceo_greeting.jpeg') no-repeat center center;
             background-size: cover;
-            padding: 120px 0;
+            padding: 140px 0;
             text-align: center;
             color: white;
             position: relative;
-            height: 346px;
+            height: 500px;
+            min-height: 500px;
         }
 
         .hero-cover {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.4);
             width: 100%;
-            height: 346px;
+            height: 100%;
             top: 0;
+            left: 0;
         }
 
         .hero-content {
@@ -171,10 +176,7 @@
         .signature-container {
             margin-top: 40px;
             text-align: right;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #E67E22;
+            padding: 0;
         }
 
         .ceo-name {
@@ -470,7 +472,9 @@
         <!-- 로고 영역 -->
         <div class="hy-logo">
             <a href="index.html">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </a>
         </div>
 
@@ -513,8 +517,7 @@
 
         <!-- 사용자 인증 영역 -->
         <div class="hy-auth-area">
-            <a href="login.html" class="hy-auth-link">로그인</a>
-            <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+            <!-- JavaScript로 동적 생성됨 -->
         </div>
 
         <!-- 모바일 메뉴 토글 버튼 -->
@@ -533,8 +536,7 @@
             </div>
             
             <div class="hy-mobile-auth">
-                <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
-                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <nav class="hy-mobile-nav">
@@ -590,13 +592,13 @@
     <div class="main-container">
         <!-- 왼쪽 이미지 -->
         <div class="image-container">
-            <img src="img/ceo_message/solar.jpg" alt="태양광 발전소" loading="lazy" 
+            <img src="img/ceo_greeting.jpeg" alt="태양광 발전소" loading="lazy" 
                  onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=&quot;placeholder-image&quot;></div>';">
         </div>
 
         <!-- 오른쪽 텍스트 -->
         <div class="text-container">
-            <h2 class="page-title">대표이사 인사말</h2>
+            <h2 class="page-title">조합장의 인사말</h2>
             <blockquote class="quote">친환경 자연에너지</blockquote>
             <h3 class="subtitle">전문업체 (주)한양에너지는 사람과 환경을 생각합니다.</h3>
             <hr class="divider-line">
@@ -627,9 +629,9 @@
             <!-- 서명 섹션 -->
             <div class="signature-container">
                 <div class="ceo-name">
-                    <span>대표이사: 정용우 / 정우영</span>
-                    <img src="images/dqdqd.png" alt="대표 도장" class="seal-image" 
-                         onerror="this.style.display='none'; this.parentNode.innerHTML='<span>대표이사: 정용우 / 정우영</span><div class=&quot;seal-placeholder&quot;></div>';">
+                    <span>(주)한양에너지 조합장 : 박경읍</span>
+                    <img src="images/dqdqd.jpeg" alt="대표 도장" class="seal-image" 
+                         onerror="this.style.display='none'; this.parentNode.innerHTML='<span>(주)한양에너지 조합장 : 박경읍</span><div class=&quot;seal-placeholder&quot;></div>';">
                 </div>
             </div>
         </div>
@@ -642,7 +644,9 @@
         <!-- 왼쪽: 로고 및 SNS -->
         <div class="footer-section logo-section">
             <div class="footer-logo">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </div>
             <p>청정에너지로 만드는 지속가능한 미래</p>
             
@@ -704,6 +708,14 @@
         "pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
     });
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        updateHeaderUserInfo();
+    });
+</script>
+
+<script src="js/header.js"></script>
 
 </body>
 </html>

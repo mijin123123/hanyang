@@ -19,6 +19,9 @@
     <link rel="stylesheet" href="css/global.css?v=1754220183">
     <link rel="stylesheet" href="css/header.css?v=1754220183">
     
+    <!-- JavaScript 파일 -->
+    <script src="js/auth.js"></script>
+    
     <style>
         :root {
             --primary: #4361ee;
@@ -371,7 +374,9 @@
             <!-- 로고 영역 -->
             <div class="hy-logo">
                 <a href="index.html">
-                    <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                    <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                    </div>
                 </a>
             </div>
 
@@ -414,8 +419,7 @@
 
             <!-- 사용자 인증 영역 -->
             <div class="hy-auth-area">
-                <a href="login.html" class="hy-auth-link">로그인</a>
-                <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <!-- 모바일 메뉴 토글 버튼 -->
@@ -434,8 +438,7 @@
                 </div>
                 
                 <div class="hy-mobile-auth">
-                    <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
-                    <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                    <!-- JavaScript로 동적 생성됨 -->
                 </div>
 
                 <nav class="hy-mobile-nav">
@@ -484,9 +487,7 @@
             <div class="service-info">
                 <h2 class="service-title">한양에너지 고객센터</h2>
                 <p class="service-subtitle">평일 10:00 ~ 19:00 (점심시간 13:00 ~ 14:00)</p>
-                <div class="service-contact">
-                    <i class="fas fa-phone-alt"></i>
-                    <span>1588-0000</span>
+                <div class="service-contact">  
                 </div>
             </div>
             <div class="service-image">
@@ -633,7 +634,9 @@
             <!-- 왼쪽: 로고 및 SNS -->
             <div class="footer-section logo-section">
                 <div class="footer-logo">
-                    <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                    <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                    </div>
                 </div>
                 <p>청정에너지로 만드는 지속가능한 미래</p>
                 
@@ -932,5 +935,11 @@
             }
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHeaderUserInfo();
+        });
+    </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* 메인 비디오 섹션 스타일 */
+/* 메인 히어로 섹션 스타일 */
 .video-visual-section {
     position: relative;
     width: 100%;
@@ -12,13 +12,31 @@
     text-align: center;
 }
 
-.video-background {
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #87CEEB 0%, #4ECDC4 50%, #45B7D1 100%);
+    will-change: transform;
+}
+
+.hero-image {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: high-quality;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .video-overlay {
@@ -27,7 +45,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 1;
 }
 
@@ -44,6 +62,7 @@
     letter-spacing: 5px;
     margin-bottom: 30px;
     color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .main-title {
@@ -52,6 +71,7 @@
     line-height: 1.2;
     margin: 20px 0;
     color: #fff;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
 }
 
 .sub-title {
@@ -62,6 +82,7 @@
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .highlight {
@@ -229,6 +250,9 @@
     width: 50%;
     height: auto;
     margin-bottom: 15px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .status-text {

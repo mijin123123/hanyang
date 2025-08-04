@@ -1,0 +1,284 @@
+// 인증 관련 JavaScript 파일
+
+// 사용자 데이터베이스 (실제 서비스에서는 서버에서 관리)
+const users = [
+    { username: 'minj0010', password: 'minj0010', name: '민진', role: 'admin' },
+    { username: 'admin', password: 'admin123', name: '관리자', role: 'admin' },
+    { username: 'user1', password: 'user123', name: '김회원', role: 'user' },
+    { username: 'user2', password: 'user456', name: '이투자', role: 'user' },
+    { username: 'test', password: 'test123', name: '테스트', role: 'user' }
+];
+
+// 로그인 함수
+function login(username, password) {
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        // 로그인 성공 - 세션 저장
+        const sessionData = {
+            username: user.username,
+            name: user.name,
+            role: user.role,
+            loginTime: new Date().toISOString()
+        };
+        
+        localStorage.setItem('userSession', JSON.stringify(sessionData));
+        return { success: true, user: sessionData };
+    } else {
+        return { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' };
+    }
+}
+
+// 로그아웃 함수
+function logout() {
+    localStorage.removeItem('userSession');
+    window.location.href = 'login.html';
+}
+
+// 현재 로그인된 사용자 정보 가져오기
+function getCurrentUser() {
+    const sessionData = localStorage.getItem('userSession');
+    if (sessionData) {
+        try {
+            return JSON.parse(sessionData);
+        } catch (e) {
+            localStorage.removeItem('userSession');
+            return null;
+        }
+    }
+    return null;
+}
+
+// 로그인 상태 확인
+function isLoggedIn() {
+    return getCurrentUser() !== null;
+}
+
+// 로그인이 필요한 페이지에서 사용할 체크 함수
+function requireLogin() {
+    if (!isLoggedIn()) {
+        alert('로그인이 필요한 서비스입니다.');
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+// 관리자 권한 체크
+function requireAdmin() {
+    const user = getCurrentUser();
+    if (!user || user.role !== 'admin') {
+        alert('관리자 권한이 필요합니다.');
+        return false;
+    }
+    return true;
+}
+
+// 헤더에서 사용자 정보 표시
+function updateHeaderUserInfo() {
+    const user = getCurrentUser();
+    const authArea = document.querySelector('.hy-auth-area');
+    const mobileAuth = document.querySelector('.hy-mobile-auth');
+    
+    if (user && authArea) {
+        // 데스크탑 헤더 업데이트 - 새로운 디자인
+        authArea.innerHTML = `
+            <div class="user-info">
+                <span class="hy-username">${user.name}님</span>
+                <a href="mypage.html" class="hy-auth-link" style="background: #0056a3; color: white; border-color: #0056a3; padding: 8px 16px; border-radius: 4px; margin-left: 10px;">
+                    <i class="fas fa-user"></i> 마이페이지
+                </a>
+                <button onclick="logout()" class="logout-btn" style="margin-left: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> 로그아웃
+                </button>
+            </div>
+        `;
+    }
+    
+    if (user && mobileAuth) {
+        // 모바일 헤더 업데이트 - 새로운 디자인
+        mobileAuth.innerHTML = `
+            <div class="user-info">
+                <span class="user-name">
+                    <i class="fas fa-user-circle"></i> ${user.name}님
+                </span>
+                <a href="mypage.html" class="hy-mobile-auth-btn" style="background: #0056a3; color: white; border-color: #0056a3; margin-bottom: 8px;">
+                    <i class="fas fa-user"></i> 마이페이지
+                </a>
+                <button onclick="logout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> 로그아웃
+                </button>
+            </div>
+        `;
+    }
+    
+    // 로그인하지 않은 경우
+    if (!user) {
+        if (authArea) {
+            authArea.innerHTML = `
+                <a href="login.html" class="hy-auth-link">
+                    <i class="fas fa-sign-in-alt"></i> 로그인
+                </a>
+                <a href="signup.html" class="hy-auth-link hy-signup">
+                    <i class="fas fa-user-plus"></i> 회원가입
+                </a>
+            `;
+        }
+        
+        if (mobileAuth) {
+            mobileAuth.innerHTML = `
+                <a href="login.html" class="hy-mobile-auth-btn">
+                    <i class="fas fa-sign-in-alt"></i> 로그인
+                </a>
+                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">
+                    <i class="fas fa-user-plus"></i> 회원가입
+                </a>
+            `;
+        }
+    }
+}
+
+// 페이지 로드 시 실행
+document.addEventListener('DOMContentLoaded', function() {
+    // 현재 페이지가 로그인 페이지가 아니라면 헤더 업데이트
+    if (!window.location.pathname.includes('login.html')) {
+        updateHeaderUserInfo();
+    }
+    
+    // 로그인 페이지에서 이미 로그인된 경우 메인으로 리다이렉트
+    if (window.location.pathname.includes('login.html') && isLoggedIn()) {
+        window.location.href = 'index.html';
+    }
+});
+
+// 자동 로그아웃 (24시간 후)
+function checkSessionExpiry() {
+    const user = getCurrentUser();
+    if (user) {
+        const loginTime = new Date(user.loginTime);
+        const now = new Date();
+        const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+        
+        if (hoursDiff > 24) {
+            logout();
+        }
+    }
+}
+
+// 1분마다 세션 만료 체크
+setInterval(checkSessionExpiry, 60000);
+
+// 사용자 프로필 업데이트 함수
+function updateUserProfile(userData) {
+    const user = getCurrentUser();
+    if (!user) return false;
+    
+    // 비밀번호 업데이트 (실제 구현에서는 서버로 전송)
+    if (userData.password) {
+        // 실제로는 해시화해서 저장해야 함
+        const userIndex = users.findIndex(u => u.username === user.username);
+        if (userIndex !== -1) {
+            users[userIndex].password = userData.password;
+        }
+    }
+    
+    // 전화번호 업데이트 (실제로는 서버에 저장)
+    if (userData.phone) {
+        user.phone = userData.phone;
+        localStorage.setItem('userSession', JSON.stringify(user));
+    }
+    
+    return true;
+}
+
+// 사용자 통계 데이터 가져오기 (샘플 데이터)
+function getUserStats(username) {
+    const sampleStats = {
+        'minj0010': {
+            products: 2,
+            balance: 4623000,
+            investment: 70000000,
+            profit: 33177000
+        },
+        'admin': {
+            products: 5,
+            balance: 15000000,
+            investment: 200000000,
+            profit: 85000000
+        },
+        'user1': {
+            products: 1,
+            balance: 1500000,
+            investment: 30000000,
+            profit: 5200000
+        },
+        'user2': {
+            products: 3,
+            balance: 3200000,
+            investment: 50000000,
+            profit: 12000000
+        },
+        'test': {
+            products: 1,
+            balance: 800000,
+            investment: 20000000,
+            profit: 2500000
+        }
+    };
+    
+    return sampleStats[username] || {
+        products: 0,
+        balance: 0,
+        investment: 0,
+        profit: 0
+    };
+}
+
+// 사용자 상세 정보 가져오기 (샘플 데이터)
+function getUserDetails(username) {
+    const sampleDetails = {
+        'minj0010': {
+            phone: '010-3234-1123',
+            bankName: 'KB국민은행',
+            accountNumber: '94401139100103',
+            address: '서울 강남구 도산대로 104 (논현동)',
+            detailAddress: '원경빌301'
+        },
+        'admin': {
+            phone: '010-1234-5678',
+            bankName: '신한은행',
+            accountNumber: '110123456789',
+            address: '서울 종로구 청와대로 1',
+            detailAddress: '관리동 101호'
+        },
+        'user1': {
+            phone: '010-9876-5432',
+            bankName: '우리은행',
+            accountNumber: '1002987654321',
+            address: '서울 강남구 테헤란로 123',
+            detailAddress: '101동 1203호'
+        },
+        'user2': {
+            phone: '010-5555-6666',
+            bankName: '하나은행',
+            accountNumber: '12312312312345',
+            address: '서울 서초구 서초대로 77',
+            detailAddress: '202동 506호'
+        },
+        'test': {
+            phone: '010-1111-2222',
+            bankName: '카카오뱅크',
+            accountNumber: '333322224444',
+            address: '서울 마포구 월드컵북로 396',
+            detailAddress: '1층'
+        }
+    };
+    
+    return sampleDetails[username] || {
+        phone: '',
+        bankName: '',
+        accountNumber: '',
+        address: '',
+        detailAddress: ''
+    };
+}

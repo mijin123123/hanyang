@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/header.css?v=1754220183">
     <link rel="stylesheet" href="css/main-sections.css?v=1754220183">
     <link rel="stylesheet" href="css/utilities.css?v=1754220183">
+    <script src="js/auth.js"></script>
     <title>조합원 상품신청 | 한양에너지</title>
     <style>
         :root {
@@ -518,7 +519,9 @@
         <!-- 로고 영역 -->
         <div class="hy-logo">
             <a href="index.html">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </a>
         </div>
 
@@ -561,8 +564,7 @@
 
         <!-- 사용자 인증 영역 -->
         <div class="hy-auth-area">
-            <a href="login.html" class="hy-auth-link">로그인</a>
-            <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+            <!-- JavaScript로 동적 생성됨 -->
         </div>
 
         <!-- 모바일 메뉴 토글 버튼 -->
@@ -581,8 +583,7 @@
             </div>
             
             <div class="hy-mobile-auth">
-                <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
-                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <nav class="hy-mobile-nav">
@@ -631,7 +632,7 @@
 
     <div class="investment-card-list">
         
-        <a href="product_detail.html?id=47" class="investment-card-link">
+        <a href="investment_detail.html" class="investment-card-link">
             <div class="investment-card">
                 <div class="ribbon">HOT</div>
                 
@@ -674,9 +675,9 @@
             </div>
         </a>
                       
-        <a href="product_detail.html?id=46" class="investment-card-link">
+        <a href="investment_detail_300kw.html" class="investment-card-link">
             <div class="investment-card">
-                <div class="ribbon">HOT</div>
+                <div class="ribbon">인기</div>
                 
                 <div class="badge-container">
                     <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
@@ -686,7 +687,7 @@
                     </span>
                 </div>
 
-                <h3 class="product-title">[300KW] 다함께 동행 뉴베이직</h3>
+                <h3 class="product-title">[300KW] 다함께 동행 베이직</h3>
                 
                 <div class="yield">일일 수익률 <span class="rate">0.06%</span></div>
                 
@@ -717,9 +718,9 @@
             </div>
         </a>
                       
-        <a href="product_detail.html?id=45" class="investment-card-link">
+        <a href="investment_detail_500kw.html" class="investment-card-link">
             <div class="investment-card">
-                <div class="ribbon">HOT</div>
+                <div class="ribbon">프리미엄</div>
                 
                 <div class="badge-container">
                     <span class="badge"><i class="fas fa-calendar-alt"></i> 365일 투자</span>
@@ -760,7 +761,7 @@
             </div>
         </a>
                       
-        <a href="product_detail.html?id=44" class="investment-card-link">
+        <a href="investment_detail_laon.html" class="investment-card-link">
             <div class="investment-card">
                 <div class="ribbon">HOT</div>
                 
@@ -774,13 +775,13 @@
 
                 <h3 class="product-title">[700KW] 다함께 동행 프리미엄 플러스</h3>
                 
-                <div class="yield">일일 수익률 <span class="rate">0.16%</span></div>
+                <div class="yield">일일 수익률 <span class="rate">0.08%</span></div>
                 
                 <div class="profit-details">
                     <p><strong>예상 수익</strong></p>
-                    <p>일 48,000원</p>
-                    <p>월 1,440,000원</p>
-                    <p>연 17,520,000원</p>
+                    <p>일 2,400원</p>
+                    <p>월 72,000원</p>
+                    <p>연 876,000원</p>
                 </div>
                 
                 <div class="minimum-amount">
@@ -790,10 +791,10 @@
                 <div class="progress-container">
                     <div class="progress-info">
                         <span class="progress-label">모집 진행률</span>
-                        <span class="progress-percent">52.6%</span>
+                        <span class="progress-percent">52.75%</span>
                     </div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 52.56%;"></div>
+                        <div class="progress-bar-fill" style="width: 52.75%;"></div>
                     </div>
                 </div>
                 
@@ -803,7 +804,7 @@
             </div>
         </a>
                       
-        <a href="product_detail.html?id=43" class="investment-card-link">
+        <a href="investment_detail_simple_eco.html" class="investment-card-link">
             <div class="investment-card">
                 <div class="ribbon">HOT</div>
                 
@@ -817,13 +818,13 @@
 
                 <h3 class="product-title">[1MW] 다함께 동행 메가</h3>
                 
-                <div class="yield">일일 수익률 <span class="rate">0.20%</span></div>
+                <div class="yield">일일 수익률 <span class="rate">0.05%</span></div>
                 
                 <div class="profit-details">
                     <p><strong>예상 수익</strong></p>
-                    <p>일 130,000원</p>
-                    <p>월 3,900,000원</p>
-                    <p>연 47,450,000원</p>
+                    <p>일 750원</p>
+                    <p>월 22,500원</p>
+                    <p>연 273,750원</p>
                 </div>
                 
                 <div class="minimum-amount">
@@ -833,10 +834,10 @@
                 <div class="progress-container">
                     <div class="progress-info">
                         <span class="progress-label">모집 진행률</span>
-                        <span class="progress-percent">61.0%</span>
+                        <span class="progress-percent">35.60%</span>
                     </div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 61%;"></div>
+                        <div class="progress-bar-fill" style="width: 35.60%;"></div>
                     </div>
                 </div>
                 
@@ -846,7 +847,7 @@
             </div>
         </a>
                       
-        <a href="product_detail.html?id=42" class="investment-card-link">
+        <a href="investment_detail_green_starter.html" class="investment-card-link">
             <div class="investment-card">
                 <div class="ribbon">HOT</div>
                 
@@ -860,13 +861,13 @@
 
                 <h3 class="product-title">[2MW] 다함께 동행 메가 플러스</h3>
                 
-                <div class="yield">일일 수익률 <span class="rate">0.24%</span></div>
+                <div class="yield">일일 수익률 <span class="rate">0.04%</span></div>
                 
                 <div class="profit-details">
                     <p><strong>예상 수익</strong></p>
-                    <p>일 312,000원</p>
-                    <p>월 9,360,000원</p>
-                    <p>연 113,880,000원</p>
+                    <p>일 400원</p>
+                    <p>월 12,000원</p>
+                    <p>연 146,000원</p>
                 </div>
                 
                 <div class="minimum-amount">
@@ -876,10 +877,10 @@
                 <div class="progress-container">
                     <div class="progress-info">
                         <span class="progress-label">모집 진행률</span>
-                        <span class="progress-percent">48.0%</span>
+                        <span class="progress-percent">18.45%</span>
                     </div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 48%;"></div>
+                        <div class="progress-bar-fill" style="width: 18.45%;"></div>
                     </div>
                 </div>
                 
@@ -896,7 +897,9 @@
         <!-- 왼쪽: 로고 및 SNS -->
         <div class="footer-section logo-section">
             <div class="footer-logo">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </div>
             <p>청정에너지로 만드는 지속가능한 미래</p>
             
@@ -956,6 +959,17 @@ ChannelIO('boot', {
 </script>
 
 <script src="js/header.js"></script>
+
+<script>
+    // 준비 중 메시지 표시 함수
+    function showComingSoon() {
+        alert('해당 상품은 준비 중입니다.\n[100KW] 다함께 동행 베이직 상품을 이용해주세요.');
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateHeaderUserInfo();
+    });
+</script>
 
 </body>
 </html>

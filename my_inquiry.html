@@ -15,6 +15,17 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    
+    <!-- JavaScript 파일 -->
+    <script src="js/auth.js"></script>
+    <script>
+        // 페이지 로드 시 로그인 체크
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!requireLogin()) {
+                return;
+            }
+        });
+    </script>
     <style>
         :root {
             --primary: #4361ee;
@@ -555,7 +566,9 @@
             <!-- 로고 영역 -->
             <div class="hy-logo">
                 <a href="index.html">
-                    <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                    <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                    </div>
                 </a>
             </div>
 
@@ -598,8 +611,7 @@
 
             <!-- 사용자 인증 영역 -->
             <div class="hy-auth-area">
-                <a href="login.html" class="hy-auth-link">로그인</a>
-                <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <!-- 모바일 메뉴 토글 버튼 -->
@@ -618,8 +630,7 @@
                 </div>
                 
                 <div class="hy-mobile-auth">
-                    <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
-                    <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                    <!-- JavaScript로 동적 생성됨 -->
                 </div>
 
                 <nav class="hy-mobile-nav">
@@ -852,7 +863,9 @@
             <!-- 왼쪽: 로고 및 SNS -->
             <div class="footer-section logo-section">
                 <div class="footer-logo">
-                    <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                    <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                    </div>
                 </div>
                 <p>청정에너지로 만드는 지속가능한 미래</p>
                 

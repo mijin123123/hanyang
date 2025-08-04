@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="css/global.css?v=1754220183">
     <link rel="stylesheet" href="css/header.css?v=1754220183">
     <link rel="stylesheet" href="css/utilities.css?v=1754220183">
+    
+    <!-- JavaScript 파일 -->
+    <script src="js/auth.js"></script>
     <title>로그인 | 한양에너지</title>
     <style>
 
@@ -554,7 +557,9 @@
         <!-- 로고 영역 -->
         <div class="hy-logo">
             <a href="index.html">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </a>
         </div>
 
@@ -692,6 +697,18 @@
             
             <div class="login-footer">
                 <p>한양에너지 회원이 아니신가요? <a href="signup.html">회원가입</a></p>
+                
+                <!-- 테스트 계정 정보 -->
+                <div class="test-accounts" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    <h4 style="margin-bottom: 10px; color: var(--primary-color);">💡 테스트 계정</h4>
+                    <div style="font-size: 0.9rem; line-height: 1.5;">
+                        <p><strong>관리자:</strong> admin / admin123</p>
+                        <p><strong>사용자1:</strong> user1 / user123</p>
+                        <p><strong>사용자2:</strong> user2 / user456</p>
+                        <p><strong>테스트:</strong> test / test123</p>
+                        <p><strong>민진:</strong> minj0010 / minj0010</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -702,7 +719,9 @@
         <!-- 왼쪽: 로고 및 SNS -->
         <div class="footer-section logo-section">
             <div class="footer-logo">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </div>
             <p>청정에너지로 만드는 지속가능한 미래</p>
             
@@ -842,14 +861,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // 데모 계정 로그인 처리
-            if (username === 'minj0010' && password === 'minj0010') {
-                showPopup('로그인 성공! 메인 페이지로 이동합니다.');
+            // 로그인 시도
+            const result = login(username, password);
+            
+            if (result.success) {
+                showPopup(`환영합니다, ${result.user.name}님! 로그인 완료!`);
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    // URL 파라미터에서 리다이렉트 URL 확인
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectUrl = urlParams.get('redirect');
+                    
+                    if (redirectUrl) {
+                        // 리다이렉트 URL이 있으면 해당 페이지로 이동
+                        window.location.href = decodeURIComponent(redirectUrl);
+                    } else {
+                        // 리다이렉트 URL이 없으면 기존 로직 사용
+                        if (result.user.role === 'admin') {
+                            window.location.href = 'index.html';
+                        } else {
+                            window.location.href = 'mypage.html';
+                        }
+                    }
                 }, 2000);
             } else {
-                showError('아이디 또는 비밀번호가 올바르지 않습니다.');
+                showError(result.message);
             }
         });
     }

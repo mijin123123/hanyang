@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/global.css?v=1754221270">
     <link rel="stylesheet" href="css/header.css?v=1754221270">
     <link rel="stylesheet" href="css/utilities.css?v=1754221270">
+    <script src="js/auth.js"></script>
     
     <style>
         /* 연혁 페이지 전용 스타일 */
@@ -41,21 +42,23 @@
 
         /* 히어로 섹션 */
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('./img/history_hero.jpeg') no-repeat center center;
             background-size: cover;
-            padding: 120px 0;
+            padding: 140px 0;
             text-align: center;
             color: white;
             position: relative;
-            height: 346px;
+            height: 500px;
+            min-height: 500px;
         }
 
         .hero-cover {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.4);
             width: 100%;
-            height: 346px;
+            height: 100%;
             top: 0;
+            left: 0;
         }
 
         .hero-content {
@@ -497,7 +500,9 @@
         <!-- 로고 영역 -->
         <div class="hy-logo">
             <a href="index.html">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" width="120">
+                <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </a>
         </div>
 
@@ -540,8 +545,7 @@
 
         <!-- 사용자 인증 영역 -->
         <div class="hy-auth-area">
-            <a href="login.html" class="hy-auth-link">로그인</a>
-            <a href="signup.html" class="hy-auth-link hy-signup">회원가입</a>
+            <!-- JavaScript로 동적 생성됨 -->
         </div>
 
         <!-- 모바일 메뉴 토글 버튼 -->
@@ -560,8 +564,7 @@
             </div>
             
             <div class="hy-mobile-auth">
-                <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
-                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">회원가입</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <nav class="hy-mobile-nav">
@@ -831,7 +834,9 @@
         <!-- 왼쪽: 로고 및 SNS -->
         <div class="footer-section logo-section">
             <div class="footer-logo">
-                <img src="img/newlogo1234.png" alt="한양에너지 로고" class="logo-img">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                    HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                </div>
             </div>
             <p>청정에너지로 만드는 지속가능한 미래</p>
             
@@ -893,6 +898,13 @@
         "pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        updateHeaderUserInfo();
+    });
+</script>
+
+<script src="js/header.js"></script>
 
 </body>
 </html>

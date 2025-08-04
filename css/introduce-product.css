@@ -159,12 +159,12 @@ body {
     top: 0;
     margin: auto;
 }
-.bg1 {background-image: url(../img/introduce_product/img25.jpg)}
-.bg2 {background-image: url(../img/introduce_product/img26.jpg)}
-.bg3 {background-image: url(../img/introduce_product/img27.jpg)}
-.bg4 {background-image: url(../img/introduce_product/img28.jpg)}
-.bg5 {background-image: url(../img/introduce_product/img29.jpg)}
-.bg6 {background-image: url(../img/introduce_product/img30.jpg)}
+.bg1 {background-color: #888888;}
+.bg2 {background-color: #888888;}
+.bg3 {background-color: #888888;}
+.bg4 {background-color: #888888;}
+.bg5 {background-color: #888888;}
+.bg6 {background-color: #888888;}
 
 /* 테이블 섹션 - 모바일 최적화 */
 .product_table_section {
