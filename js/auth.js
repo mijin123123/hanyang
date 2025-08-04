@@ -4,7 +4,7 @@
 let supabaseModule = null;
 
 // Supabase 사용 여부 설정
-const USE_SUPABASE = false; // RLS 정책 오류로 임시 비활성화
+const USE_SUPABASE = true; // 데이터베이스 연동 활성화
 
 // Supabase 모듈 로드 함수
 async function loadSupabaseModule() {
@@ -291,9 +291,35 @@ async function signup(userData) {
     if (USE_SUPABASE && supabaseModule) {
         // Supabase 회원가입 사용
         console.log('Supabase 회원가입 시도'); // 디버깅용
-        return await supabaseModule.signupUser(userData);
-    } else {
-        console.log('로컬 회원가입 방식 사용'); // 디버깅용
+        try {
+            const result = await supabaseModule.signupUser(userData);
+            console.log('Supabase 회원가입 결과:', result);
+            
+            if (result.success) {
+                // Supabase 성공 시
+                return {
+                    success: true,
+                    message: result.message || '회원가입이 완료되었습니다. 바로 로그인하실 수 있습니다.',
+                    user: result.data
+                };
+            } else if (result.fallback) {
+                // RLS 정책 오류로 로컬 방식으로 처리
+                console.warn('Supabase RLS 오류로 로컬 방식으로 전환');
+            } else {
+                // 기타 Supabase 오류
+                return {
+                    success: false,
+                    message: result.message || 'Supabase 회원가입 실패'
+                };
+            }
+        } catch (error) {
+            console.error('Supabase 회원가입 예외:', error);
+            // 예외 발생 시 로컬 방식으로 fallback
+        }
+    }
+    
+    // 로컬 방식 또는 Supabase fallback
+    console.log('로컬 회원가입 방식 사용'); // 디버깅용
         
         try {
             // 입력 데이터 검증
@@ -302,22 +328,22 @@ async function signup(userData) {
             }
             
             // 기존 로컬 방식
-            // 중복 확인
+            // 중복 확인 - users 배열과 localStorage의 승인된 사용자에서 확인
             const existingUser = users.find(u => u.username === userData.username || u.email === userData.email);
-            const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
-            const existingPending = storedPending.find(u => u.username === userData.username || u.email === userData.email);
+            const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+            const existingApproved = approvedUsers.find(u => u.username === userData.username || u.email === userData.email);
             
             console.log('중복 확인 결과:', { 
                 existingUser: !!existingUser, 
-                existingPending: !!existingPending,
+                existingApproved: !!existingApproved,
                 userData: userData.username 
             }); // 디버깅용
             
-            if (existingUser || existingPending) {
+            if (existingUser || existingApproved) {
                 return { success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' };
             }
             
-            // 새 회원 추가 (승인 대기 상태)
+            // 새 회원 추가 (즉시 승인 상태)
             const newUser = {
                 id: Date.now().toString(),
                 username: userData.username,
@@ -327,25 +353,26 @@ async function signup(userData) {
                 phone: userData.phone || '',
                 address: userData.address || '',
                 role: 'user',
-                status: 'pending', // 승인 대기 상태
+                status: 'approved', // 즉시 승인 상태
                 created_at: new Date().toISOString()
             };
             
-            console.log('새 회원 생성:', newUser); // 디버깅용
+            console.log('새 회원 생성 (즉시 승인):', newUser); // 디버깅용
             
-            // 임시로 pendingMembers에 추가
-            pendingMembers.push(newUser);
+            // users 배열에 직접 추가 (즉시 로그인 가능)
+            users.push(newUser);
             
-            // localStorage에도 저장하여 관리자 페이지에서 접근 가능하도록 함
-            const updatedPending = [...storedPending, newUser];
-            localStorage.setItem('pendingMembers', JSON.stringify(updatedPending));
+            // localStorage에도 승인된 사용자로 저장
+            const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+            approvedUsers.push(newUser);
+            localStorage.setItem('approvedUsers', JSON.stringify(approvedUsers));
             
-            console.log('pendingMembers 업데이트됨, 총 개수:', pendingMembers.length); // 디버깅용
-            console.log('localStorage에 저장된 pendingMembers:', updatedPending); // 디버깅용
+            console.log('users 배열에 추가됨, 총 개수:', users.length); // 디버깅용
+            console.log('localStorage 승인 사용자에 저장됨:', approvedUsers); // 디버깅용
             
             return { 
                 success: true, 
-                message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.',
+                message: '회원가입이 완료되었습니다. 바로 로그인하실 수 있습니다.',
                 user: newUser 
             };
         } catch (error) {
