@@ -92,6 +92,9 @@
                     <button class="btn btn-primary" onclick="refreshPendingMembers()">
                         <i class="fas fa-sync"></i> 새로고침
                     </button>
+                    <button class="btn btn-info" onclick="testAddPendingMember()" style="margin-left: 10px;">
+                        <i class="fas fa-plus"></i> 테스트 회원 추가
+                    </button>
                 </div>
                 
                 <div class="admin-table">
@@ -125,6 +128,9 @@
                         <h2><i class="fas fa-users"></i> 승인된 회원 목록</h2>
                         <div class="table-actions">
                             <input type="text" id="searchInput" placeholder="이름이나 아이디로 검색..." class="search-input">
+                            <button class="btn btn-info" onclick="checkLocalStorageData()">
+                                <i class="fas fa-database"></i> 데이터 확인
+                            </button>
                             <button class="btn btn-primary" onclick="exportMembers()">
                                 <i class="fas fa-download"></i> 내보내기
                             </button>
@@ -196,8 +202,15 @@
         // 승인 대기 회원 로드
         async function loadPendingMembers() {
             try {
+                console.log('승인 대기 회원 로드 시작...'); // 디버깅
+                
+                // localStorage 직접 확인
+                const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+                console.log('localStorage에서 가져온 대기 회원:', storedPending); // 디버깅
+                
                 const pendingMembers = await getPendingMembers();
-                console.log('승인 대기 회원 로드됨:', pendingMembers);
+                console.log('getPendingMembers() 결과:', pendingMembers); // 디버깅
+                
                 renderPendingMemberTable(pendingMembers);
             } catch (error) {
                 console.error('승인 대기 회원 로드 실패:', error);
@@ -541,6 +554,46 @@
                 return false;
             }
             return true;
+        }
+
+        // 테스트용 대기 회원 추가 함수
+        function testAddPendingMember() {
+            const testMember = {
+                id: Date.now().toString(),
+                username: 'test_' + Date.now(),
+                name: '테스트 회원',
+                email: 'test@example.com',
+                phone: '010-1234-5678',
+                address: '서울시 테스트구',
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+
+            // localStorage에 추가
+            const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+            storedPending.push(testMember);
+            localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
+            
+            console.log('테스트 회원 추가됨:', testMember);
+            alert('테스트 회원이 추가되었습니다: ' + testMember.name);
+            
+            // 목록 새로고침
+            loadPendingMembers();
+        }
+
+        // localStorage 데이터 확인 함수
+        function checkLocalStorageData() {
+            const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+            const approved = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+            
+            console.log('localStorage 승인 대기 회원:', pending);
+            console.log('localStorage 승인된 회원:', approved);
+            
+            alert(`저장된 데이터:
+승인 대기: ${pending.length}명
+승인됨: ${approved.length}명
+
+자세한 내용은 콘솔을 확인하세요.`);
         }
     </script>
 
