@@ -4,7 +4,7 @@
 let supabaseModule = null;
 
 // Supabase 사용 여부 설정
-const USE_SUPABASE = false; // 일시적으로 비활성화하여 로컬 방식 사용
+const USE_SUPABASE = true; // Supabase 데이터베이스 활성화
 
 // Supabase 모듈 로드 함수
 async function loadSupabaseModule() {
@@ -346,9 +346,25 @@ async function getPendingMembers() {
     // Supabase 모듈 로드 시도
     await loadSupabaseModule();
     
+    console.log('getPendingMembers 호출, USE_SUPABASE:', USE_SUPABASE, 'supabaseModule:', !!supabaseModule);
+    
     if (USE_SUPABASE && supabaseModule) {
-        const result = await supabaseModule.getPendingMembers();
-        return result.success ? result.data : [];
+        try {
+            console.log('Supabase를 통한 승인 대기 회원 조회 시도...');
+            const result = await supabaseModule.getPendingMembers();
+            console.log('Supabase 조회 결과:', result);
+            
+            if (result.success && Array.isArray(result.data)) {
+                console.log('Supabase에서 승인 대기 회원 조회 성공:', result.data.length, '명');
+                return result.data;
+            } else {
+                console.warn('Supabase 조회 실패 또는 잘못된 데이터 형식:', result);
+                return [];
+            }
+        } catch (error) {
+            console.error('Supabase 승인 대기 회원 조회 오류:', error);
+            return [];
+        }
     } else {
         // localStorage 초기화 확인
         let storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');

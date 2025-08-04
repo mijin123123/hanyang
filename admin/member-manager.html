@@ -205,7 +205,8 @@
         // 승인 대기 회원 로드
         async function loadPendingMembers() {
             try {
-                console.log('승인 대기 회원 로드 시작...'); // 디버깅
+                console.log('승인 대기 회원 로드 시작...');
+                console.log('USE_SUPABASE 상태:', typeof USE_SUPABASE !== 'undefined' ? USE_SUPABASE : '정의되지 않음');
                 
                 // getPendingMembers 함수가 정의되어 있는지 확인
                 if (typeof getPendingMembers === 'undefined') {
@@ -217,22 +218,40 @@
                 
                 // localStorage 직접 확인
                 const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
-                console.log('localStorage에서 가져온 대기 회원:', storedPending); // 디버깅
+                console.log('localStorage에서 가져온 대기 회원:', storedPending);
                 
                 const pendingMembers = await getPendingMembers();
-                console.log('getPendingMembers() 결과:', pendingMembers); // 디버깅
+                console.log('getPendingMembers() 결과:', pendingMembers);
+                console.log('결과 타입:', typeof pendingMembers);
+                console.log('결과가 배열인가?', Array.isArray(pendingMembers));
                 
-                renderPendingMemberTable(pendingMembers);
+                // Supabase 결과가 객체 형태일 수 있으므로 처리
+                let actualMembers = pendingMembers;
+                if (pendingMembers && pendingMembers.data) {
+                    actualMembers = pendingMembers.data;
+                    console.log('Supabase 응답에서 data 추출:', actualMembers);
+                }
+                
+                renderPendingMemberTable(actualMembers);
             } catch (error) {
                 console.error('승인 대기 회원 로드 실패:', error);
                 document.getElementById('pendingMemberTableBody').innerHTML = 
-                    '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">승인 대기 회원을 불러오는 중 오류가 발생했습니다.</td></tr>';
+                    `<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">오류: ${error.message}</td></tr>`;
             }
         }
 
         // 승인 대기 회원 테이블 렌더링
         function renderPendingMemberTable(pendingMembers) {
             const tbody = document.getElementById('pendingMemberTableBody');
+            
+            console.log('renderPendingMemberTable 호출됨:', pendingMembers);
+            
+            // pendingMembers가 배열이 아닌 경우 처리
+            if (!Array.isArray(pendingMembers)) {
+                console.warn('pendingMembers가 배열이 아닙니다:', typeof pendingMembers, pendingMembers);
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">데이터 형식 오류가 발생했습니다.</td></tr>';
+                return;
+            }
             
             if (pendingMembers.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">승인 대기 중인 회원이 없습니다.</td></tr>';
@@ -242,9 +261,9 @@
             tbody.innerHTML = pendingMembers.map((member, index) => `
                 <tr>
                     <td>${index + 1}</td>
-                    <td>${member.name}</td>
-                    <td>${member.username}</td>
-                    <td>${member.email}</td>
+                    <td>${member.name || 'N/A'}</td>
+                    <td>${member.username || 'N/A'}</td>
+                    <td>${member.email || 'N/A'}</td>
                     <td>${member.phone || '-'}</td>
                     <td>${formatDate(member.created_at)}</td>
                     <td>
