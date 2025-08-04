@@ -362,8 +362,7 @@ async function signup(userData) {
             // users 배열에 직접 추가 (즉시 로그인 가능)
             users.push(newUser);
             
-            // localStorage에도 승인된 사용자로 저장
-            const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+            // localStorage에도 승인된 사용자로 저장 (기존 변수 재사용)
             approvedUsers.push(newUser);
             localStorage.setItem('approvedUsers', JSON.stringify(approvedUsers));
             
@@ -382,7 +381,6 @@ async function signup(userData) {
                 message: '회원가입 처리 중 오류가 발생했습니다: ' + error.message 
             };
         }
-    }
 }
 
 // 승인 대기 회원 목록 조회 (관리자용)
