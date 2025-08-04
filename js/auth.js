@@ -383,11 +383,19 @@ async function getPendingMembers() {
             return [];
         }
     } else {
-        // localStorage 초기화 확인
-        let storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+        console.log('로컬 스토리지 방식으로 승인 대기 회원 조회');
         
-        // localStorage가 비어있으면 기본 데이터로 초기화
-        if (storedPending.length === 0) {
+        // localStorage에서 데이터 조회
+        let storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+        console.log('localStorage에서 조회된 대기 회원:', storedPending);
+        
+        // 메모리의 pendingMembers도 확인
+        const memoryPending = pendingMembers.filter(member => member.status === 'pending');
+        console.log('메모리에서 조회된 대기 회원:', memoryPending);
+        
+        // localStorage가 비어있고 메모리에도 데이터가 없으면 기본 데이터로 초기화
+        if (storedPending.length === 0 && memoryPending.length === 0) {
+            console.log('대기 회원 데이터가 없어 기본 데이터로 초기화');
             storedPending = [
                 {
                     id: '6',
@@ -411,21 +419,24 @@ async function getPendingMembers() {
                 }
             ];
             localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
-            console.log('localStorage에 기본 대기 회원 초기화됨:', storedPending); // 디버깅용
+            console.log('기본 대기 회원 데이터 초기화 완료');
         }
         
-        const memoryPending = pendingMembers.filter(member => member.status === 'pending');
-        
-        // 중복 제거 (ID 기준)
+        // 메모리와 localStorage 데이터 병합 (중복 제거)
         const allPending = [...storedPending];
         memoryPending.forEach(member => {
-            if (!storedPending.find(stored => stored.id === member.id)) {
+            if (!allPending.find(stored => stored.id === member.id)) {
                 allPending.push(member);
             }
         });
         
-        console.log('getPendingMembers 결과:', allPending); // 디버깅용
-        return allPending.filter(member => member.status === 'pending');
+        // pending 상태인 회원만 필터링
+        const finalPending = allPending.filter(member => member.status === 'pending');
+        
+        console.log('최종 승인 대기 회원 목록:', finalPending);
+        console.log('총 승인 대기 회원 수:', finalPending.length);
+        
+        return finalPending;
     }
 }
 

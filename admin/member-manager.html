@@ -611,19 +611,67 @@
             loadPendingMembers();
         }
 
-        // localStorage 데이터 확인 함수
+        // localStorage 데이터 확인 함수 (강화 버전)
         function checkLocalStorageData() {
             const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
             const approved = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
             
-            console.log('localStorage 승인 대기 회원:', pending);
-            console.log('localStorage 승인된 회원:', approved);
+            console.log('=== localStorage 데이터 상세 조회 ===');
+            console.log('승인 대기 회원 (pendingMembers):', pending);
+            console.log('승인된 회원 (approvedUsers):', approved);
             
-            alert(`저장된 데이터:
-승인 대기: ${pending.length}명
-승인됨: ${approved.length}명
+            // auth.js의 메모리 데이터도 확인
+            if (typeof pendingMembers !== 'undefined') {
+                console.log('auth.js 메모리의 pendingMembers:', pendingMembers);
+            }
+            if (typeof users !== 'undefined') {
+                console.log('auth.js 메모리의 users:', users);
+            }
+            
+            // getPendingMembers 함수 테스트
+            if (typeof getPendingMembers !== 'undefined') {
+                getPendingMembers().then(result => {
+                    console.log('getPendingMembers() 현재 결과:', result);
+                });
+            }
+            
+            alert(`💾 저장된 데이터 현황:
+📋 승인 대기: ${pending.length}명
+✅ 승인완료: ${approved.length}명
+🔧 USE_SUPABASE: ${typeof USE_SUPABASE !== 'undefined' ? USE_SUPABASE : '정의되지 않음'}
 
-자세한 내용은 콘솔을 확인하세요.`);
+📝 상세 정보는 브라우저 콘솔(F12)을 확인하세요!`);
+        }
+
+        // 새로운 테스트 회원 추가 함수
+        function addTestMember() {
+            const testMember = {
+                id: 'test_' + Date.now(),
+                username: 'testuser_' + Date.now(),
+                name: '테스트회원_' + new Date().getHours() + new Date().getMinutes(),
+                email: `test${Date.now()}@example.com`,
+                phone: '010-0000-0000',
+                address: '테스트 주소',
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+            
+            const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+            pending.push(testMember);
+            localStorage.setItem('pendingMembers', JSON.stringify(pending));
+            
+            console.log('테스트 회원 추가됨:', testMember);
+            alert('테스트 회원이 추가되었습니다! 페이지를 새로고침하세요.');
+        }
+
+        // localStorage 초기화 함수
+        function resetLocalStorageData() {
+            if (confirm('⚠️ 모든 localStorage 데이터를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+                localStorage.removeItem('pendingMembers');
+                localStorage.removeItem('approvedUsers');
+                console.log('localStorage 데이터가 초기화되었습니다.');
+                alert('데이터가 초기화되었습니다. 페이지를 새로고침하세요.');
+            }
         }
 
         // Supabase 연결 테스트 함수
