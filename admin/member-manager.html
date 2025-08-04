@@ -279,44 +279,6 @@
                 </tr>
             `).join('');
         }
-            if (!Array.isArray(pendingMembers)) {
-                console.warn('pendingMembers가 배열이 아닙니다:', typeof pendingMembers, pendingMembers);
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">데이터 형식 오류가 발생했습니다.</td></tr>';
-                return;
-            }
-            
-            if (pendingMembers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">승인 대기 중인 회원이 없습니다.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = pendingMembers.map((member, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${member.name || 'N/A'}</td>
-                    <td>${member.username || 'N/A'}</td>
-                    <td>${member.email || 'N/A'}</td>
-                    <td>${member.phone || '-'}</td>
-                    <td>${formatDate(member.created_at)}</td>
-                    <td>
-                        <span class="status-badge status-pending">
-                            <i class="fas fa-clock"></i> 대기중
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-success btn-sm" onclick="quickApproveMember('${member.id}')" title="승인">
-                            <i class="fas fa-check"></i> 승인
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="quickRejectMember('${member.id}')" title="거부">
-                            <i class="fas fa-times"></i> 거부
-                        </button>
-                        <button class="btn btn-info btn-sm" onclick="viewPendingMemberDetail('${member.id}')" title="상세보기">
-                            <i class="fas fa-eye"></i> 상세
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
 
         // 승인된 회원 로드
         async function loadApprovedMembers() {
