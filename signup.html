@@ -656,13 +656,18 @@
         </div>
 
         <div class="form-group">
-            <label for="detailed_address">상세주소</label>
-            <input type="text" id="detailed_address" name="detailed_address">
+            <label for="detailAddress">상세주소</label>
+            <input type="text" id="detailAddress" name="detailed_address">
         </div>
 
         <div class="form-group">
             <label for="name">성함</label>
             <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" name="email" required placeholder="example@email.com">
         </div>
 
         <div class="form-group">
@@ -968,13 +973,26 @@ function toggleCheckboxes(checkbox) {
 }
 
 function validateForm() {
+    console.log('validateForm 호출됨'); // 디버깅용
+    
     const isUsernameValid = validateUsername();
     const isPasswordValid = validatePassword();
     const isPasswordMatch = confirmPassword();
     
+    console.log('Validation 결과:', {
+        username: isUsernameValid,
+        password: isPasswordValid,
+        passwordMatch: isPasswordMatch
+    }); // 디버깅용
+    
     // 필수 약관 동의 확인
     const termsChecked = document.querySelector('input[name="terms_of_service"]:checked');
     const privacyChecked = document.querySelector('input[name="privacy_policy"]:checked');
+    
+    console.log('약관 동의 확인:', {
+        terms: !!termsChecked,
+        privacy: !!privacyChecked
+    }); // 디버깅용
     
     if (!termsChecked || !privacyChecked) {
         showPopup('모든 필수 약관에 동의해주세요.');
@@ -982,11 +1000,13 @@ function validateForm() {
     }
     
     if (isUsernameValid && isPasswordValid && isPasswordMatch) {
+        console.log('모든 validation 통과, 회원가입 처리 시작'); // 디버깅용
         // 실제 회원가입 처리
         processSignup();
         return false; // 폼 제출 방지
     }
     
+    console.log('Validation 실패'); // 디버깅용
     return false;
 }
 
@@ -1001,16 +1021,25 @@ async function processSignup() {
         address: document.getElementById('address').value + ' ' + (document.getElementById('detailAddress').value || '')
     };
     
-    // auth.js의 signup 함수 호출 (await 추가)
-    const result = await signup(formData);
+    console.log('회원가입 데이터:', formData); // 디버깅용
     
-    if (result.success) {
-        showPopup(result.message, function() {
-            // 성공 시 로그인 페이지로 이동
-            window.location.href = 'login.html';
-        });
-    } else {
-        showPopup(result.message);
+    try {
+        // auth.js의 signup 함수 호출 (await 추가)
+        const result = await signup(formData);
+        
+        console.log('회원가입 결과:', result); // 디버깅용
+        
+        if (result.success) {
+            showPopup(result.message, function() {
+                // 성공 시 로그인 페이지로 이동
+                window.location.href = 'login.html';
+            });
+        } else {
+            showPopup(result.message);
+        }
+    } catch (error) {
+        console.error('회원가입 오류:', error);
+        showPopup('회원가입 중 오류가 발생했습니다: ' + error.message);
     }
 }
 

@@ -278,17 +278,26 @@ function updateUserProfile(userData) {
 
 // 회원가입 함수 (승인 대기 상태로 등록)
 async function signup(userData) {
+    console.log('signup 함수 호출됨, 데이터:', userData); // 디버깅용
+    
     // Supabase 모듈 로드 시도
     await loadSupabaseModule();
     
+    console.log('USE_SUPABASE:', USE_SUPABASE, 'supabaseModule:', !!supabaseModule); // 디버깅용
+    
     if (USE_SUPABASE && supabaseModule) {
         // Supabase 회원가입 사용
+        console.log('Supabase 회원가입 시도'); // 디버깅용
         return await supabaseModule.signupUser(userData);
     } else {
+        console.log('로컬 회원가입 방식 사용'); // 디버깅용
+        
         // 기존 로컬 방식
         // 중복 확인
         const existingUser = users.find(u => u.username === userData.username || u.email === userData.email);
         const existingPending = pendingMembers.find(u => u.username === userData.username || u.email === userData.email);
+        
+        console.log('중복 확인 결과:', { existingUser: !!existingUser, existingPending: !!existingPending }); // 디버깅용
         
         if (existingUser || existingPending) {
             return { success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' };
@@ -308,8 +317,12 @@ async function signup(userData) {
             created_at: new Date().toISOString()
         };
         
+        console.log('새 회원 생성:', newUser); // 디버깅용
+        
         // 임시로 pendingMembers에 추가
         pendingMembers.push(newUser);
+        
+        console.log('pendingMembers 업데이트됨, 총 개수:', pendingMembers.length); // 디버깅용
         
         return { 
             success: true, 
