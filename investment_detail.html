@@ -6,25 +6,23 @@
     <meta name="description" content="한전과 20년 고정계약 체결, 안전한 태양광 수익 설계, 매월 이자수익 세전 최대 30% 지급">
     <meta name="keywords" content="태양광,태양광발전사업,태양열,태양광투자,신재생에너지,고수익,안정적인투자,안전한투자,1억투자,한양에너지,조합원,제테크">
     <meta name="author" content="한양에너지">
+    <!-- 파비콘 -->
     <link rel="icon" href="img/favi.ico" type="image/jpeg">
-    <link rel="stylesheet" href="css/123header.css?v=1754251194">
+    
+    <!-- 폰트 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" href="css/global.css?v=1754221270">
+    <link rel="stylesheet" href="css/header.css?v=1754221270">
+    <link rel="stylesheet" href="css/utilities.css?v=1754221270">
+    <script src="js/auth.js"></script>
+    
     <title>[100KW] 다함께 동행 베이직 - 투자 상세 페이지</title>
-    <style>
-    /* 임시 기본 스타일 - 실제로는 header-new.css 파일에 작성 */
-    .hy-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1000;
-        background: white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    </style>
 </head>
 <body>
-<!-- 새로운 헤더 구조 -->
+<!-- Header -->
 <header class="hy-header">
     <div class="hy-container">
         <!-- 로고 영역 -->
@@ -75,9 +73,7 @@
 
         <!-- 사용자 인증 영역 -->
         <div class="hy-auth-area">
-            <span class="hy-username">minj0010님</span>
-            <a href="mypage.html" class="hy-auth-link">마이페이지</a>
-            <a href="logout.html" class="hy-auth-link">로그아웃</a>
+            <!-- JavaScript로 동적 생성됨 -->
         </div>
 
         <!-- 모바일 메뉴 토글 버튼 -->
@@ -88,7 +84,7 @@
         </button>
     </div>
 
-    <!-- 모바일 메뉴 (별도 레이어로 분리) -->
+    <!-- 모바일 메뉴 -->
     <div class="hy-mobile-menu">
         <div class="hy-mobile-container">
             <div class="hy-mobile-header">
@@ -96,8 +92,7 @@
             </div>
             
             <div class="hy-mobile-auth">
-                <a href="mypage.html" class="hy-mobile-auth-btn">마이페이지</a>
-                <a href="logout.html" class="hy-mobile-auth-btn hy-logout">로그아웃</a>
+                <!-- JavaScript로 동적 생성됨 -->
             </div>
 
             <nav class="hy-mobile-nav">
@@ -139,63 +134,52 @@
     </div>
 </header>
 
-<script type="text/javascript" async="" src="https://cdn.channel.io/plugin/ch-plugin-web.js"></script>
 <script>
-// 새로운 헤더 전용 스크립트
+// 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', function() {
-    // 모바일 메뉴 토글
-    const mobileToggle = document.querySelector('.hy-mobile-toggle');
-    const mobileMenu = document.querySelector('.hy-mobile-menu');
-    const mobileClose = document.querySelector('.hy-mobile-close');
-    
-    mobileToggle.addEventListener('click', function() {
-        mobileMenu.classList.add('hy-show');
-        document.body.style.overflow = 'hidden';
-    });
-    
-    mobileClose.addEventListener('click', function() {
-        mobileMenu.classList.remove('hy-show');
-        document.body.style.overflow = '';
-    });
-
-    // 모바일 서브메뉴 토글
-    const mobileMenuBtns = document.querySelectorAll('.hy-mobile-menu-btn');
-    mobileMenuBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const submenu = this.nextElementSibling;
-            const isOpen = submenu.style.maxHeight;
-            
-            // 모든 서브메뉴 닫기
-            document.querySelectorAll('.hy-mobile-submenu').forEach(menu => {
-                if (menu !== submenu) {
-                    menu.style.maxHeight = null;
-                    menu.previousElementSibling.classList.remove('hy-open');
-                }
-            });
-            
-            // 현재 서브메뉴 토글
-            if (isOpen) {
-                submenu.style.maxHeight = null;
-                this.classList.remove('hy-open');
-            } else {
-                submenu.style.maxHeight = submenu.scrollHeight + 'px';
-                this.classList.add('hy-open');
-            }
-        });
-    });
-
-    // 데스크탑 드롭다운
-    const desktopItems = document.querySelectorAll('.hy-has-dropdown');
-    desktopItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.querySelector('.hy-submenu').style.display = 'block';
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            this.querySelector('.hy-submenu').style.display = 'none';
-        });
-    });
+    updateHeaderUserInfo();
 });
+
+// 헤더에 사용자 정보 업데이트
+function updateHeaderUserInfo() {
+    const user = getCurrentUser();
+    const authArea = document.querySelector('.hy-auth-area');
+    const mobileAuth = document.querySelector('.hy-mobile-auth');
+    
+    if (user) {
+        // 데스크탑 헤더
+        authArea.innerHTML = `
+            <span class="hy-username">${user.name}님</span>
+            <a href="mypage.html" class="hy-auth-link">마이페이지</a>
+            <a href="#" class="hy-auth-link" onclick="handleLogout()">로그아웃</a>
+        `;
+        
+        // 모바일 헤더
+        mobileAuth.innerHTML = `
+            <a href="mypage.html" class="hy-mobile-auth-btn">마이페이지</a>
+            <a href="#" class="hy-mobile-auth-btn hy-logout" onclick="handleLogout()">로그아웃</a>
+        `;
+    } else {
+        // 비로그인 상태
+        authArea.innerHTML = `
+            <a href="login.html" class="hy-auth-link">로그인</a>
+            <a href="signup.html" class="hy-auth-link">회원가입</a>
+        `;
+        
+        mobileAuth.innerHTML = `
+            <a href="login.html" class="hy-mobile-auth-btn">로그인</a>
+            <a href="signup.html" class="hy-mobile-auth-btn">회원가입</a>
+        `;
+    }
+}
+
+// 로그아웃 처리
+function handleLogout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        logout();
+        window.location.href = 'index.html';
+    }
+}
 </script>
 
 <meta charset="UTF-8">
@@ -1063,6 +1047,10 @@ function showPurchaseModal() {
     };
 }
 </script>
+
+<!-- JavaScript 파일 -->
+<script src="js/main.js"></script>
+<script src="js/header.js"></script>
 
 <!-- 카카오 상담 채팅 -->
 <script>

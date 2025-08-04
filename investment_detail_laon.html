@@ -6,9 +6,19 @@
     <meta name="description" content="한전과 20년 고정계약 체결, 안전한 태양광 수익 설계, 매월 이자수익 세전 최대 30% 지급">
     <meta name="keywords" content="태양광,태양광발전사업,태양열,태양광투자,신재생에너지,고수익,안정적인투자,안전한투자,1억투자,한양에너지,조합원,제테크">
     <meta name="author" content="한양에너지">
+    <!-- 파비콘 -->
     <link rel="icon" href="img/favi.ico" type="image/jpeg">
-    <link rel="stylesheet" href="css/123header.css?v=1754251194">
+    
+    <!-- 폰트 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" href="css/global.css?v=1754221270">
+    <link rel="stylesheet" href="css/header.css?v=1754221270">
+    <link rel="stylesheet" href="css/utilities.css?v=1754221270">
+    <script src="js/auth.js"></script>
+    
     <title>[700KW] 다함께 동행 프리미엄 플러스 - 투자 상세 페이지</title>
     <style>
     /* 임시 기본 스타일 - 실제로는 header-new.css 파일에 작성 */
@@ -77,7 +87,7 @@
         <div class="hy-auth-area">
             <span class="hy-username">minj0010님</span>
             <a href="mypage.html" class="hy-auth-link">마이페이지</a>
-            <a href="logout.html" class="hy-auth-link">로그아웃</a>
+            <a href="#" class="hy-auth-link" onclick="handleLogout()">로그아웃</a>
         </div>
 
         <!-- 모바일 메뉴 토글 버튼 -->
@@ -97,7 +107,7 @@
             
             <div class="hy-mobile-auth">
                 <a href="mypage.html" class="hy-mobile-auth-btn">마이페이지</a>
-                <a href="logout.html" class="hy-mobile-auth-btn hy-logout">로그아웃</a>
+                <a href="#" class="hy-mobile-auth-btn hy-logout" onclick="handleLogout()">로그아웃</a>
             </div>
 
             <nav class="hy-mobile-nav">
@@ -195,7 +205,27 @@ document.addEventListener('DOMContentLoaded', function() {
             this.querySelector('.hy-submenu').style.display = 'none';
         });
     });
+
+    // 로그인된 사용자 정보 표시
+    updateHeaderUserInfo();
 });
+
+// 헤더 사용자 정보 업데이트
+function updateHeaderUserInfo() {
+    const user = getCurrentUser();
+    const usernameElement = document.getElementById('headerUsername');
+    
+    if (user && usernameElement) {
+        usernameElement.textContent = user.name + '님';
+    }
+}
+
+// 로그아웃 처리
+function handleLogout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        logout();
+    }
+}
 </script>
 
 <meta charset="UTF-8">

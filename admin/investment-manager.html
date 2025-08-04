@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>투자 관리 - 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-tachometer-alt"></i> 관리자</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> 대시보드</a></li>
+                <li><a href="popup-manager.html"><i class="fas fa-images"></i> 팝업 관리</a></li>
+                <li><a href="notice-manager.html"><i class="fas fa-bullhorn"></i> 공지사항 관리</a></li>
+                <li><a href="inquiry-manager.html"><i class="fas fa-envelope"></i> 문의 관리</a></li>
+                <li><a href="member-manager.html"><i class="fas fa-users"></i> 회원 관리</a></li>
+                <li><a href="investment-manager.html" class="active"><i class="fas fa-chart-line"></i> 투자 관리</a></li>
+                <li><a href="account-manager.html"><i class="fas fa-university"></i> 계좌 관리</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+        </div>
+    </div>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>투자 관리</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-info" id="adminInfo">관리자님 환영합니다</span>
+                <select id="statusFilter" onchange="filterInvestments()" style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="all">전체</option>
+                    <option value="pending">승인대기</option>
+                    <option value="approved">승인완료</option>
+                    <option value="rejected">반려</option>
+                </select>
+                <button class="btn btn-primary" onclick="exportInvestments()">
+                    <i class="fas fa-download"></i> 투자 내역 내보내기
+                </button>
+            </div>
+        </header>
+
+        <!-- 투자 관리 컨텐츠 -->
+        <div class="dashboard-content">
+            <!-- 통계 카드 -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 30px;">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>총 투자금액</h3>
+                        <p class="stat-number">0원</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>투자자 수</h3>
+                        <p class="stat-number">0명</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>승인대기</h3>
+                        <p class="stat-number">0건</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>이번 달 투자</h3>
+                        <p class="stat-number">0원</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 투자 목록 -->
+            <div class="admin-table">
+                <table id="investmentTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 0)">번호</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 1)">투자자</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 2)">상품명</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 3, 'number')">투자금액</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 4)">신청일</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 5)">상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="investmentTableBody">
+                        <!-- JavaScript로 동적 생성 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div id="paginationContainer"></div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        // 로그인 체크
+        checkAdminAuth();
+        
+        // 관리자 정보 표시
+        const currentAdmin = getCurrentAdmin();
+        if (currentAdmin) {
+            document.getElementById('adminInfo').textContent = `${currentAdmin.name}님 환영합니다`;
+        }
+
+        // 투자 데이터 (실제 데이터 - 김민정 2개 상품: 500만원, 6500만원)
+        let investments = [
+            {
+                id: 1,
+                investor: "김민정",
+                product: "[300KW] 다함께 동행 뉴베이직",
+                amount: 5000000,
+                applicationDate: "2025-01-15",
+                status: "approved",
+                email: "minj0010@example.com",
+                phone: "010-1234-5678",
+                bankName: "국민은행",
+                accountNumber: "123-456-789"
+            },
+            {
+                id: 2,
+                investor: "김민정",
+                product: "[1MW] 다함께 동행 메가",
+                amount: 65000000,
+                applicationDate: "2025-01-20",
+                status: "approved",
+                email: "minj0010@example.com",
+                phone: "010-1234-5678",
+                bankName: "국민은행",
+                accountNumber: "123-456-789"
+            }
+        ];
+
+        let filteredInvestments = [...investments];
+
+        // 통계 업데이트
+        function updateInvestmentStats() {
+            // 총 투자금액
+            const totalAmount = investments.reduce((sum, inv) => sum + inv.amount, 0);
+            document.querySelector('.stat-card:nth-child(1) .stat-number').textContent = totalAmount.toLocaleString() + '원';
+            
+            // 투자자 수 (중복 제거)
+            const uniqueInvestors = new Set(investments.map(inv => inv.investor)).size;
+            document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = uniqueInvestors + '명';
+            
+            // 승인대기
+            const pendingCount = investments.filter(inv => inv.status === 'pending').length;
+            document.querySelector('.stat-card:nth-child(3) .stat-number').textContent = pendingCount + '건';
+            
+            // 이번 달 투자 (2025년 1월)
+            const thisMonthInvestments = investments.filter(inv => inv.applicationDate.startsWith('2025-01'));
+            const thisMonthAmount = thisMonthInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+            document.querySelector('.stat-card:nth-child(4) .stat-number').textContent = thisMonthAmount.toLocaleString() + '원';
+        }
+
+        // 투자 목록 렌더링
+        function renderInvestmentTable(data = filteredInvestments) {
+            const tbody = document.getElementById('investmentTableBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666; padding: 40px;">투자 신청 내역이 없습니다.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+
+            data.forEach(investment => {
+                const row = document.createElement('tr');
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(investment.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = '승인대기';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-active';
+                        statusText = '승인완료';
+                        break;
+                    case 'rejected':
+                        statusClass = 'status-inactive';
+                        statusText = '반려';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${investment.id}</td>
+                    <td>${investment.investor}</td>
+                    <td>${investment.product}</td>
+                    <td>${investment.amount.toLocaleString()}원</td>
+                    <td>${investment.applicationDate}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewInvestment(${investment.id})">
+                            <i class="fas fa-eye"></i> 상세보기
+                        </button>
+                        ${investment.status === 'pending' ? `
+                            <button class="btn btn-success btn-sm" onclick="approveInvestment(${investment.id})">
+                                <i class="fas fa-check"></i> 승인
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="rejectInvestment(${investment.id})">
+                                <i class="fas fa-times"></i> 반려
+                            </button>
+                        ` : ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 투자 상세보기
+        function viewInvestment(id) {
+            const investment = investments.find(i => i.id === id);
+            if (investment) {
+                alert(`투자 상세 정보:\n\n투자자: ${investment.investor}\n이메일: ${investment.email || 'N/A'}\n연락처: ${investment.phone || 'N/A'}\n상품명: ${investment.product}\n투자금액: ${investment.amount.toLocaleString()}원\n은행: ${investment.bankName || 'N/A'}\n계좌번호: ${investment.accountNumber || 'N/A'}\n신청일: ${investment.applicationDate}\n상태: ${getStatusText(investment.status)}`);
+            }
+        }
+
+        // 투자 승인
+        function approveInvestment(id) {
+            confirmAction('이 투자를 승인하시겠습니까?', () => {
+                const investmentIndex = investments.findIndex(i => i.id === id);
+                if (investmentIndex !== -1) {
+                    investments[investmentIndex].status = 'approved';
+                    filterInvestments();
+                    showAlert('success', '투자가 성공적으로 승인되었습니다.');
+                }
+            });
+        }
+
+        // 투자 반려
+        function rejectInvestment(id) {
+            confirmAction('이 투자를 반려하시겠습니까?', () => {
+                const investmentIndex = investments.findIndex(i => i.id === id);
+                if (investmentIndex !== -1) {
+                    investments[investmentIndex].status = 'rejected';
+                    filterInvestments();
+                    showAlert('success', '투자가 반려되었습니다.');
+                }
+            });
+        }
+
+        // 투자 필터링
+        function filterInvestments() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            filteredInvestments = investments.filter(investment => {
+                return statusFilter === 'all' || investment.status === statusFilter;
+            });
+            
+            renderInvestmentTable(filteredInvestments);
+        }
+
+        // 상태 텍스트 반환
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return '승인대기';
+                case 'approved': return '승인완료';
+                case 'rejected': return '반려';
+                default: return '알 수 없음';
+            }
+        }
+
+        // 투자 내역 내보내기
+        function exportInvestments() {
+            const csv = generateInvestmentCSV();
+            downloadCSV(csv, 'investments.csv');
+            showAlert('success', '투자 내역이 성공적으로 내보내졌습니다.');
+        }
+
+        // CSV 생성
+        function generateInvestmentCSV() {
+            const headers = ['번호', '투자자', '상품명', '투자금액', '신청일', '상태'];
+            const rows = filteredInvestments.map(investment => [
+                investment.id,
+                investment.investor,
+                investment.product,
+                investment.amount,
+                investment.applicationDate,
+                getStatusText(investment.status)
+            ]);
+
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        // CSV 다운로드
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateInvestmentStats();
+            renderInvestmentTable();
+        });
+    </script>
+
+    <style>
+        /* 상태 배지 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* 버튼 크기 */
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        /* 테이블 헤더 정렬 가능 표시 */
+        th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        /* 관리자 정보 스타일 */
+        .admin-info {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-right: 15px;
+            padding: 8px 12px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 5px;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+    </style>
+</body>
+</html>

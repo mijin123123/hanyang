@@ -867,21 +867,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.success) {
                 showPopup(`환영합니다, ${result.user.name}님! 로그인 완료!`);
                 setTimeout(() => {
-                    // URL 파라미터에서 리다이렉트 URL 확인
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirectUrl = urlParams.get('redirect');
-                    
-                    if (redirectUrl) {
-                        // 리다이렉트 URL이 있으면 해당 페이지로 이동
-                        window.location.href = decodeURIComponent(redirectUrl);
-                    } else {
-                        // 리다이렉트 URL이 없으면 기존 로직 사용
-                        if (result.user.role === 'admin') {
-                            window.location.href = 'index.html';
-                        } else {
-                            window.location.href = 'mypage.html';
-                        }
-                    }
+                    // auth.js의 리다이렉트 처리 함수 사용
+                    handleLoginSuccess();
                 }, 2000);
             } else {
                 showError(result.message);

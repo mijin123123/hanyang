@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 관리 - 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-tachometer-alt"></i> 관리자</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> 대시보드</a></li>
+                <li><a href="popup-manager.html"><i class="fas fa-images"></i> 팝업 관리</a></li>
+                <li><a href="notice-manager.html"><i class="fas fa-bullhorn"></i> 공지사항 관리</a></li>
+                <li><a href="inquiry-manager.html" class="active"><i class="fas fa-envelope"></i> 문의 관리</a></li>
+                <li><a href="member-manager.html"><i class="fas fa-users"></i> 회원 관리</a></li>
+                <li><a href="investment-manager.html"><i class="fas fa-chart-line"></i> 투자 관리</a></li>
+                <li><a href="account-manager.html"><i class="fas fa-university"></i> 계좌 관리</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+        </div>
+    </div>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>문의 관리</h1>
+            </div>
+            <div class="header-right">
+                <select id="statusFilter" onchange="filterInquiries()" style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="all">전체</option>
+                    <option value="pending">대기중</option>
+                    <option value="replied">답변완료</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="제목이나 이름으로 검색..." style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+        </header>
+
+        <!-- 문의 관리 컨텐츠 -->
+        <div class="dashboard-content">
+            <!-- 문의 목록 -->
+            <div class="admin-table">
+                <table id="inquiryTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 0)">번호</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 1)">이름</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 2)">제목</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 3)">문의일</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 4)">상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inquiryTableBody">
+                        <!-- JavaScript로 동적 생성 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div id="paginationContainer"></div>
+        </div>
+    </div>
+
+    <!-- 문의 상세/답변 모달 -->
+    <div id="inquiryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="modalTitle">문의 상세</h3>
+                <button class="modal-close" onclick="hideInquiryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 문의 내용 -->
+                <div class="inquiry-details">
+                    <div class="detail-section">
+                        <h4>문의 정보</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>이름:</label>
+                                <span id="inquiryName"></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>이메일:</label>
+                                <span id="inquiryEmail"></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>연락처:</label>
+                                <span id="inquiryPhone"></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>문의일:</label>
+                                <span id="inquiryDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>문의 내용</h4>
+                        <div class="inquiry-content" id="inquiryContent"></div>
+                    </div>
+                </div>
+
+                <!-- 답변 작성 -->
+                <div class="reply-section">
+                    <h4>답변 작성</h4>
+                    <form id="replyForm" class="admin-form">
+                        <div class="form-group">
+                            <label for="replyContent">답변 내용</label>
+                            <textarea id="replyContent" name="replyContent" rows="8" placeholder="답변을 입력해주세요..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideInquiryModal()">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="sendReply()">답변 전송</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 오버레이 -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;" onclick="hideInquiryModal()"></div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        // 로그인 체크
+        checkAdminAuth();
+
+        // 문의 데이터 (실제 환경에서는 서버에서 가져와야 함)
+        let inquiries = [];
+
+        let currentInquiry = null;
+        let filteredInquiries = [...inquiries];
+
+        // 문의 목록 렌더링
+        function renderInquiryTable(data = filteredInquiries) {
+            const tbody = document.getElementById('inquiryTableBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666; padding: 40px;">문의 내역이 없습니다.</td></tr>';
+                return;
+            }
+
+            data.forEach((inquiry, index) => {
+                const row = document.createElement('tr');
+                const statusClass = inquiry.status === 'replied' ? 'status-active' : 'status-pending';
+                const statusText = inquiry.status === 'replied' ? '답변완료' : '대기중';
+                
+                row.innerHTML = `
+                    <td>${inquiry.id}</td>
+                    <td>${inquiry.name}</td>
+                    <td>${inquiry.title}</td>
+                    <td>${inquiry.createdAt}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewInquiry(${inquiry.id})">
+                            <i class="fas fa-eye"></i> 상세보기
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteInquiry(${inquiry.id})">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 문의 상세 모달 표시
+        function viewInquiry(id) {
+            currentInquiry = inquiries.find(i => i.id === id);
+            
+            if (currentInquiry) {
+                document.getElementById('inquiryName').textContent = currentInquiry.name;
+                document.getElementById('inquiryEmail').textContent = currentInquiry.email;
+                document.getElementById('inquiryPhone').textContent = currentInquiry.phone;
+                document.getElementById('inquiryDate').textContent = currentInquiry.createdAt;
+                document.getElementById('inquiryContent').textContent = currentInquiry.content;
+                
+                // 기존 답변이 있으면 표시
+                if (currentInquiry.reply) {
+                    document.getElementById('replyContent').value = currentInquiry.reply;
+                } else {
+                    document.getElementById('replyContent').value = '';
+                }
+                
+                showModal();
+            }
+        }
+
+        // 모달 표시
+        function showModal() {
+            document.getElementById('inquiryModal').style.display = 'block';
+            document.getElementById('modalOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 모달 숨기기
+        function hideInquiryModal() {
+            document.getElementById('inquiryModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 답변 전송
+        function sendReply() {
+            const replyContent = document.getElementById('replyContent').value.trim();
+            
+            if (!replyContent) {
+                showAlert('error', '답변 내용을 입력해주세요.');
+                return;
+            }
+            
+            if (currentInquiry) {
+                // 답변 저장
+                const inquiryIndex = inquiries.findIndex(i => i.id === currentInquiry.id);
+                if (inquiryIndex !== -1) {
+                    inquiries[inquiryIndex].reply = replyContent;
+                    inquiries[inquiryIndex].status = 'replied';
+                }
+                
+                showAlert('success', '답변이 성공적으로 전송되었습니다.');
+                hideInquiryModal();
+                filterInquiries(); // 현재 필터 적용하여 재렌더링
+            }
+        }
+
+        // 문의 삭제
+        function deleteInquiry(id) {
+            confirmAction('이 문의를 삭제하시겠습니까?', () => {
+                inquiries = inquiries.filter(i => i.id !== id);
+                filterInquiries(); // 현재 필터 적용하여 재렌더링
+                showAlert('success', '문의가 성공적으로 삭제되었습니다.');
+            });
+        }
+
+        // 문의 필터링
+        function filterInquiries() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredInquiries = inquiries.filter(inquiry => {
+                const statusMatch = statusFilter === 'all' || inquiry.status === statusFilter;
+                const searchMatch = inquiry.title.toLowerCase().includes(searchTerm) || 
+                                  inquiry.name.toLowerCase().includes(searchTerm);
+                
+                return statusMatch && searchMatch;
+            });
+            
+            renderInquiryTable(filteredInquiries);
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            renderInquiryTable();
+            
+            // 검색 기능 설정
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', filterInquiries);
+        });
+    </script>
+
+    <style>
+        /* 모달 스타일 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 1002;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 문의 상세 스타일 */
+        .inquiry-details {
+            margin-bottom: 30px;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-section h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-item label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .detail-item span {
+            color: #2c3e50;
+        }
+
+        .inquiry-content {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .reply-section h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        /* 상태 배지 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* 버튼 크기 */
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* 테이블 헤더 정렬 가능 표시 */
+        th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

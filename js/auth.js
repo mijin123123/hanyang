@@ -2,11 +2,25 @@
 
 // 사용자 데이터베이스 (실제 서비스에서는 서버에서 관리)
 const users = [
-    { username: 'minj0010', password: 'minj0010', name: '민진', role: 'admin' },
+    { username: 'minj0010', password: 'minj0010', name: '김민정', role: 'admin' },
     { username: 'admin', password: 'admin123', name: '관리자', role: 'admin' },
     { username: 'user1', password: 'user123', name: '김회원', role: 'user' },
     { username: 'user2', password: 'user456', name: '이투자', role: 'user' },
     { username: 'test', password: 'test123', name: '테스트', role: 'user' }
+];
+
+// 조합상품 보호 페이지 목록
+const protectedPages = [
+    'introduce_product.html',
+    'product_list.html', 
+    'my_investments.html',
+    'withdraw_request.html',
+    'investment_detail.html',
+    'investment_detail_300kw.html',
+    'investment_detail_500kw.html',
+    'investment_detail_green_starter.html',
+    'investment_detail_laon.html',
+    'investment_detail_simple_eco.html'
 ];
 
 // 로그인 함수
@@ -32,6 +46,7 @@ function login(username, password) {
 // 로그아웃 함수
 function logout() {
     localStorage.removeItem('userSession');
+    localStorage.removeItem('redirectUrl');
     window.location.href = 'login.html';
 }
 
@@ -282,3 +297,54 @@ function getUserDetails(username) {
         detailAddress: ''
     };
 }
+
+// 조합상품 페이지 접근 제어
+function checkCombinationProductAccess() {
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    // 현재 페이지가 보호된 조합상품 페이지인지 확인
+    if (protectedPages.includes(currentPage)) {
+        if (!isLoggedIn()) {
+            // 현재 페이지 URL을 저장하여 로그인 후 돌아올 수 있도록 함
+            localStorage.setItem('redirectUrl', window.location.href);
+            
+            alert('조합상품 페이지는 로그인이 필요합니다.\n로그인 페이지로 이동합니다.');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        // 로그인 세션 만료 체크 (24시간)
+        const user = getCurrentUser();
+        if (user && user.loginTime) {
+            const loginTime = new Date(user.loginTime);
+            const currentTime = new Date();
+            const timeDiff = currentTime - loginTime;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            
+            if (hoursDiff > 24) {
+                localStorage.removeItem('userSession');
+                alert('로그인 세션이 만료되었습니다.\n다시 로그인해주세요.');
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+// 로그인 성공 후 리다이렉트 처리
+function handleLoginSuccess() {
+    const redirectUrl = localStorage.getItem('redirectUrl');
+    if (redirectUrl) {
+        localStorage.removeItem('redirectUrl');
+        window.location.href = redirectUrl;
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+// 페이지 로드시 조합상품 접근 체크
+document.addEventListener('DOMContentLoaded', function() {
+    checkCombinationProductAccess();
+});

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팝업 관리 - 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-tachometer-alt"></i> 관리자</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> 대시보드</a></li>
+                <li><a href="popup-manager.html" class="active"><i class="fas fa-images"></i> 팝업 관리</a></li>
+                <li><a href="notice-manager.html"><i class="fas fa-bullhorn"></i> 공지사항 관리</a></li>
+                <li><a href="inquiry-manager.html"><i class="fas fa-envelope"></i> 문의 관리</a></li>
+                <li><a href="member-manager.html"><i class="fas fa-users"></i> 회원 관리</a></li>
+                <li><a href="investment-manager.html"><i class="fas fa-chart-line"></i> 투자 관리</a></li>
+                <li><a href="account-manager.html"><i class="fas fa-university"></i> 계좌 관리</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+        </div>
+    </div>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>팝업 관리</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-info" id="adminInfo">관리자님 환영합니다</span>
+                <button class="btn btn-primary" onclick="showAddPopupModal()">
+                    <i class="fas fa-plus"></i> 새 팝업 추가
+                </button>
+            </div>
+        </header>
+
+        <!-- 팝업 관리 컨텐츠 -->
+        <div class="dashboard-content">
+            <!-- 현재 팝업 목록 -->
+            <div class="admin-table">
+                <table id="popupTable">
+                    <thead>
+                        <tr>
+                            <th>미리보기</th>
+                            <th>팝업 이름</th>
+                            <th>생성일</th>
+                            <th>상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="popupTableBody">
+                        <!-- JavaScript로 동적 생성 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 팝업 추가/수정 모달 -->
+    <div id="popupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">새 팝업 추가</h3>
+                <button class="modal-close" onclick="hidePopupModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="popupForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="popupName">팝업 이름</label>
+                        <input type="text" id="popupName" name="popupName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="popupImage">팝업 이미지</label>
+                        <div class="file-upload" id="fileUploadZone">
+                            <div class="file-upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="file-upload-text">
+                                클릭하거나 파일을 드래그하여 업로드
+                                <br>권장 크기: 450px × 509px
+                            </div>
+                            <input type="file" id="popupImage" name="popupImage" accept="image/*" required>
+                        </div>
+                        <img id="imagePreview" class="image-preview" style="display: none;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="popupLink">링크 URL (선택사항)</label>
+                        <input type="url" id="popupLink" name="popupLink" placeholder="https://example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="popupStatus">상태</label>
+                        <select id="popupStatus" name="popupStatus">
+                            <option value="active">활성</option>
+                            <option value="inactive">비활성</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hidePopupModal()">취소</button>
+                <button type="button" class="btn btn-primary" onclick="savePopup()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 오버레이 -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;" onclick="hidePopupModal()"></div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        // 로그인 체크
+        checkAdminAuth();
+        
+        // 관리자 정보 표시
+        const currentAdmin = getCurrentAdmin();
+        if (currentAdmin) {
+            document.getElementById('adminInfo').textContent = `${currentAdmin.name}님 환영합니다`;
+        }
+
+        // 팝업 데이터 (실제 환경에서는 서버에서 가져와야 함)
+        let popups = [
+            {
+                id: 1,
+                name: "한양에너지 신규 투자 상품 출시",
+                image: "adm/uploads/popup_images/1748313714_image_2025-05-20_15-37-49.png",
+                link: "investment_detail_300kw.html",
+                status: "active",
+                createdAt: "2025-05-20"
+            },
+            {
+                id: 2,
+                name: "에너지 협동조합 특별 혜택 안내",
+                image: "adm/uploads/popup_images/1748313608_image_2025-05-27_11-39-31.png",
+                link: "product_list.html",
+                status: "active",
+                createdAt: "2025-05-27"
+            }
+        ];
+
+        let editingPopupId = null;
+
+        // 팝업 목록 렌더링
+        function renderPopupTable() {
+            const tbody = document.getElementById('popupTableBody');
+            tbody.innerHTML = '';
+
+            if (popups.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666; padding: 40px;">등록된 팝업이 없습니다.</td></tr>';
+                return;
+            }
+
+            popups.forEach(popup => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <img src="${popup.image}" alt="${popup.name}" style="width: 60px; height: 68px; object-fit: cover; border-radius: 5px;">
+                    </td>
+                    <td>${popup.name}</td>
+                    <td>${popup.createdAt}</td>
+                    <td>
+                        <span class="status-badge ${popup.status === 'active' ? 'status-active' : 'status-inactive'}">
+                            ${popup.status === 'active' ? '활성' : '비활성'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editPopup(${popup.id})">
+                            <i class="fas fa-edit"></i> 수정
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePopup(${popup.id})">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 팝업 추가 모달 표시
+        function showAddPopupModal() {
+            editingPopupId = null;
+            document.getElementById('modalTitle').textContent = '새 팝업 추가';
+            document.getElementById('popupForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('popupImage').required = true;
+            showModal();
+        }
+
+        // 팝업 수정 모달 표시
+        function editPopup(id) {
+            editingPopupId = id;
+            const popup = popups.find(p => p.id === id);
+            
+            if (popup) {
+                document.getElementById('modalTitle').textContent = '팝업 수정';
+                document.getElementById('popupName').value = popup.name;
+                document.getElementById('popupLink').value = popup.link || '';
+                document.getElementById('popupStatus').value = popup.status;
+                document.getElementById('imagePreview').src = popup.image;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('popupImage').required = false;
+                showModal();
+            }
+        }
+
+        // 모달 표시
+        function showModal() {
+            document.getElementById('popupModal').style.display = 'block';
+            document.getElementById('modalOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 모달 숨기기
+        function hidePopupModal() {
+            document.getElementById('popupModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 팝업 저장
+        function savePopup() {
+            const form = document.getElementById('popupForm');
+            if (!validateForm(form)) {
+                return;
+            }
+
+            const formData = new FormData(form);
+            const popupData = {
+                name: formData.get('popupName'),
+                link: formData.get('popupLink'),
+                status: formData.get('popupStatus')
+            };
+
+            if (editingPopupId) {
+                // 수정
+                const popupIndex = popups.findIndex(p => p.id === editingPopupId);
+                if (popupIndex !== -1) {
+                    popups[popupIndex] = {
+                        ...popups[popupIndex],
+                        ...popupData
+                    };
+                    
+                    // 새 이미지가 업로드된 경우
+                    const imageFile = formData.get('popupImage');
+                    if (imageFile && imageFile.size > 0) {
+                        // 실제 환경에서는 서버에 업로드
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            popups[popupIndex].image = e.target.result;
+                            renderPopupTable();
+                        };
+                        reader.readAsDataURL(imageFile);
+                    }
+                    
+                    showAlert('success', '팝업이 성공적으로 수정되었습니다.');
+                }
+            } else {
+                // 추가
+                const imageFile = formData.get('popupImage');
+                if (imageFile && imageFile.size > 0) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const newPopup = {
+                            id: Date.now(),
+                            ...popupData,
+                            image: e.target.result,
+                            createdAt: new Date().toISOString().split('T')[0]
+                        };
+                        popups.push(newPopup);
+                        renderPopupTable();
+                        showAlert('success', '새 팝업이 성공적으로 추가되었습니다.');
+                    };
+                    reader.readAsDataURL(imageFile);
+                }
+            }
+
+            hidePopupModal();
+            if (!editingPopupId || !formData.get('popupImage') || formData.get('popupImage').size === 0) {
+                renderPopupTable();
+            }
+        }
+
+        // 팝업 삭제
+        function deletePopup(id) {
+            confirmAction('이 팝업을 삭제하시겠습니까?', () => {
+                popups = popups.filter(p => p.id !== id);
+                renderPopupTable();
+                showAlert('success', '팝업이 성공적으로 삭제되었습니다.');
+            });
+        }
+
+        // Helper 함수들
+        function validateForm(form) {
+            const formData = new FormData(form);
+            const name = formData.get('popupName');
+            const image = formData.get('popupImage');
+            
+            if (!name || name.trim() === '') {
+                alert('팝업 이름을 입력해주세요.');
+                return false;
+            }
+            
+            if (!editingPopupId && (!image || image.size === 0)) {
+                alert('팝업 이미지를 선택해주세요.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function showAlert(type, message) {
+            alert(message);
+        }
+
+        function confirmAction(message, callback) {
+            if (confirm(message)) {
+                callback();
+            }
+        }
+
+        function handleFileUpload(fileInput, imagePreview) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function setupDragDrop(dropZone, fileInput) {
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#007bff';
+            });
+            
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#ddd';
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#ddd';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            renderPopupTable();
+            
+            // 파일 업로드 설정
+            const fileInput = document.getElementById('popupImage');
+            const fileUploadZone = document.getElementById('fileUploadZone');
+            const imagePreview = document.getElementById('imagePreview');
+            
+            handleFileUpload(fileInput, imagePreview);
+            setupDragDrop(fileUploadZone, fileInput);
+        });
+    </script>
+
+    <style>
+        /* 모달 스타일 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 1002;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 상태 배지 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 버튼 크기 */
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* 파일 업로드 스타일 */
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            position: relative;
+            background: #fafafa;
+        }
+
+        .file-upload:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .file-upload-icon {
+            font-size: 32px;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        /* 관리자 정보 스타일 */
+        .admin-info {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-right: 15px;
+            padding: 8px 12px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 5px;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+    </style>
+</body>
+</html>
