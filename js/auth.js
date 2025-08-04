@@ -103,28 +103,25 @@ async function login(username, password) {
     console.log('로컬 로그인 방식 사용'); // 디버깅용
     console.log('users 배열:', users); // 디버깅용
     
-    const user = users.find(u => u.username === username && u.password === password);
-    console.log('찾은 사용자:', user); // 디버깅용
+    // localStorage에서 승인된 사용자도 확인
+    const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+    console.log('localStorage 승인 사용자:', approvedUsers); // 디버깅용
+    
+    // users 배열과 localStorage에서 사용자 찾기
+    let user = users.find(u => u.username === username && u.password === password);
+    if (!user) {
+        user = approvedUsers.find(u => u.username === username && u.password === password);
+        console.log('localStorage에서 찾은 사용자:', user); // 디버깅용
+    }
+    
+    console.log('최종 찾은 사용자:', user); // 디버깅용
     
     if (user) {
         console.log('사용자 상태:', user.status); // 디버깅용
         
-        // 승인 상태 확인
-        if (user.status !== 'approved') {
-            let message = '';
-            switch (user.status) {
-                case 'pending':
-                    message = '회원가입 승인 대기 중입니다. 관리자 승인 후 로그인이 가능합니다.';
-                    break;
-                case 'rejected':
-                    message = '회원가입이 거부되었습니다. 관리자에게 문의해주세요.';
-                    break;
-                default:
-                    message = '계정에 문제가 있습니다. 관리자에게 문의해주세요.';
-            }
-            console.log('로그인 실패 - 승인 상태 문제:', message); // 디버깅용
-            return { success: false, message };
-        }
+        // 즉시 승인 시스템으로 변경 - 승인 상태 확인 제거
+        // 기존 승인 시스템 제거됨: 모든 회원은 즉시 로그인 가능
+        console.log('즉시 승인 시스템: 로그인 허용'); // 디버깅용
         
         // 로그인 성공 - 세션 저장
         const sessionData = {
