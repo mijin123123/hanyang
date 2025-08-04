@@ -1,10 +1,24 @@
 // 인증 관련 JavaScript 파일
 
-// Supabase 연동 (실제 연동 활성화)
-import { supabase, signupUser, loginUser, getPendingMembers as getSupabasePendingMembers, approveMember as supabaseApproveMember, getAllMembers } from './supabase-config.js';
+// Supabase 연동 준비 (동적 import 사용)
+let supabaseModule = null;
 
 // Supabase 사용 여부 설정
-const USE_SUPABASE = true; // true로 변경하여 Supabase 연동 활성화
+const USE_SUPABASE = false; // 일단 false로 설정하여 기존 방식 사용
+
+// Supabase 모듈 로드 함수
+async function loadSupabaseModule() {
+    if (!supabaseModule && USE_SUPABASE) {
+        try {
+            supabaseModule = await import('./supabase-config.js');
+            console.log('Supabase 모듈 로드 완료');
+        } catch (error) {
+            console.error('Supabase 모듈 로드 실패:', error);
+            // Supabase 로드 실패시 로컬 방식으로 fallback
+            USE_SUPABASE = false;
+        }
+    }
+}
 
 // 임시 사용자 데이터베이스 (Supabase 미사용시 또는 백업용)
 const users = [
@@ -55,9 +69,12 @@ const protectedPages = [
 
 // 로그인 함수 (승인 상태 확인 포함)
 async function login(username, password) {
-    if (USE_SUPABASE) {
+    // Supabase 모듈 로드 시도
+    await loadSupabaseModule();
+    
+    if (USE_SUPABASE && supabaseModule) {
         // Supabase 로그인 사용
-        return await loginUser(username, password);
+        return await supabaseModule.loginUser(username, password);
     } else {
         // 기존 로컬 로그인 방식
         const user = users.find(u => u.username === username && u.password === password);
@@ -261,9 +278,12 @@ function updateUserProfile(userData) {
 
 // 회원가입 함수 (승인 대기 상태로 등록)
 async function signup(userData) {
-    if (USE_SUPABASE) {
+    // Supabase 모듈 로드 시도
+    await loadSupabaseModule();
+    
+    if (USE_SUPABASE && supabaseModule) {
         // Supabase 회원가입 사용
-        return await signupUser(userData);
+        return await supabaseModule.signupUser(userData);
     } else {
         // 기존 로컬 방식
         // 중복 확인
@@ -301,8 +321,11 @@ async function signup(userData) {
 
 // 승인 대기 회원 목록 조회 (관리자용)
 async function getPendingMembers() {
-    if (USE_SUPABASE) {
-        const result = await getSupabasePendingMembers();
+    // Supabase 모듈 로드 시도
+    await loadSupabaseModule();
+    
+    if (USE_SUPABASE && supabaseModule) {
+        const result = await supabaseModule.getPendingMembers();
         return result.success ? result.data : [];
     } else {
         return pendingMembers.filter(member => member.status === 'pending');
@@ -311,12 +334,15 @@ async function getPendingMembers() {
 
 // 회원 승인/거부 처리 (관리자용)
 async function approveMember(memberId, action, reason = '') {
-    if (USE_SUPABASE) {
+    // Supabase 모듈 로드 시도
+    await loadSupabaseModule();
+    
+    if (USE_SUPABASE && supabaseModule) {
         const admin = getCurrentUser();
         if (!admin) {
             return { success: false, message: '관리자 권한이 필요합니다.' };
         }
-        return await supabaseApproveMember(memberId, action, admin.id, reason);
+        return await supabaseModule.approveMember(memberId, action, admin.id, reason);
     } else {
         // 기존 로컬 방식
         const memberIndex = pendingMembers.findIndex(m => m.id === memberId);
