@@ -1,0 +1,82 @@
+<!-- 관리자 공통 JavaScript 함수들 -->
+<script>
+// 로그아웃 함수
+function logout() {
+    if (confirm('로그아웃하시겠습니까?')) {
+        fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('로그아웃되었습니다.');
+                window.location.href = '/admin/login';
+            }
+        })
+        .catch(error => {
+            console.error('로그아웃 오류:', error);
+            window.location.href = '/admin/login';
+        });
+    }
+}
+
+// 사이드바 토글
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+    }
+}
+
+// 알림 표시 함수
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        ${type === 'success' ? 'background: #28a745;' : 'background: #dc3545;'}
+    `;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    // 3초 후 제거
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+
+// 확인 다이얼로그
+function confirmAction(message, callback) {
+    if (confirm(message)) {
+        callback();
+    }
+}
+
+// 모바일에서 사이드바 외부 클릭 시 닫기
+document.addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggle = document.querySelector('.sidebar-toggle');
+    
+    if (window.innerWidth <= 768 && 
+        sidebar && toggle &&
+        !sidebar.contains(e.target) && 
+        !toggle.contains(e.target) && 
+        sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+    }
+});
+</script>

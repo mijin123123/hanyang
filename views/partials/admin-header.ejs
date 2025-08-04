@@ -1,0 +1,33 @@
+<!-- 관리자 공통 헤더 -->
+<header class="admin-header">
+    <div class="header-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1><%= pageTitle || '관리자 페이지' %></h1>
+    </div>
+    <div class="header-right">
+        <% if (user) { %>
+        <span class="admin-info" id="adminInfo"><%= user.name %>님 환영합니다</span>
+        <% } %>
+        <span class="current-time" id="currentTime"></span>
+    </div>
+</header>
+
+<script>
+// 현재 시간 업데이트
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleString('ko-KR');
+    const timeElement = document.getElementById('currentTime');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
+}
+
+// 페이지 로드 시 시간 업데이트 시작
+document.addEventListener('DOMContentLoaded', function() {
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+});
+</script>

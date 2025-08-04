@@ -22,7 +22,7 @@ function checkAdminAuth() {
     const loginTime = localStorage.getItem('adminLoginTime');
     
     if (!isLoggedIn || isLoggedIn !== 'true') {
-        window.location.href = 'login.html';
+        window.location.href = "/admin/login";
         return false;
     }
     
@@ -40,7 +40,7 @@ function logout() {
     localStorage.removeItem('adminLoggedIn');
     localStorage.removeItem('adminLoginTime');
     localStorage.removeItem('currentAdminId');
-    window.location.href = 'login.html';
+    window.location.href = "/admin/login";
 }
 
 // 사이드바 토글 함수

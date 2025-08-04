@@ -1,0 +1,82 @@
+    <!-- 푸터 시작 -->
+    <footer class="hy-footer">
+        <div class="hy-footer-container">
+            <div class="hy-footer-content">
+                <div class="hy-footer-section">
+                    <div class="hy-footer-logo">
+                        <img src="/img/hanyang_energy_logo.png" alt="한양에너지 로고">
+                        <p>청정에너지로 만드는 지속가능한 미래</p>
+                    </div>
+                </div>
+                
+                <div class="hy-footer-section">
+                    <h4>바로가기</h4>
+                    <ul>
+                        <li><a href="/introduce_service">회사소개</a></li>
+                        <li><a href="/introduce_product">조합상품</a></li>
+                        <li><a href="/faq">고객센터</a></li>
+                        <li><a href="/project_gallery">프로젝트</a></li>
+                    </ul>
+                </div>
+                
+                <div class="hy-footer-section">
+                    <h4>연락처</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 전라남도 목포시 구주소-주소</p>
+                    <p><i class="fas fa-envelope"></i> hanenergy@example.com</p>
+                    <p><i class="fas fa-phone"></i> 02-1234-5678</p>
+                </div>
+                
+                <div class="hy-footer-section">
+                    <h4>소셜미디어</h4>
+                    <div class="hy-social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-blog"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hy-footer-bottom">
+                <p>&copy; 2024 한양에너지. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 기존 JavaScript 파일들 -->
+    <script src="/js/header.js"></script>
+    
+    <!-- 페이지별 JavaScript -->
+    <% if (typeof additionalJS !== 'undefined') { %>
+        <% additionalJS.forEach(js => { %>
+            <script src="/js/<%= js %>"></script>
+        <% }); %>
+    <% } %>
+    
+    <!-- 서버 기반 인증을 위한 JavaScript -->
+    <script>
+        // 서버에서 전달받은 사용자 정보
+        window.currentUser = <%-JSON.stringify(user || null)%>;
+        
+        // 기존 클라이언트 사이드 auth.js와의 호환성을 위한 함수들
+        function getCurrentUser() {
+            return window.currentUser;
+        }
+        
+        function isLoggedIn() {
+            return window.currentUser !== null;
+        }
+        
+        // 서버 기반 로그아웃
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/logout';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</body>
+</html>

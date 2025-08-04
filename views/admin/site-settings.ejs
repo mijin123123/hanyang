@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이트 설정 - 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <%- include('../partials/admin-sidebar', { currentPage: 'site-settings' }) %>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <%- include('../partials/admin-header', { pageTitle: '사이트 설정', user: user }) %>
+        
+        <!-- 추가 헤더 컨트롤 -->
+        <div class="page-controls">
+            <div class="controls-left">
+                <h2>사이트 기본 설정</h2>
+            </div>
+            <div class="controls-right">
+                <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> 설정 저장
+                </button>
+            </div>
+        </div>
+
+        <!-- 사이트 설정 컨텐츠 -->
+        <div class="dashboard-content">
+            <div class="settings-container">
+                <form id="settingsForm" class="admin-form" onsubmit="event.preventDefault(); saveSettings(); return false;">
+                    <!-- 회사 정보 섹션 -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-building"></i> 회사 정보</h3>
+                        <div class="form-group">
+                            <label for="companyName">회사명</label>
+                            <input type="text" id="companyName" name="companyName" placeholder="한양에너지협동조합">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">주소</label>
+                            <input type="text" id="address" name="address" placeholder="서울특별시 강남구 테헤란로 123길 45">
+                        </div>
+                    </div>
+
+                    <!-- 계좌 정보 섹션 -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-credit-card"></i> 계좌 정보</h3>
+                        <div class="form-group">
+                            <label for="accountNumber">계좌번호</label>
+                            <input type="text" id="accountNumber" name="accountNumber" placeholder="농협 123-456-789-10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="accountHolder">예금주</label>
+                            <input type="text" id="accountHolder" name="accountHolder" placeholder="한양에너지협동조합">
+                        </div>
+                    </div>
+
+                    <!-- 연락처 정보 섹션 -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-phone"></i> 연락처 정보</h3>
+                        <div class="form-group">
+                            <label for="contactPhone">대표 전화번호</label>
+                            <input type="tel" id="contactPhone" name="contactPhone" placeholder="02-1234-5678">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactEmail">대표 이메일</label>
+                            <input type="email" id="contactEmail" name="contactEmail" placeholder="info@hanyang-energy.co.kr">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 JavaScript 로드 시작');
+        
+        // 즉시 테스트 함수 실행
+        function testFunction() {
+            console.log('✅ JavaScript 함수 실행 가능');
+            alert('JavaScript가 정상 작동합니다!');
+        }
+        
+        // 페이지 로드 즉시 테스트
+        testFunction();
+
+        // 설정 데이터 로드
+        function loadSettings() {
+            console.log('📥 설정 로드 시작');
+            
+            fetch('/api/admin/settings')
+                .then(response => {
+                    console.log('로드 응답:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('로드된 데이터:', data);
+                    if (data.success) {
+                        const settings = data.data;
+                        // 모든 필드 설정
+                        if (settings.companyName) {
+                            document.getElementById('companyName').value = settings.companyName;
+                        }
+                        if (settings.address) {
+                            document.getElementById('address').value = settings.address;
+                        }
+                        if (settings.accountNumber) {
+                            document.getElementById('accountNumber').value = settings.accountNumber;
+                        }
+                        if (settings.accountHolder) {
+                            document.getElementById('accountHolder').value = settings.accountHolder;
+                        }
+                        if (settings.contactPhone) {
+                            document.getElementById('contactPhone').value = settings.contactPhone;
+                        }
+                        if (settings.contactEmail) {
+                            document.getElementById('contactEmail').value = settings.contactEmail;
+                        }
+                        console.log('✅ 설정 로드 완료');
+                    }
+                })
+                .catch(error => {
+                    console.error('로드 오류:', error);
+                });
+        }
+
+        // 설정 저장 - 실제 폼 값 사용
+        function saveSettings() {
+            console.log('🔄 저장 함수 호출됨');
+            
+            // 실제 폼 값들 수집
+            const companyName = document.getElementById('companyName').value;
+            const address = document.getElementById('address').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountHolder = document.getElementById('accountHolder').value;
+            const contactPhone = document.getElementById('contactPhone').value;
+            const contactEmail = document.getElementById('contactEmail').value;
+            
+            console.log('📤 전송할 데이터:', {
+                companyName, address, accountNumber, accountHolder, contactPhone, contactEmail
+            });
+            
+            // 직접 fetch 호출
+            fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    companyName: companyName,
+                    address: address,
+                    accountNumber: accountNumber,
+                    accountHolder: accountHolder,
+                    contactPhone: contactPhone,
+                    contactEmail: contactEmail
+                })
+            })
+            .then(response => {
+                console.log('응답 상태:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('응답 데이터:', data);
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('오류:', error);
+                alert('오류 발생: ' + error.message);
+            });
+        }
+
+        // Helper 함수
+        function showAlert(type, message) {
+            if (type === 'success') {
+                alert('✅ ' + message);
+            } else {
+                alert('❌ ' + message);
+            }
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+        });
+    </script>
+
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 18px;
+        }
+
+        .form-section h3 i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .page-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .controls-left h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+    </style>
+</body>
+</html>

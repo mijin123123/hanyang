@@ -1,0 +1,328 @@
+<%- include('partials/header', { 
+    title: '한양에너지',
+    description: '한전과 20년 고정계약 체결, 안전한 태양광 수익 설계, 매월 이자수익 세전 최대 30% 지급',
+    keywords: '태양광,태양광발전사업,태양열,태양광투자,신재생에너지,고수익,안정적인투자,안전한투자,1억투자,한양에너지,조합원,제테크',
+    additionalCSS: ['css/main-sections.css']
+}) %>
+
+<style>
+    /* 팝업 스타일 */
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .popup.show {
+        display: flex;
+        opacity: 1;
+    }
+
+    .popup-content {
+        background-color: #fff;
+        padding: 0;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        transform: scale(0.8);
+        transition: transform 0.5s ease;
+    }
+
+    .popup-content.show {
+        transform: scale(1);
+    }
+
+    .close-popup {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #333;
+    }
+
+    .popup-image {
+        width: 450px;
+        height: 509px;
+        object-fit: cover;
+    }
+
+    .popup-footer {
+        display: flex;
+        width: 100%;
+        border-top: 0px solid #000;
+    }
+
+    .popup-button-left,
+    .popup-button-right {
+        flex: 1;
+        padding: 15px 0;
+        font-size: 16px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .popup-button-left {
+        color: #626262;
+        border-right: 1px solid #ddd;
+    }
+
+    .popup-button-right {
+        color: #555;
+    }
+
+    .popup-button-left:hover {
+        color: #0056b3;
+    }
+
+    .popup-button-right:hover {
+        color: #333;
+    }
+
+    @media screen and (max-width: 480px) {
+        .popup-content {
+            max-width: 90%;
+        }
+
+        .popup-image {
+            max-width: 100%;
+            height: auto;
+        }
+    }
+</style>
+
+<!-- 메인 히어로 섹션 -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <p class="hero-subtitle">hanyang-energy</p>
+            <h1 class="hero-title">언제, 어디서나 트렌디한 나만의<br><span class="highlight">HANYANG ENERGY</span></h1>
+            <p class="hero-description">신뢰할 수 있는 파트너<br>한양에너지와 함께 안정적인 투자를 시작하세요</p>
+            <div class="hero-buttons">
+                <a href="/introduce_product" class="btn-primary">상품 보러가기</a>
+            </div>
+        </div>
+    </div>
+    <div class="hero-background"></div>
+</section>
+
+<!-- 서비스 소개 섹션 -->
+<section class="services-section">
+    <div class="hy-container">
+        <div class="section-header">
+            <h2>한양에너지 서비스</h2>
+            <p>안전하고 수익성 높은 태양광 투자 솔루션을 제공합니다</p>
+        </div>
+        
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-solar-panel"></i>
+                </div>
+                <h3>태양광 발전사업</h3>
+                <p>한전과 20년 고정계약으로 안정적인 수익을 보장합니다</p>
+                <a href="/introduce_service" class="service-link">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>투자 컨설팅</h3>
+                <p>전문가의 상담을 통해 최적의 투자 전략을 수립하세요</p>
+                <a href="/introduce_service" class="service-link">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>안전한 투자</h3>
+                <p>정부 정책과 법적 보장으로 안전한 투자 환경을 제공합니다</p>
+                <a href="/introduce_service" class="service-link">자세히 보기 <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 투자상품 섹션 -->
+<section class="products-section">
+    <div class="hy-container">
+        <div class="section-header">
+            <h2>투자상품 안내</h2>
+            <p>다양한 태양광 투자상품으로 안정적인 수익을 창출하세요</p>
+        </div>
+        
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="img/powerstation1.jpeg" alt="발전소 1">
+                </div>
+                <div class="product-content">
+                    <h3>Green Starter</h3>
+                    <div class="product-specs">
+                        <span class="spec">500kW 급</span>
+                        <span class="spec">연 수익률 8%</span>
+                    </div>
+                    <p>초보 투자자를 위한 안전한 시작 상품</p>
+                    <a href="/investment_detail" class="btn-outline">상세보기</a>
+                </div>
+            </div>
+            
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="img/powerstation2.jpeg" alt="발전소 2">
+                </div>
+                <div class="product-content">
+                    <h3>Simple Eco</h3>
+                    <div class="product-specs">
+                        <span class="spec">1MW 급</span>
+                        <span class="spec">연 수익률 10%</span>
+                    </div>
+                    <p>간편하고 친환경적인 투자 솔루션</p>
+                    <a href="/investment_detail" class="btn-outline">상세보기</a>
+                </div>
+            </div>
+            
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="img/powerstation3.jpeg" alt="발전소 3">
+                </div>
+                <div class="product-content">
+                    <h3>LAON Premium</h3>
+                    <div class="product-specs">
+                        <span class="spec">2MW 급</span>
+                        <span class="spec">연 수익률 12%</span>
+                    </div>
+                    <p>고수익을 원하는 투자자를 위한 프리미엄 상품</p>
+                    <a href="/investment_detail" class="btn-outline">상세보기</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-cta">
+            <a href="/product_list" class="btn-primary">전체 상품 보기</a>
+        </div>
+    </div>
+</section>
+
+<!-- 회사소개 섹션 -->
+<section class="about-section">
+    <div class="hy-container">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>한양에너지와 함께하는 미래</h2>
+                <p>우리는 태양광 에너지를 통해 지속 가능한 미래를 만들어가고 있습니다. 안전하고 수익성 높은 투자 기회를 제공하여 고객과 함께 성장하는 것이 우리의 목표입니다.</p>
+                
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">20년</div>
+                        <div class="stat-label">한전 고정계약</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">30%</div>
+                        <div class="stat-label">연간 최대 수익률</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">투자 안정성</div>
+                    </div>
+                </div>
+                
+                <div class="about-buttons">
+                    <a href="/ceo_message" class="btn-primary">회사소개</a>
+                    <a href="/project_gallery" class="btn-outline">발전소 현황</a>
+                </div>
+            </div>
+            
+            <div class="about-image">
+                <img src="img/ceo_greeting.jpeg" alt="한양에너지 소개">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 팝업 (쿠키 설정에 따라 표시) -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <button class="close-popup" onclick="closePopup()">&times;</button>
+        <img src="images/1.png" alt="팝업 이미지" class="popup-image">
+        <div class="popup-footer">
+            <button class="popup-button-left" onclick="closePopupToday()">오늘 하루 안 보기</button>
+            <button class="popup-button-right" onclick="closePopup()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 팝업 관련 스크립트
+document.addEventListener('DOMContentLoaded', function() {
+    // 쿠키 확인 함수
+    function getCookie(name) {
+        const value = "; " + document.cookie;
+        const parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+    // 쿠키 설정 함수
+    function setCookie(name, value, days) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = name + "=" + value + ";expires=" + expires.toUTCString() + ";path=/";
+    }
+
+    // 팝업 표시 여부 확인
+    if (!getCookie('hidePopup')) {
+        const popup = document.getElementById('popup');
+        const popupContent = popup.querySelector('.popup-content');
+        
+        setTimeout(() => {
+            popup.classList.add('show');
+            setTimeout(() => {
+                popupContent.classList.add('show');
+            }, 100);
+        }, 1000);
+    }
+});
+
+// 팝업 닫기
+function closePopup() {
+    const popup = document.getElementById('popup');
+    const popupContent = popup.querySelector('.popup-content');
+    
+    popupContent.classList.remove('show');
+    setTimeout(() => {
+        popup.classList.remove('show');
+    }, 300);
+}
+
+// 오늘 하루 안 보기
+function closePopupToday() {
+    setCookie('hidePopup', 'true', 1);
+    closePopup();
+}
+
+// 팝업 외부 클릭시 닫기
+document.getElementById('popup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePopup();
+    }
+});
+</script>
+
+<%- include('partials/footer') %>

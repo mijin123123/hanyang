@@ -1,4 +1,4 @@
-// 헤더 전용 스크립트
+// 헤더 관련 스크립트
 document.addEventListener('DOMContentLoaded', function() {
     // 모바일 메뉴 토글
     const mobileToggle = document.querySelector('.hy-mobile-toggle');
@@ -78,7 +78,7 @@ function updateHeaderUserInfo() {
         if (authArea) {
             authArea.innerHTML = `
                 <span class="hy-username">${user.name}님</span>
-                <a href="mypage.html" class="hy-auth-link" style="background: #0056a3; color: white; border-color: #0056a3;">
+                <a href="mypage" class="hy-auth-link" style="background: #0056a3; color: white; border-color: #0056a3;">
                     <i class="fas fa-user"></i> 마이페이지
                 </a>
                 <button onclick="logout()" class="logout-btn">
@@ -94,7 +94,7 @@ function updateHeaderUserInfo() {
                     <span class="user-name">
                         <i class="fas fa-user-circle"></i> ${user.name}님
                     </span>
-                    <a href="mypage.html" class="hy-mobile-auth-btn" style="background: #0056a3; color: white; border-color: #0056a3; margin-bottom: 8px;">
+                    <a href="mypage" class="hy-mobile-auth-btn" style="background: #0056a3; color: white; border-color: #0056a3; margin-bottom: 8px;">
                         <i class="fas fa-user"></i> 마이페이지
                     </a>
                     <button onclick="logout()" class="logout-btn">
@@ -107,10 +107,10 @@ function updateHeaderUserInfo() {
         // 로그인하지 않은 경우
         if (authArea) {
             authArea.innerHTML = `
-                <a href="login.html" class="hy-auth-link">
+                <a href="/login" class="hy-auth-link">
                     <i class="fas fa-sign-in-alt"></i> 로그인
                 </a>
-                <a href="signup.html" class="hy-auth-link hy-signup">
+                <a href="/signup" class="hy-auth-link hy-signup">
                     <i class="fas fa-user-plus"></i> 회원가입
                 </a>
             `;
@@ -118,10 +118,10 @@ function updateHeaderUserInfo() {
         
         if (mobileAuth) {
             mobileAuth.innerHTML = `
-                <a href="login.html" class="hy-mobile-auth-btn">
+                <a href="/login" class="hy-mobile-auth-btn">
                     <i class="fas fa-sign-in-alt"></i> 로그인
                 </a>
-                <a href="signup.html" class="hy-mobile-auth-btn hy-signup">
+                <a href="/signup" class="hy-mobile-auth-btn hy-signup">
                     <i class="fas fa-user-plus"></i> 회원가입
                 </a>
             `;

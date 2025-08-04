@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || '한양에너지' %></title>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- 기존 CSS 파일들 -->
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/main-sections.css">
+    <link rel="stylesheet" href="/css/utilities.css">
+    
+    <!-- 페이지별 CSS -->
+    <% if (typeof additionalCSS !== 'undefined') { %>
+        <% additionalCSS.forEach(css => { %>
+            <link rel="stylesheet" href="/css/<%= css %>">
+        <% }); %>
+    <% } %>
+    
+    <style>
+        /* 서버 기반 사용자 정보 표시를 위한 스타일 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hy-username {
+            color: #333;
+            font-weight: 500;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 시작 -->
+    <header class="hy-header">
+        <div class="hy-header-container">
+            <div class="hy-logo">
+                <a href="/">
+                    <img src="/img/hanyang_energy_logo.png" alt="한양에너지 로고">
+                </a>
+            </div>
+            
+            <nav class="hy-nav">
+                <ul class="hy-nav-menu">
+                    <li class="hy-nav-item hy-dropdown">
+                        <a href="#" class="hy-nav-link">회사소개 <i class="fas fa-chevron-down"></i></a>
+                        <ul class="hy-dropdown-menu">
+                            <li><a href="/introduce_service">서비스 소개</a></li>
+                            <li><a href="/ceo_message">CEO 인사말</a></li>
+                            <li><a href="/history">회사연혁</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-nav-item hy-dropdown">
+                        <a href="#" class="hy-nav-link">조합상품 <i class="fas fa-chevron-down"></i></a>
+                        <ul class="hy-dropdown-menu">
+                            <li><a href="/introduce_product">상품 소개</a></li>
+                            <li><a href="/product_list">상품 목록</a></li>
+                            <li><a href="/my_investments">나의 투자</a></li>
+                            <li><a href="/withdraw_request">출금 신청</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-nav-item hy-dropdown">
+                        <a href="#" class="hy-nav-link">투자상품 <i class="fas fa-chevron-down"></i></a>
+                        <ul class="hy-dropdown-menu">
+                            <li><a href="/investment_detail">투자 상품 상세</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-nav-item hy-dropdown">
+                        <a href="#" class="hy-nav-link">고객센터 <i class="fas fa-chevron-down"></i></a>
+                        <ul class="hy-dropdown-menu">
+                            <li><a href="/faq">FAQ</a></li>
+                            <li><a href="/announcements">공지사항</a></li>
+                            <li><a href="/project_gallery">프로젝트 갤러리</a></li>
+                            <li><a href="/inquiry_list">문의사항</a></li>
+                            <li><a href="/my_inquiry">나의 문의</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="hy-auth-area">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="user-info">
+                        <span class="hy-username"><%= user.name %>님</span>
+                        <a href="/mypage" class="hy-auth-link" style="background: #0056a3; color: white; border-color: #0056a3; padding: 8px 16px; border-radius: 4px; margin-left: 10px;">
+                            <i class="fas fa-user"></i> 마이페이지
+                        </a>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="hy-auth-link" style="background: #28a745; color: white; border-color: #28a745; padding: 8px 16px; border-radius: 4px; margin-left: 10px;">
+                                <i class="fas fa-cog"></i> 관리자
+                            </a>
+                        <% } %>
+                        <form action="/logout" method="POST" style="display: inline; margin-left: 10px;">
+                            <button type="submit" class="logout-btn">
+                                <i class="fas fa-sign-out-alt"></i> 로그아웃
+                            </button>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="hy-auth-link">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </a>
+                    <a href="/signup" class="hy-auth-link hy-signup">
+                        <i class="fas fa-user-plus"></i> 회원가입
+                    </a>
+                <% } %>
+            </div>
+            
+            <!-- 모바일 메뉴 버튼 -->
+            <div class="hy-mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+        
+        <!-- 모바일 메뉴 -->
+        <div class="hy-mobile-menu">
+            <div class="hy-mobile-auth">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="user-info">
+                        <span class="user-name">
+                            <i class="fas fa-user-circle"></i> <%= user.name %>님
+                        </span>
+                        <a href="/mypage" class="hy-mobile-auth-btn" style="background: #0056a3; color: white; border-color: #0056a3; margin-bottom: 8px;">
+                            <i class="fas fa-user"></i> 마이페이지
+                        </a>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="hy-mobile-auth-btn" style="background: #28a745; color: white; border-color: #28a745; margin-bottom: 8px;">
+                                <i class="fas fa-cog"></i> 관리자
+                            </a>
+                        <% } %>
+                        <form action="/logout" method="POST">
+                            <button type="submit" class="logout-btn" style="width: 100%;">
+                                <i class="fas fa-sign-out-alt"></i> 로그아웃
+                            </button>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="hy-mobile-auth-btn">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </a>
+                    <a href="/signup" class="hy-mobile-auth-btn hy-signup">
+                        <i class="fas fa-user-plus"></i> 회원가입
+                    </a>
+                <% } %>
+            </div>
+            
+            <nav class="hy-mobile-nav">
+                <!-- 모바일 네비게이션 메뉴 내용 -->
+            </nav>
+        </div>
+    </header>

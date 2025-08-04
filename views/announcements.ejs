@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 | 한양에너지</title>
+    <meta name="description" content="한양에너지 공지사항 - 최신 소식과 중요한 안내사항을 확인하세요">
+    <meta name="keywords" content="한양에너지,공지사항,태양광,신재생에너지,안내">
+    
+    <!-- 파비콘 -->
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    
+    <!-- 외부 스타일시트 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" href="css/global.css?v=1754220183">
+    <link rel="stylesheet" href="css/header.css?v=1754220183">
+    
+    <!-- JavaScript 파일 -->
+    <script src="js/auth.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary: #3f37c9;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            color: var(--dark);
+            background-color: #f5f7ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            max-width: 1200px;
+            margin: 120px auto 0;
+            padding: 0 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* 고객센터 배너 */
+        .customer-service-banner {
+            width: 100%;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--box-shadow);
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .service-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .service-contact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .service-image {
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .service-image img {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        /* 페이지 제목 */
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--danger));
+            border-radius: 2px;
+        }
+
+        /* 공지사항 목록 */
+        .announcement-list {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .announcement-item {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .announcement-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .announcement-header {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background-color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+
+        .announcement-header:hover {
+            background-color: var(--light);
+        }
+
+        .announcement-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .announcement-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+            min-width: 20px;
+        }
+
+        .announcement-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .announcement-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .announcement-date {
+            font-size: 0.9rem;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        .announcement-toggle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            transition: transform 0.3s ease, color 0.3s ease;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .announcement-toggle.active {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        /* 공지사항 내용 */
+        .announcement-content {
+            display: none;
+            padding: 0 24px 24px;
+            border-top: 1px solid var(--light);
+            animation: slideDown 0.3s ease;
+        }
+
+        .announcement-content.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .announcement-text {
+            padding: 20px;
+            background-color: var(--light);
+            border-radius: 8px;
+            line-height: 1.8;
+            color: var(--dark);
+            word-break: keep-all;
+        }
+
+        .announcement-text br {
+            margin-bottom: 8px;
+        }
+
+        .announcement-bottom-meta {
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-align: right;
+            padding: 8px 0;
+        }
+
+        /* 공지사항 없음 상태 */
+        .no-announcements {
+            text-align: center;
+            padding: 60px 40px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .no-announcements i {
+            font-size: 4rem;
+            color: var(--gray);
+            margin-bottom: 20px;
+            opacity: 0.4;
+        }
+
+        .no-announcements h3 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .no-announcements p {
+            font-size: 1rem;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* 반응형 스타일 */
+        @media (max-width: 768px) {
+            .main-container {
+                margin-top: 100px;
+                padding: 0 15px;
+            }
+
+            .customer-service-banner {
+                flex-direction: column;
+                text-align: center;
+                padding: 24px;
+            }
+
+            .service-info {
+                margin-bottom: 20px;
+            }
+
+            .service-title {
+                font-size: 1.5rem;
+            }
+
+            .service-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .page-title {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+
+            .announcement-header {
+                padding: 20px;
+            }
+
+            .announcement-content {
+                padding: 0 20px 20px;
+            }
+
+            .announcement-meta {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .announcement-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .announcement-title-area {
+                width: 100%;
+            }
+
+            .announcement-meta {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .announcement-title {
+                font-size: 1rem;
+            }
+
+            .service-title {
+                font-size: 1.3rem;
+            }
+
+            .page-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="hy-header">
+        <div class="hy-container">
+            <!-- 로고 영역 -->
+            <div class="hy-logo">
+                <a href="/">
+                    <div style="font-size: 24px; font-weight: 800; color: #555555; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 데스크탑 네비게이션 -->
+            <nav class="hy-desktop-nav">
+                <ul class="hy-main-menu">
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="/ceo_message">회사소개</a>
+                        <ul class="hy-submenu">
+                            <li><a href="/ceo_message">인사말</a></li>
+                            <li><a href="/history">연혁</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="/introduce_service">서비스 소개</a>
+                        <ul class="hy-submenu">
+                            <li><a href="/introduce_service">서비스 소개</a></li>
+                            <li><a href="/project_gallery">발전소 현황</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="/introduce_product">조합상품</a>
+                        <ul class="hy-submenu">
+                            <li><a href="/introduce_product">조합상품안내</a></li>
+                            <li><a href="/product_list">조합원 상품신청</a></li>
+                            <li><a href="/my_investments">조합원 출자현황</a></li>
+                            <li><a href="/withdraw_request">조합원 입금/출금</a></li>
+                        </ul>
+                    </li>
+                    <li class="hy-menu-item hy-has-dropdown">
+                        <a href="/announcements">고객센터</a>
+                        <ul class="hy-submenu">
+                            <li><a href="/announcements">공지사항</a></li>
+                            <li><a href="/faq">자주 묻는 질문</a></li>
+                            <li><a href="/inquiry_list">1:1문의신청</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- 사용자 인증 영역 -->
+            <div class="hy-auth-area">
+                <!-- JavaScript로 동적 생성됨 -->
+            </div>
+
+            <!-- 모바일 메뉴 토글 버튼 -->
+            <button class="hy-mobile-toggle" aria-label="메뉴 열기">
+                <span class="hy-toggle-bar"></span>
+                <span class="hy-toggle-bar"></span>
+                <span class="hy-toggle-bar"></span>
+            </button>
+        </div>
+
+        <!-- 모바일 메뉴 -->
+        <div class="hy-mobile-menu">
+            <div class="hy-mobile-container">
+                <div class="hy-mobile-header">
+                    <button class="hy-mobile-close" aria-label="메뉴 닫기">✕</button>
+                </div>
+                
+                <div class="hy-mobile-auth">
+                    <!-- JavaScript로 동적 생성됨 -->
+                </div>
+
+                <nav class="hy-mobile-nav">
+                    <ul>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">회사소개</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="/ceo_message">인사말</a></li>
+                                <li><a href="/history">연혁</a></li>
+                            </ul>
+                        </li>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">서비스 소개</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="/introduce_service">서비스 소개</a></li>
+                                <li><a href="/project_gallery">발전소 현황</a></li>
+                            </ul>
+                        </li>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">조합상품</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="/introduce_product">조합상품안내</a></li>
+                                <li><a href="/product_list">조합원 상품신청</a></li>
+                                <li><a href="/my_investments">조합원 출자현황</a></li>
+                                <li><a href="/withdraw_request">조합원 입금/출금</a></li>
+                            </ul>
+                        </li>
+                        <li class="hy-mobile-dropdown">
+                            <button class="hy-mobile-menu-btn">고객센터</button>
+                            <ul class="hy-mobile-submenu">
+                                <li><a href="/announcements">공지사항</a></li>
+                                <li><a href="/faq">자주 묻는 질문</a></li>
+                                <li><a href="/inquiry_list">1:1문의신청</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-container">
+        <!-- 고객센터 배너 -->
+        <div class="customer-service-banner">
+            <div class="service-info">
+                <h2 class="service-title">한양에너지 고객센터</h2>
+                <p class="service-subtitle">평일 10:00 ~ 19:00 (점심시간 13:00 ~ 14:00)</p>
+                <div class="service-contact">  
+                </div>
+            </div>
+            <div class="service-image">
+                <img src="img/announcements/question.png" alt="고객센터" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <!-- 페이지 제목 -->
+        <h1 class="page-title">공지사항</h1>
+
+        <!-- 공지사항 목록 -->
+        <div class="announcement-list">
+            <!-- 공지사항 1 -->
+            <div class="announcement-item">
+                <div class="announcement-header" onclick="toggleAnnouncement(1)">
+                    <div class="announcement-title-area">
+                        <i class="fas fa-bullhorn announcement-icon"></i>
+                        <span class="announcement-title">(주)한양에너지 배당금 출자 일정 안내</span>
+                    </div>
+                    <div class="announcement-meta">
+                        <span class="announcement-date">2024.12.01</span>
+                        <i class="fas fa-chevron-down announcement-toggle" id="toggle-1"></i>
+                    </div>
+                </div>
+                <div id="announcement-content-1" class="announcement-content">
+                    <div class="announcement-text">
+                        안녕하세요, (주)한양에너지 입니다.<br><br>
+                        
+                        한양을 이용해 주시는 조합원 분들께 안내드립니다.<br><br>
+                        
+                        배당금 출자일정은 원활한 출금업무를 위해서 매주 금요일 당일 18시까지 일괄적으로 출금처리 진행되는점 참고 바라겠습니다.<br><br>
+                        
+                        한양에너지의 조합원 분들께서는 위 내용 확인해 주시고 배당금 출금은 금요일 오전부터 가능한 금액내에서 출금신청 부탁드리겠습니다.<br><br>
+                        
+                        조합원들의 원활하고 안전한 수익금 출금을 위해서 꼭 공지사항 숙지하시어 헷갈리시지 않도록 유의하시기 바랍니다.<br><br>
+                        
+                        보다 더 원활한 서비스 이용을 위해 노력하는 한양에너지가 되겠습니다.<br><br>
+                        
+                        감사합니다.
+                    </div>
+                    <div class="announcement-bottom-meta">
+                        작성일: 2024.12.01 22:46
+                    </div>
+                </div>
+            </div>
+
+            <!-- 공지사항 2 -->
+            <div class="announcement-item">
+                <div class="announcement-header" onclick="toggleAnnouncement(2)">
+                    <div class="announcement-title-area">
+                        <i class="fas fa-bullhorn announcement-icon"></i>
+                        <span class="announcement-title">(주)한양에너지 사이트 이용 유의 안내</span>
+                    </div>
+                    <div class="announcement-meta">
+                        <span class="announcement-date">2024.11.15</span>
+                        <i class="fas fa-chevron-down announcement-toggle" id="toggle-2"></i>
+                    </div>
+                </div>
+                <div id="announcement-content-2" class="announcement-content">
+                    <div class="announcement-text">
+                        안녕하세요, (주)한양에너지 입니다.<br><br>
+                        
+                        한양에너지를 이용해 주시는 조합원 분들께 안내드립니다.<br><br>
+                        
+                        최근 피싱 사이트로 인한 피해 사례가 늘고 있어 한양에너지에서도 주기적으로 피싱 사이트를 점검 중에 있습니다.<br><br>
+                        
+                        한양에너지의 조합원 분들께서는 사이트 이용 시 주소를 확인해 주시고<br><br>
+                        
+                        사칭 사이트로 의심되는 경우 한양에너지의 고객센터로 문의해 주시기 바랍니다.<br><br>
+                        
+                        보다 더 원활한 서비스 이용을 위해 노력하는 한양에너지가 되겠습니다.<br><br>
+                        
+                        감사합니다.
+                    </div>
+                    <div class="announcement-bottom-meta">
+                        작성일: 2024.11.15 18:39
+                    </div>
+                </div>
+            </div>
+
+            <!-- 공지사항 3 -->
+            <div class="announcement-item">
+                <div class="announcement-header" onclick="toggleAnnouncement(3)">
+                    <div class="announcement-title-area">
+                        <i class="fas fa-bullhorn announcement-icon"></i>
+                        <span class="announcement-title">한양에너지 조합상품 일부개정 안내</span>
+                    </div>
+                    <div class="announcement-meta">
+                        <span class="announcement-date">2024.09.03</span>
+                        <i class="fas fa-chevron-down announcement-toggle" id="toggle-3"></i>
+                    </div>
+                </div>
+                <div id="announcement-content-3" class="announcement-content">
+                    <div class="announcement-text">
+                        1. 대상약관<br><br>
+                        - 한양에너지 조합상품 특약<br><br><br>
+                        
+                        2. 개정 약관 시행일자<br><br>
+                        - 2024년 9월 3일<br><br><br>
+                        
+                        3. 기존 가입 고객에 대한 적용여부<br><br>
+                        - 미적용<br><br><br>
+                        
+                        4. 기타사항<br><br>
+                        - 고객은 약관의 변경내용이 게시되거나 통지된 후부터 변경되는 약관의 시행일 전 영업일까지 계약을 해지할 수 있으며, 변경내용에 대하여 이의를 제기하지 아니하는 경우 약관의 변경에 동의한 것으로 봅니다.
+                    </div>
+                    <div class="announcement-bottom-meta">
+                        작성일: 2024.09.03 10:36
+                    </div>
+                </div>
+            </div>
+
+            <!-- 공지사항 4 -->
+            <div class="announcement-item">
+                <div class="announcement-header" onclick="toggleAnnouncement(4)">
+                    <div class="announcement-title-area">
+                        <i class="fas fa-info-circle announcement-icon"></i>
+                        <span class="announcement-title">개인정보 처리방침 안내</span>
+                    </div>
+                    <div class="announcement-meta">
+                        <span class="announcement-date">2024.07.19</span>
+                        <i class="fas fa-chevron-down announcement-toggle" id="toggle-4"></i>
+                    </div>
+                </div>
+                <div id="announcement-content-4" class="announcement-content">
+                    <div class="announcement-text">
+                        (주)한양에너지(이하 "우리 회사"라 합니다)는 정보주체의 자유와 권리 보호를 위해 「개인정보 보호법」 및 관계법령이 정한 바를 준수하여, 적법하게 개인정보를 처리하고 안전하게 관리하고 있습니다.<br><br>
+                        
+                        이에 「개인정보 보호법」 제30조(개인정보 처리방침의 수립 및 공개)에 따라 정보주체에게 개인정보 처리에 관한 절차 및 기준을 안내하고, 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을 수립·공개합니다.<br><br>
+                        
+                        개인정보 처리방침의 상세한 내용은 별도 페이지에서 확인하실 수 있습니다.
+                    </div>
+                    <div class="announcement-bottom-meta">
+                        작성일: 2024.07.19 18:40
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <!-- 왼쪽: 로고 및 SNS -->
+            <div class="footer-section logo-section">
+                <div class="footer-logo">
+                    <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
+                    </div>
+                </div>
+                <p>청정에너지로 만드는 지속가능한 미래</p>
+                
+                <div class="sns-links">
+                    <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="인스타그램"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="블로그"><i class="fab fa-blogger-b"></i></a>
+                </div>
+            </div>
+
+            <!-- 중앙: 통합 링크 섹션 -->
+            <div class="footer-section links-section">
+                <h4>바로가기</h4>
+                <ul class="footer-links">
+                    <li><a href="/ceo_message">인사말</a></li>
+                    <li><a href="/history">연혁</a></li>
+                    <li><a href="/introduce_service">서비스 소개</a></li>
+                    <li><a href="/announcements">공지사항</a></li>
+                    <li><a href="/faq">자주 묻는 질문</a></li>
+                </ul>
+            </div>
+
+            <!-- 오른쪽: 연락처 섹션 -->
+            <div class="footer-section contact-section">
+                <h4>연락처</h4>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="contact-text">
+                            전라남도 보성군 보성읍 구교길2-1
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="contact-text">
+                            hanenergy@example.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409 | © 2024 주식회사 한양에너지. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 헤더 JavaScript -->
+    <script src="js/header.js"></script>
+
+    <!-- 공지사항 JavaScript -->
+    <script>
+        // 공지사항 토글 기능
+        function toggleAnnouncement(id) {
+            const content = document.getElementById(`announcement-content-${id}`);
+            const toggleIcon = document.getElementById(`toggle-${id}`);
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                content.style.display = 'none';
+                toggleIcon.classList.remove('fa-chevron-up', 'active');
+                toggleIcon.classList.add('fa-chevron-down');
+            } else {
+                content.classList.add('show');
+                content.style.display = 'block';
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up', 'active');
+            }
+        }
+
+        // 페이지 로드 시 첫 번째 공지사항 펼치기
+        document.addEventListener('DOMContentLoaded', function() {
+            // 첫 번째 공지사항을 기본으로 열어두기
+            toggleAnnouncement(1);
+        });
+    </script>
+
+    <!-- 푸터 스타일 -->
+    <style>
+        /* 개선된 푸터 스타일 */
+        .modern-footer {
+            margin-top: 100px;
+            background-color: #535353;
+            color: #ecf0f1;
+            font-family: 'Pretendard', sans-serif;
+            padding: 40px 20px 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 푸터 컨테이너 */
+        .modern-footer .footer-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 30px;
+        }
+
+        /* 섹션 스타일 */
+        .modern-footer .footer-section {
+            flex: 1;
+            min-width: 220px;
+            margin-bottom: 20px;
+        }
+
+        /* 로고 및 SNS 섹션 */
+        .modern-footer .logo-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modern-footer .footer-logo {
+            margin-bottom: 15px;
+        }
+
+        .modern-footer .logo-img {
+            max-width: 100%;
+            width: 270px;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        .modern-footer .sns-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .modern-footer .sns-links a {
+            color: #ecf0f1;
+            font-size: 20px;
+            transition: color 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .modern-footer .sns-links a:hover {
+            color: #3498db;
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        /* 링크 스타일 */
+        .modern-footer .links-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .modern-footer .links-section h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #3498db;
+        }
+
+        .modern-footer .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modern-footer .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .modern-footer .footer-links a {
+            text-decoration: none;
+            color: #bdc3c7;
+            transition: all 0.3s;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .modern-footer .footer-links a:hover {
+            color: #3498db;
+            padding-left: 5px;
+        }
+
+        /* 연락처 섹션 */
+        .modern-footer .contact-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .modern-footer .contact-section h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #3498db;
+        }
+
+        .modern-footer .contact-info {
+            margin-bottom: 20px;
+        }
+
+        .modern-footer .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .modern-footer .contact-icon {
+            margin-right: 12px;
+            color: #3498db;
+            font-size: 16px;
+            margin-top: 3px;
+            min-width: 16px;
+        }
+
+        .modern-footer .contact-text {
+            flex: 1;
+            word-break: keep-all;
+        }
+
+        /* 하단 저작권 */
+        .modern-footer .footer-bottom {
+            text-align: center;
+            font-size: 13px;
+            color: #bdc3c7;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        /* 반응형 디자인 - 태블릿 */
+        @media (max-width: 900px) {
+            .modern-footer .footer-section {
+                min-width: calc(50% - 15px);
+            }
+            
+            .modern-footer .footer-container {
+                gap: 20px;
+            }
+        }
+
+        /* 반응형 디자인 - 모바일 */
+        @media (max-width: 600px) {
+            .modern-footer {
+                padding: 30px 15px 20px;
+            }
+            
+            .modern-footer .footer-section {
+                min-width: 100%;
+                margin-bottom: 25px;
+            }
+            
+            .modern-footer .footer-container {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .modern-footer .links-section {
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .modern-footer .footer-links a {
+                padding: 8px 0;
+            }
+            
+            .modern-footer .logo-img {
+                width: 220px;
+            }
+            
+            .modern-footer .footer-bottom {
+                font-size: 12px;
+                padding-top: 15px;
+                margin-top: 20px;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHeaderUserInfo();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- 관리자 공통 사이드바 -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><i class="fas fa-tachometer-alt"></i> 관리자</h2>
+    </div>
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="/admin/dashboard" class="<%= currentPage === 'dashboard' ? 'active' : '' %>"><i class="fas fa-home"></i> 대시보드</a></li>
+            <li><a href="/admin/popup-manager" class="<%= currentPage === 'popup-manager' ? 'active' : '' %>"><i class="fas fa-images"></i> 팝업 관리</a></li>
+            <li><a href="/admin/notice-manager" class="<%= currentPage === 'notice-manager' ? 'active' : '' %>"><i class="fas fa-bullhorn"></i> 공지사항 관리</a></li>
+            <li><a href="/admin/inquiry-manager" class="<%= currentPage === 'inquiry-manager' ? 'active' : '' %>"><i class="fas fa-envelope"></i> 문의 관리</a></li>
+            <li><a href="/admin/member-manager" class="<%= currentPage === 'member-manager' ? 'active' : '' %>"><i class="fas fa-users"></i> 회원 관리</a></li>
+            <li><a href="/admin/investment-manager" class="<%= currentPage === 'investment-manager' ? 'active' : '' %>"><i class="fas fa-chart-line"></i> 투자 관리</a></li>
+            <li><a href="/admin/account-manager" class="<%= currentPage === 'account-manager' ? 'active' : '' %>"><i class="fas fa-university"></i> 계좌 관리</a></li>
+            <li><a href="/admin/site-settings" class="<%= currentPage === 'site-settings' ? 'active' : '' %>"><i class="fas fa-cog"></i> 사이트 설정</a></li>
+        </ul>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> 로그아웃
+        </button>
+    </div>
+</div>

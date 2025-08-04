@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 관리 - 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <%- include('../partials/admin-sidebar', { currentPage: 'inquiry-manager' }) %>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <%- include('../partials/admin-header', { pageTitle: '문의 관리', user: user }) %>
+
+        <!-- 추가 헤더 컨트롤 -->
+        <div class="page-controls">
+            <div class="controls-right">
+                <select id="statusFilter" onchange="filterInquiries()" style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="all">전체</option>
+                    <option value="pending">대기중</option>
+                    <option value="replied">답변완료</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="제목이나 이름으로 검색..." style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+        </div>
+
+        <!-- 문의 관리 컨텐츠 -->
+        <div class="dashboard-content">
+            <!-- 문의 목록 -->
+            <div class="admin-table">
+                <table id="inquiryTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 0)">번호</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 1)">이름</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 2)">제목</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 3)">문의일</th>
+                            <th onclick="sortTable(this.parentNode.parentNode.parentNode, 4)">상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inquiryTableBody">
+                        <!-- JavaScript로 동적 생성 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div id="paginationContainer"></div>
+        </div>
+    </div>
+
+    <!-- 모달 오버레이 -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;" onclick="hideInquiryModal()"></div>
+
+    <!-- 문의 상세/답변 모달 -->
+    <div id="inquiryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="modalTitle">문의 상세</h3>
+                <button class="modal-close" onclick="hideInquiryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 문의 내용 -->
+                <div class="inquiry-details">
+                    <div class="detail-section">
+                        <h4>문의 정보</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>이름:</label>
+                                <span id="inquiryName"></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>이메일:</label>
+                                <span id="inquiryEmail"></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>연락처:</label>
+                                <span id="inquiryPhone"></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>문의일:</label>
+                                <span id="inquiryDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>문의 내용</h4>
+                        <div class="inquiry-content" id="inquiryContent"></div>
+                    </div>
+                </div>
+
+                <!-- 답변 작성 -->
+                <div class="reply-section">
+                    <h4>답변 작성</h4>
+                    <form id="replyForm" class="admin-form">
+                        <div class="form-group">
+                            <label for="replyContent">답변 내용</label>
+                            <textarea id="replyContent" name="replyContent" rows="8" placeholder="답변을 입력해주세요..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideInquiryModal()">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="sendReply()">답변 전송</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 오버레이 -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;" onclick="hideInquiryModal()"></div>
+
+    <script src="/admin/js/admin.js"></script>
+    <script src="/js/auth.js"></script>
+    <%- include('../partials/admin-scripts') %>
+    <script>
+
+        // 문의 데이터 로드
+        async function loadInquiries() {
+            try {
+                const response = await fetch('/api/inquiries');
+                const result = await response.json();
+                
+                if (result.success) {
+                    inquiries = result.data;
+                    filteredInquiries = [...inquiries];
+                    renderInquiryTable();
+                } else {
+                    console.error('문의 목록 로드 실패:', result.message);
+                }
+            } catch (error) {
+                console.error('문의 목록 로드 중 오류:', error);
+                // 서버 연결 실패 시 로컬 데이터 사용
+                inquiries = [
+                    {
+                        id: 1,
+                        name: "김투자",
+                        email: "investor@example.com",
+                        phone: "010-1234-5678",
+                        title: "투자 상품 문의",
+                        content: "300KW 다함께 동행 뉴베이직 상품에 대해 자세히 알고 싶습니다.",
+                        status: "pending",
+                        createdAt: "2025-01-20",
+                        reply: null,
+                        replyDate: null
+                    }
+                ];
+                filteredInquiries = [...inquiries];
+                renderInquiryTable();
+            }
+        }
+
+        // 문의 데이터 (백업용)
+        let inquiries = [
+            {
+                id: 1,
+                name: "김투자",
+                email: "investor@example.com",
+                phone: "010-1234-5678",
+                title: "투자 상품 문의",
+                content: "300KW 다함께 동행 뉴베이직 상품에 대해 자세히 알고 싶습니다. 투자 조건과 수익률, 그리고 투자 기간에 대해 상담받고 싶습니다.",
+                status: "pending",
+                createdAt: "2025-01-20",
+                reply: null,
+                replyDate: null
+            },
+            {
+                id: 2,
+                name: "이관리",
+                email: "manager@example.com",
+                phone: "010-9876-5432",
+                title: "회원가입 관련 문의",
+                content: "회원가입 후 승인이 얼마나 걸리는지 궁금합니다. 또한 필요한 서류가 있다면 알려주세요.",
+                status: "replied",
+                createdAt: "2025-01-18",
+                reply: "회원가입 승인은 보통 1-2일 소요됩니다. 추가 서류는 필요하지 않으며, 가입 완료 후 바로 투자 상품을 확인하실 수 있습니다.",
+                replyDate: "2025-01-19"
+            },
+            {
+                id: 3,
+                name: "박에너지",
+                email: "energy@example.com",
+                phone: "010-5555-6666",
+                title: "수익금 지급 일정 문의",
+                content: "투자 후 수익금은 언제부터 지급되나요? 월별로 지급되는지 아니면 다른 주기인지 궁금합니다.",
+                status: "pending",
+                createdAt: "2025-01-19",
+                reply: null,
+                replyDate: null
+            }
+        ];
+
+        let currentInquiry = null;
+        let filteredInquiries = [...inquiries];
+
+        // 문의 목록 렌더링
+        function renderInquiryTable(data = filteredInquiries) {
+            const tbody = document.getElementById('inquiryTableBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666; padding: 40px;">문의 내역이 없습니다.</td></tr>';
+                return;
+            }
+
+            data.forEach((inquiry, index) => {
+                const row = document.createElement('tr');
+                const statusClass = inquiry.status === 'replied' ? 'status-active' : 'status-pending';
+                const statusText = inquiry.status === 'replied' ? '답변완료' : '대기중';
+                
+                row.innerHTML = `
+                    <td>${inquiry.id}</td>
+                    <td>${inquiry.name}</td>
+                    <td>${inquiry.title}</td>
+                    <td>${inquiry.createdAt}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewInquiry(${inquiry.id})">
+                            <i class="fas fa-eye"></i> 상세보기
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteInquiry(${inquiry.id})">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 문의 상세 모달 표시
+        function viewInquiry(id) {
+            currentInquiry = inquiries.find(i => i.id === id);
+            
+            if (currentInquiry) {
+                document.getElementById('inquiryName').textContent = currentInquiry.name;
+                document.getElementById('inquiryEmail').textContent = currentInquiry.email;
+                document.getElementById('inquiryPhone').textContent = currentInquiry.phone;
+                document.getElementById('inquiryDate').textContent = currentInquiry.createdAt;
+                document.getElementById('inquiryContent').textContent = currentInquiry.content;
+                
+                // 기존 답변이 있으면 표시
+                if (currentInquiry.reply) {
+                    document.getElementById('replyContent').value = currentInquiry.reply;
+                } else {
+                    document.getElementById('replyContent').value = '';
+                }
+                
+                showModal();
+            }
+        }
+
+        // 모달 표시
+        function showModal() {
+            document.getElementById('inquiryModal').style.display = 'block';
+            document.getElementById('modalOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 모달 숨기기
+        function hideInquiryModal() {
+            document.getElementById('inquiryModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 답변 전송
+        async function sendReply() {
+            const replyContent = document.getElementById('replyContent').value.trim();
+            
+            if (!replyContent) {
+                showAlert('error', '답변 내용을 입력해주세요.');
+                return;
+            }
+            
+            if (currentInquiry) {
+                try {
+                    const response = await fetch(`/api/inquiries/${currentInquiry.id}/reply`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ reply: replyContent })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // 로컬 데이터 업데이트
+                        const inquiryIndex = inquiries.findIndex(i => i.id === currentInquiry.id);
+                        if (inquiryIndex !== -1) {
+                            inquiries[inquiryIndex].reply = replyContent;
+                            inquiries[inquiryIndex].status = 'replied';
+                            inquiries[inquiryIndex].replyDate = new Date().toISOString().split('T')[0];
+                        }
+                        
+                        showAlert('success', '답변이 성공적으로 전송되었습니다.');
+                        hideInquiryModal();
+                        filterInquiries();
+                    } else {
+                        showAlert('error', result.message || '답변 전송에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('답변 전송 중 오류:', error);
+                    showAlert('error', '서버 연결에 실패했습니다.');
+                }
+            }
+        }
+
+        // 문의 삭제
+        async function deleteInquiry(id) {
+            confirmAction('이 문의를 삭제하시겠습니까?', async () => {
+                try {
+                    const response = await fetch(`/api/inquiries/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        inquiries = inquiries.filter(i => i.id !== id);
+                        filterInquiries();
+                        showAlert('success', '문의가 성공적으로 삭제되었습니다.');
+                    } else {
+                        showAlert('error', result.message || '문의 삭제에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('문의 삭제 중 오류:', error);
+                    showAlert('error', '서버 연결에 실패했습니다.');
+                }
+            });
+        }
+
+        // 문의 필터링
+        function filterInquiries() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredInquiries = inquiries.filter(inquiry => {
+                const statusMatch = statusFilter === 'all' || inquiry.status === statusFilter;
+                const searchMatch = inquiry.title.toLowerCase().includes(searchTerm) || 
+                                  inquiry.name.toLowerCase().includes(searchTerm);
+                
+                return statusMatch && searchMatch;
+            });
+            
+            renderInquiryTable(filteredInquiries);
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 관리자 정보 표시
+            <% if (user) { %>
+            // 관리자 정보가 있을 경우 표시 (필요시 추가)
+            <% } %>
+            
+            // 문의 데이터 로드
+            loadInquiries();
+            
+            // 검색 기능 설정
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', filterInquiries);
+        });
+
+        // 테이블 정렬 기능
+        function sortTable(table, column) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
+            const isNumeric = column === 0 || column === 3; // 번호, 날짜 컬럼
+            
+            // 현재 정렬 방향 확인
+            const isAscending = table.getAttribute('data-sort-direction') !== 'asc';
+            table.setAttribute('data-sort-direction', isAscending ? 'asc' : 'desc');
+            
+            rows.sort((a, b) => {
+                let aVal = a.cells[column].textContent.trim();
+                let bVal = b.cells[column].textContent.trim();
+                
+                if (isNumeric) {
+                    aVal = parseFloat(aVal) || 0;
+                    bVal = parseFloat(bVal) || 0;
+                }
+                
+                if (aVal < bVal) return isAscending ? -1 : 1;
+                if (aVal > bVal) return isAscending ? 1 : -1;
+                return 0;
+            });
+            
+            // 정렬된 행들을 다시 추가
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+
+    <style>
+        /* 모달 스타일 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 1002;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 문의 상세 스타일 */
+        .inquiry-details {
+            margin-bottom: 30px;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-section h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-item label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .detail-item span {
+            color: #2c3e50;
+        }
+
+        .inquiry-content {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .reply-section h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        /* 상태 배지 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* 버튼 크기 */
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* 테이블 헤더 정렬 가능 표시 */
+        th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

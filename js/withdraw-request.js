@@ -37,7 +37,16 @@ function formatAccountNumber(input) {
 
 // 폼 제출 처리
 function handleFormSubmit(formType) {
-    const user = getCurrentUser();
+    // getCurrentUser 함수가 정의되지 않은 경우를 대비
+    let user;
+    if (typeof getCurrentUser === 'function') {
+        user = getCurrentUser();
+    } else {
+        // 직접 로컬스토리지에서 가져오기
+        const userData = localStorage.getItem('currentUser');
+        user = userData ? JSON.parse(userData) : null;
+    }
+    
     if (!user) {
         alert('로그인이 필요합니다.');
         return false;
@@ -104,7 +113,16 @@ function saveRequest(requestData) {
 
 // 신청 내역 불러오기
 function loadRequestHistory() {
-    const user = getCurrentUser();
+    // getCurrentUser 함수가 정의되지 않은 경우를 대비
+    let user;
+    if (typeof getCurrentUser === 'function') {
+        user = getCurrentUser();
+    } else {
+        // 직접 로컬스토리지에서 가져오기
+        const userData = localStorage.getItem('currentUser');
+        user = userData ? JSON.parse(userData) : null;
+    }
+    
     if (!user) return;
     
     const requests = JSON.parse(localStorage.getItem('withdrawRequests') || '[]');
@@ -153,8 +171,16 @@ function getBankName(bankCode) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 로그인 상태 확인 후 신청 내역 로드
-    const user = getCurrentUser();
+    // 로그인 상태 확인 및 신청 내역 로드
+    let user;
+    if (typeof getCurrentUser === 'function') {
+        user = getCurrentUser();
+    } else {
+        // 직접 로컬스토리지에서 가져오기
+        const userData = localStorage.getItem('currentUser');
+        user = userData ? JSON.parse(userData) : null;
+    }
+    
     if (user) {
         loadRequestHistory();
     }
@@ -200,13 +226,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 로그인 버튼 클릭 시 현재 페이지 URL을 전달
+    // 로그인 버튼 클릭 시 현재 페이지 URL 전달
     const loginBtns = document.querySelectorAll('.login-btn');
     loginBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             const currentUrl = encodeURIComponent(window.location.href);
-            window.location.href = `login.html?redirect=${currentUrl}`;
+            window.location.href = `/login?redirect=${currentUrl}`;
         });
     });
 });

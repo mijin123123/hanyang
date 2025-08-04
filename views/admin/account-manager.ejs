@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계좌 관리 - 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <%- include('../partials/admin-sidebar', { currentPage: 'account-manager' }) %>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>계좌 관리</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-info" id="adminInfo">관리자님 환영합니다</span>
+                <button class="btn btn-primary" onclick="showAddAccountModal()">
+                    <i class="fas fa-plus"></i> 새 계좌 추가
+                </button>
+            </div>
+        </header>
+
+        <!-- 계좌 관리 컨텐츠 -->
+        <div class="dashboard-content">
+            <!-- 입금 계좌 설정 -->
+            <div class="account-section">
+                <h3><i class="fas fa-arrow-down"></i> 입금 계좌 설정</h3>
+                <div class="admin-table">
+                    <table id="depositAccountTable">
+                        <thead>
+                            <tr>
+                                <th>은행명</th>
+                                <th>계좌번호</th>
+                                <th>예금주</th>
+                                <th>상태</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositAccountTableBody">
+                            <!-- JavaScript로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 출금 계좌 설정 -->
+            <div class="account-section">
+                <h3><i class="fas fa-arrow-up"></i> 출금 계좌 설정</h3>
+                <div class="admin-table">
+                    <table id="withdrawAccountTable">
+                        <thead>
+                            <tr>
+                                <th>은행명</th>
+                                <th>계좌번호</th>
+                                <th>예금주</th>
+                                <th>상태</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawAccountTableBody">
+                            <!-- JavaScript로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 계좌 사용 내역 -->
+            <div class="account-section">
+                <h3><i class="fas fa-history"></i> 계좌 사용 내역</h3>
+                <div class="admin-table">
+                    <table id="accountHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>일시</th>
+                                <th>계좌번호</th>
+                                <th>거래유형</th>
+                                <th>금액</th>
+                                <th>사용자</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountHistoryTableBody">
+                            <!-- JavaScript로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 계좌 추가/수정 모달 -->
+    <div id="accountModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">새 계좌 추가</h3>
+                <button class="modal-close" onclick="hideAccountModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="accountType">계좌 유형</label>
+                        <select id="accountType" name="accountType" required>
+                            <option value="deposit">입금 계좌</option>
+                            <option value="withdraw">출금 계좌</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bankName">은행명</label>
+                        <select id="bankName" name="bankName" required>
+                            <option value="">은행을 선택하세요</option>
+                            <option value="국민은행">국민은행</option>
+                            <option value="신한은행">신한은행</option>
+                            <option value="우리은행">우리은행</option>
+                            <option value="하나은행">하나은행</option>
+                            <option value="농협은행">농협은행</option>
+                            <option value="기업은행">기업은행</option>
+                            <option value="새마을금고">새마을금고</option>
+                            <option value="신협">신협</option>
+                            <option value="부산은행">부산은행</option>
+                            <option value="대구은행">대구은행</option>
+                            <option value="경남은행">경남은행</option>
+                            <option value="광주은행">광주은행</option>
+                            <option value="전북은행">전북은행</option>
+                            <option value="제주은행">제주은행</option>
+                            <option value="카카오뱅크">카카오뱅크</option>
+                            <option value="토스뱅크">토스뱅크</option>
+                            <option value="케이뱅크">케이뱅크</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accountNumber">계좌번호</label>
+                        <input type="text" id="accountNumber" name="accountNumber" placeholder="하이픈(-) 없이 입력" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accountHolder">예금주</label>
+                        <input type="text" id="accountHolder" name="accountHolder" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accountStatus">상태</label>
+                        <select id="accountStatus" name="accountStatus">
+                            <option value="active">활성</option>
+                            <option value="inactive">비활성</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accountMemo">메모</label>
+                        <textarea id="accountMemo" name="accountMemo" rows="3" placeholder="계좌에 대한 추가 정보를 입력하세요"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideAccountModal()">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveAccount()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 오버레이 -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;" onclick="hideAccountModal()"></div>
+
+    <script src="js/admin.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // 로그인 체크
+        checkAdminAuth();
+        
+        // 관리자 정보 표시
+        const currentAdmin = getCurrentAdmin();
+        if (currentAdmin) {
+            document.getElementById('adminInfo').textContent = `${currentAdmin.name}님 환영합니다`;
+        }
+
+        // 계좌 데이터 (동적으로 로드)
+        let depositAccounts = [];
+
+        // 사이트 설정에서 계좌 정보 로드
+        async function loadAccountSettings() {
+            try {
+                console.log('🔍 계좌 설정 로드 시작');
+                const response = await fetch('/api/admin/settings');
+                const result = await response.json();
+                
+                if (result.success && result.data.accountNumber && result.data.accountHolder) {
+                    // 사이트 설정의 계좌 정보를 입금 계좌로 설정
+                    depositAccounts = [{
+                        id: 1,
+                        bankName: "새마을금고", // 계좌번호에서 은행명 추출 또는 기본값
+                        accountNumber: result.data.accountNumber,
+                        accountHolder: result.data.accountHolder,
+                        status: "active",
+                        memo: "한양에너지 전용 입금 계좌",
+                        type: "deposit",
+                        createdAt: new Date().toISOString().split('T')[0]
+                    }];
+                    
+                    console.log('✅ 계좌 설정 로드 완료:', depositAccounts[0]);
+                    renderDepositAccountTable();
+                } else {
+                    console.log('⚠️ 계좌 정보가 설정되지 않음');
+                    // 기본 데이터 사용
+                    depositAccounts = [
+                        {
+                            id: 1,
+                            bankName: "국민은행",
+                            accountNumber: "94030200393435",
+                            accountHolder: "정우영",
+                            status: "active",
+                            memo: "한양에너지 전용 입금 계좌",
+                            type: "deposit",
+                            createdAt: "2024-01-15"
+                        }
+                    ];
+                    renderDepositAccountTable();
+                }
+            } catch (error) {
+                console.error('❌ 계좌 설정 로드 오류:', error);
+                // 기본 데이터로 fallback
+                depositAccounts = [
+                    {
+                        id: 1,
+                        bankName: "국민은행",
+                        accountNumber: "94030200393435",
+                        accountHolder: "정우영",
+                        status: "active",
+                        memo: "한양에너지 전용 입금 계좌",
+                        type: "deposit",
+                        createdAt: "2024-01-15"
+                    }
+                ];
+                renderDepositAccountTable();
+            }
+        }
+
+        let withdrawAccounts = [
+            {
+                id: 1,
+                bankName: "KB국민은행",
+                accountNumber: "94401139100103",
+                accountHolder: "김민정",
+                status: "active",
+                memo: "김민정 출금 전용 계좌",
+                type: "withdraw",
+                createdAt: "2024-03-10"
+            }
+        ];
+
+        let accountHistory = [
+            {
+                id: 1,
+                date: "2025-04-30 10:11:45",
+                accountNumber: "94030200393435",
+                type: "deposit",
+                amount: 65000000,
+                user: "김민정",
+                memo: "투자금 입금"
+            },
+            {
+                id: 2,
+                date: "2025-04-30 10:11:45",
+                accountNumber: "94401139100103",
+                type: "withdraw",
+                amount: 3900000,
+                user: "김민정",
+                memo: "수익금 출금"
+            },
+            {
+                id: 3,
+                date: "2025-03-29 15:20:41",
+                accountNumber: "94401139100103",
+                type: "withdraw",
+                amount: 3900000,
+                user: "김민정",
+                memo: "수익금 출금"
+            },
+            {
+                id: 4,
+                date: "2025-02-28 13:31:38",
+                accountNumber: "94401139100103",
+                type: "withdraw",
+                amount: 3900000,
+                user: "김민정",
+                memo: "수익금 출금"
+            },
+            {
+                id: 5,
+                date: "2024-11-22 13:31:25",
+                accountNumber: "94030200393435",
+                type: "deposit",
+                amount: 65000000,
+                user: "김민정",
+                memo: "투자금 입금"
+            }
+        ];
+
+        let editingAccountId = null;
+        let editingAccountType = null;
+
+        // 입금 계좌 목록 렌더링
+        function renderDepositAccountTable() {
+            const tbody = document.getElementById('depositAccountTableBody');
+            tbody.innerHTML = '';
+
+            if (depositAccounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666; padding: 40px;">등록된 입금 계좌가 없습니다.</td></tr>';
+                return;
+            }
+
+            depositAccounts.forEach(account => {
+                const row = document.createElement('tr');
+                const statusClass = account.status === 'active' ? 'status-active' : 'status-inactive';
+                const statusText = account.status === 'active' ? '활성' : '비활성';
+                
+                row.innerHTML = `
+                    <td>${account.bankName}</td>
+                    <td>${formatAccountNumber(account.accountNumber)}</td>
+                    <td>${account.accountHolder}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editAccount('deposit', ${account.id})">
+                            <i class="fas fa-edit"></i> 수정
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAccount('deposit', ${account.id})">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 출금 계좌 목록 렌더링
+        function renderWithdrawAccountTable() {
+            const tbody = document.getElementById('withdrawAccountTableBody');
+            tbody.innerHTML = '';
+
+            if (withdrawAccounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666; padding: 40px;">등록된 출금 계좌가 없습니다.</td></tr>';
+                return;
+            }
+
+            withdrawAccounts.forEach(account => {
+                const row = document.createElement('tr');
+                const statusClass = account.status === 'active' ? 'status-active' : 'status-inactive';
+                const statusText = account.status === 'active' ? '활성' : '비활성';
+                
+                row.innerHTML = `
+                    <td>${account.bankName}</td>
+                    <td>${formatAccountNumber(account.accountNumber)}</td>
+                    <td>${account.accountHolder}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editAccount('withdraw', ${account.id})">
+                            <i class="fas fa-edit"></i> 수정
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAccount('withdraw', ${account.id})">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 계좌 사용 내역 렌더링
+        function renderAccountHistoryTable() {
+            const tbody = document.getElementById('accountHistoryTableBody');
+            tbody.innerHTML = '';
+
+            if (accountHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666; padding: 40px;">계좌 사용 내역이 없습니다.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+
+            accountHistory.forEach(history => {
+                const row = document.createElement('tr');
+                const typeText = history.type === 'deposit' ? '입금' : '출금';
+                const typeClass = history.type === 'deposit' ? 'text-success' : 'text-danger';
+                
+                row.innerHTML = `
+                    <td>${history.date}</td>
+                    <td>${formatAccountNumber(history.accountNumber)}</td>
+                    <td><span class="${typeClass}">${typeText}</span></td>
+                    <td>${history.amount.toLocaleString()}원</td>
+                    <td>${history.user}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 계좌번호 포맷팅
+        function formatAccountNumber(accountNumber) {
+            // 계좌번호를 4자리씩 끊어서 표시
+            return accountNumber.replace(/(\d{4})(?=\d)/g, '$1-');
+        }
+
+        // 계좌 추가 모달 표시
+        function showAddAccountModal() {
+            editingAccountId = null;
+            editingAccountType = null;
+            document.getElementById('modalTitle').textContent = '새 계좌 추가';
+            document.getElementById('accountForm').reset();
+            showModal();
+        }
+
+        // 계좌 수정 모달 표시
+        function editAccount(type, id) {
+            editingAccountType = type;
+            editingAccountId = id;
+            
+            const accounts = type === 'deposit' ? depositAccounts : withdrawAccounts;
+            const account = accounts.find(a => a.id === id);
+            
+            if (account) {
+                document.getElementById('modalTitle').textContent = '계좌 수정';
+                document.getElementById('accountType').value = type;
+                document.getElementById('bankName').value = account.bankName;
+                document.getElementById('accountNumber').value = account.accountNumber;
+                document.getElementById('accountHolder').value = account.accountHolder;
+                document.getElementById('accountStatus').value = account.status;
+                document.getElementById('accountMemo').value = account.memo || '';
+                showModal();
+            }
+        }
+
+        // 모달 표시
+        function showModal() {
+            document.getElementById('accountModal').style.display = 'block';
+            document.getElementById('modalOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 모달 숨기기
+        function hideAccountModal() {
+            document.getElementById('accountModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 계좌 저장
+        function saveAccount() {
+            const form = document.getElementById('accountForm');
+            if (!validateForm(form)) {
+                return;
+            }
+
+            const formData = new FormData(form);
+            const accountData = {
+                bankName: formData.get('bankName'),
+                accountNumber: formData.get('accountNumber').replace(/[^0-9]/g, ''), // 숫자만 저장
+                accountHolder: formData.get('accountHolder'),
+                status: formData.get('accountStatus'),
+                memo: formData.get('accountMemo'),
+                type: formData.get('accountType')
+            };
+
+            if (editingAccountId) {
+                // 수정
+                const accounts = editingAccountType === 'deposit' ? depositAccounts : withdrawAccounts;
+                const accountIndex = accounts.findIndex(a => a.id === editingAccountId);
+                if (accountIndex !== -1) {
+                    accounts[accountIndex] = {
+                        ...accounts[accountIndex],
+                        ...accountData
+                    };
+                    showAlert('success', '계좌가 성공적으로 수정되었습니다.');
+                }
+            } else {
+                // 추가
+                const newAccount = {
+                    id: Date.now(),
+                    ...accountData,
+                    createdAt: new Date().toISOString().split('T')[0]
+                };
+
+                if (accountData.type === 'deposit') {
+                    depositAccounts.push(newAccount);
+                } else {
+                    withdrawAccounts.push(newAccount);
+                }
+                
+                showAlert('success', '새 계좌가 성공적으로 추가되었습니다.');
+            }
+
+            hideAccountModal();
+            renderDepositAccountTable();
+            renderWithdrawAccountTable();
+        }
+
+        // 계좌 삭제
+        function deleteAccount(type, id) {
+            confirmAction('이 계좌를 삭제하시겠습니까?', () => {
+                if (type === 'deposit') {
+                    depositAccounts = depositAccounts.filter(a => a.id !== id);
+                } else {
+                    withdrawAccounts = withdrawAccounts.filter(a => a.id !== id);
+                }
+                
+                renderDepositAccountTable();
+                renderWithdrawAccountTable();
+                showAlert('success', '계좌가 성공적으로 삭제되었습니다.');
+            });
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAccountSettings(); // 사이트 설정에서 계좌 정보 로드
+            renderWithdrawAccountTable();
+            renderAccountHistoryTable();
+        });
+
+        // Helper 함수들
+        function validateForm(form) {
+            const formData = new FormData(form);
+            const bankName = formData.get('bankName');
+            const accountNumber = formData.get('accountNumber');
+            const accountHolder = formData.get('accountHolder');
+            
+            if (!bankName || bankName === '') {
+                alert('은행명을 선택해주세요.');
+                return false;
+            }
+            
+            if (!accountNumber || accountNumber.trim() === '') {
+                alert('계좌번호를 입력해주세요.');
+                return false;
+            }
+            
+            if (!accountHolder || accountHolder.trim() === '') {
+                alert('예금주를 입력해주세요.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function showAlert(type, message) {
+            alert(message);
+        }
+
+        function confirmAction(message, callback) {
+            if (confirm(message)) {
+                callback();
+            }
+        }
+    </script>
+
+    <style>
+        /* 모달 스타일 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 1002;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 계좌 섹션 */
+        .account-section {
+            margin-bottom: 40px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .account-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .account-section h3 i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        /* 상태 배지 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 텍스트 색상 */
+        .text-success {
+            color: #28a745 !important;
+            font-weight: 600;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+            font-weight: 600;
+        }
+
+        /* 버튼 크기 */
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* 관리자 정보 스타일 */
+        .admin-info {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-right: 15px;
+            padding: 8px 12px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 5px;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+    </style>
+</body>
+</html>
