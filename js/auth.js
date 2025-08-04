@@ -4,20 +4,24 @@
 let supabaseModule = null;
 
 // Supabase 사용 여부 설정
-const USE_SUPABASE = false; // 일단 false로 설정하여 기존 방식 사용
+const USE_SUPABASE = true; // Supabase 데이터베이스 사용으로 변경
 
 // Supabase 모듈 로드 함수
 async function loadSupabaseModule() {
     if (!supabaseModule && USE_SUPABASE) {
         try {
+            console.log('Supabase 모듈 로드 시도...'); // 디버깅용
             supabaseModule = await import('./supabase-config.js');
-            console.log('Supabase 모듈 로드 완료');
+            console.log('Supabase 모듈 로드 완료:', supabaseModule);
         } catch (error) {
             console.error('Supabase 모듈 로드 실패:', error);
-            // Supabase 로드 실패시 로컬 방식으로 fallback
-            USE_SUPABASE = false;
+            console.error('오류 상세:', error.stack); // 더 자세한 오류 정보
+            // Supabase 로드 실패시 로컬 방식으로 fallback - 하지만 경고 표시
+            console.warn('Supabase 연결 실패로 로컬 저장소 방식으로 전환됩니다.');
+            alert('데이터베이스 연결에 실패했습니다. 임시로 로컬 저장소를 사용합니다.');
         }
     }
+}
 }
 
 // 임시 사용자 데이터베이스 (Supabase 미사용시 또는 백업용)
