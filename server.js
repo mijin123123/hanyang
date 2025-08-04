@@ -225,24 +225,44 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
-// 로그인 처리
-app.post('/login', (req, res) => {
+// 로그인 처리 (Supabase 연동)
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
+    try {
+        // 비밀번호 해시화
+        const passwordHash = hashPassword(password);
+        
+        // 사용자 조회
+        const { data: user, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', username)
+            .eq('password_hash', passwordHash)
+            .eq('status', 'approved') // 승인된 사용자만
+            .single();
+
+        if (error || !user) {
+            console.log('로그인 실패:', username);
+            return res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+        }
+
+        // 세션 설정
         req.session.user = {
             id: user.id,
             username: user.username,
             name: user.name,
+            email: user.email,
             role: user.role,
+            status: user.status,
             loginTime: new Date().toISOString()
         };
         
+        console.log('✅ 로그인 성공:', user.username);
         res.json({ success: true, user: req.session.user });
-    } else {
-        res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+    } catch (error) {
+        console.error('로그인 처리 중 오류:', error);
+        res.json({ success: false, message: '로그인 처리 중 오류가 발생했습니다.' });
     }
 });
 
@@ -251,37 +271,69 @@ app.get('/signup', (req, res) => {
     res.render('signup');
 });
 
-// 회원가입 처리
-app.post('/signup', (req, res) => {
+// 회원가입 처리 (Supabase 연동)
+app.post('/signup', async (req, res) => {
     const { username, password, name, email, phone, address } = req.body;
     
-    // 중복 확인
-    const existingUser = users.find(u => u.username === username || u.email === email);
-    if (existingUser) {
-        return res.json({ success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' });
+    try {
+        // 중복 확인
+        const { data: existingUsers, error: checkError } = await supabase
+            .from('members')
+            .select('username, email')
+            .or(`username.eq.${username},email.eq.${email}`);
+
+        if (checkError) {
+            console.error('회원 중복 확인 오류:', checkError);
+            return res.json({ success: false, message: '회원가입 처리 중 오류가 발생했습니다.' });
+        }
+
+        if (existingUsers && existingUsers.length > 0) {
+            return res.json({ success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' });
+        }
+
+        // 비밀번호 해시화
+        const passwordHash = hashPassword(password);
+
+        // 새 회원 추가 (즉시 승인)
+        const { data: newUser, error: insertError } = await supabase
+            .from('members')
+            .insert([{
+                username,
+                password_hash: passwordHash,
+                name,
+                email,
+                phone: phone || '',
+                address: address || '',
+                role: 'user',
+                status: 'approved', // 즉시 승인
+                approved_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+
+        if (insertError) {
+            console.error('회원 추가 오류:', insertError);
+            return res.json({ success: false, message: '회원가입 처리 중 오류가 발생했습니다.' });
+        }
+
+        console.log('✅ 새 회원 가입:', newUser.username);
+        
+        res.json({ 
+            success: true, 
+            message: '회원가입이 완료되었습니다. 바로 로그인하실 수 있습니다.',
+            user: {
+                id: newUser.id,
+                username: newUser.username,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role,
+                status: newUser.status
+            }
+        });
+    } catch (error) {
+        console.error('회원가입 처리 중 오류:', error);
+        res.json({ success: false, message: '서버 오류가 발생했습니다.' });
     }
-    
-    // 새 회원 추가 (즉시 승인)
-    const newUser = {
-        id: Date.now().toString(),
-        username,
-        password,
-        name,
-        email,
-        phone: phone || '',
-        address: address || '',
-        role: 'user',
-        status: 'approved',
-        created_at: new Date().toISOString()
-    };
-    
-    users.push(newUser);
-    
-    res.json({ 
-        success: true, 
-        message: '회원가입이 완료되었습니다. 바로 로그인하실 수 있습니다.',
-        user: newUser 
-    });
 });
 
 // 로그아웃
