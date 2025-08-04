@@ -4,7 +4,7 @@
 let supabaseModule = null;
 
 // Supabase 사용 여부 설정
-const USE_SUPABASE = true; // Supabase 데이터베이스 활성화
+const USE_SUPABASE = false; // RLS 정책 오류로 임시 비활성화
 
 // Supabase 모듈 로드 함수
 async function loadSupabaseModule() {
@@ -295,49 +295,66 @@ async function signup(userData) {
     } else {
         console.log('로컬 회원가입 방식 사용'); // 디버깅용
         
-        // 기존 로컬 방식
-        // 중복 확인
-        const existingUser = users.find(u => u.username === userData.username || u.email === userData.email);
-        const existingPending = pendingMembers.find(u => u.username === userData.username || u.email === userData.email);
-        
-        console.log('중복 확인 결과:', { existingUser: !!existingUser, existingPending: !!existingPending }); // 디버깅용
-        
-        if (existingUser || existingPending) {
-            return { success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' };
+        try {
+            // 입력 데이터 검증
+            if (!userData || !userData.username || !userData.password || !userData.name || !userData.email) {
+                return { success: false, message: '필수 정보가 누락되었습니다.' };
+            }
+            
+            // 기존 로컬 방식
+            // 중복 확인
+            const existingUser = users.find(u => u.username === userData.username || u.email === userData.email);
+            const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+            const existingPending = storedPending.find(u => u.username === userData.username || u.email === userData.email);
+            
+            console.log('중복 확인 결과:', { 
+                existingUser: !!existingUser, 
+                existingPending: !!existingPending,
+                userData: userData.username 
+            }); // 디버깅용
+            
+            if (existingUser || existingPending) {
+                return { success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' };
+            }
+            
+            // 새 회원 추가 (승인 대기 상태)
+            const newUser = {
+                id: Date.now().toString(),
+                username: userData.username,
+                password: userData.password,
+                name: userData.name,
+                email: userData.email,
+                phone: userData.phone || '',
+                address: userData.address || '',
+                role: 'user',
+                status: 'pending', // 승인 대기 상태
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('새 회원 생성:', newUser); // 디버깅용
+            
+            // 임시로 pendingMembers에 추가
+            pendingMembers.push(newUser);
+            
+            // localStorage에도 저장하여 관리자 페이지에서 접근 가능하도록 함
+            const updatedPending = [...storedPending, newUser];
+            localStorage.setItem('pendingMembers', JSON.stringify(updatedPending));
+            
+            console.log('pendingMembers 업데이트됨, 총 개수:', pendingMembers.length); // 디버깅용
+            console.log('localStorage에 저장된 pendingMembers:', updatedPending); // 디버깅용
+            
+            return { 
+                success: true, 
+                message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.',
+                user: newUser 
+            };
+        } catch (error) {
+            console.error('로컬 회원가입 처리 중 오류:', error);
+            return { 
+                success: false, 
+                message: '회원가입 처리 중 오류가 발생했습니다: ' + error.message 
+            };
         }
-        
-        // 새 회원 추가 (승인 대기 상태)
-        const newUser = {
-            id: Date.now().toString(),
-            username: userData.username,
-            password: userData.password,
-            name: userData.name,
-            email: userData.email,
-            phone: userData.phone,
-            address: userData.address,
-            role: 'user',
-            status: 'pending', // 승인 대기 상태
-            created_at: new Date().toISOString()
-        };
-        
-        console.log('새 회원 생성:', newUser); // 디버깅용
-        
-        // 임시로 pendingMembers에 추가
-        pendingMembers.push(newUser);
-        
-        // localStorage에도 저장하여 관리자 페이지에서 접근 가능하도록 함
-        const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
-        storedPending.push(newUser);
-        localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
-        
-        console.log('pendingMembers 업데이트됨, 총 개수:', pendingMembers.length); // 디버깅용
-        console.log('localStorage에 저장된 pendingMembers:', storedPending); // 디버깅용
-        
-        return { 
-            success: true, 
-            message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.',
-            user: newUser 
-        };
     }
 }
 
