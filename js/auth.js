@@ -27,6 +27,7 @@ async function loadSupabaseModule() {
 const users = [
     { id: '1', username: 'minj0010', password: 'minj0010', name: '김민정', role: 'admin', status: 'approved' },
     { id: '2', username: 'admin', password: 'admin123', name: '관리자', role: 'admin', status: 'approved' },
+    { id: '8', username: 'test_admin', password: '1234', name: '테스트관리자', role: 'admin', status: 'approved' },
     { id: '3', username: 'user1', password: 'user123', name: '김회원', role: 'user', status: 'approved' },
     { id: '4', username: 'user2', password: 'user456', name: '이투자', role: 'user', status: 'approved' },
     { id: '5', username: 'test', password: 'test123', name: '테스트', role: 'user', status: 'pending' }
@@ -72,47 +73,75 @@ const protectedPages = [
 
 // 로그인 함수 (승인 상태 확인 포함)
 async function login(username, password) {
+    console.log('로그인 시도:', username, '비밀번호 길이:', password?.length); // 디버깅용
+    
     // Supabase 모듈 로드 시도
     await loadSupabaseModule();
     
+    console.log('Supabase 상태:', USE_SUPABASE, '모듈 로드됨:', !!supabaseModule); // 디버깅용
+    
     if (USE_SUPABASE && supabaseModule) {
         // Supabase 로그인 사용
-        return await supabaseModule.loginUser(username, password);
-    } else {
-        // 기존 로컬 로그인 방식
-        const user = users.find(u => u.username === username && u.password === password);
-        
-        if (user) {
-            // 승인 상태 확인
-            if (user.status !== 'approved') {
-                let message = '';
-                switch (user.status) {
-                    case 'pending':
-                        message = '회원가입 승인 대기 중입니다. 관리자 승인 후 로그인이 가능합니다.';
-                        break;
-                    case 'rejected':
-                        message = '회원가입이 거부되었습니다. 관리자에게 문의해주세요.';
-                        break;
-                    default:
-                        message = '계정에 문제가 있습니다. 관리자에게 문의해주세요.';
-                }
-                return { success: false, message };
+        console.log('Supabase 로그인 시도 중...'); // 디버깅용
+        try {
+            const result = await supabaseModule.loginUser(username, password);
+            console.log('Supabase 로그인 결과:', result);
+            
+            // Supabase 실패 시 로컬 방식으로 fallback
+            if (!result.success) {
+                console.warn('Supabase 로그인 실패, 로컬 방식으로 전환');
+            } else {
+                return result;
             }
-            
-            // 로그인 성공 - 세션 저장
-            const sessionData = {
-                id: user.id,
-                username: user.username,
-                name: user.name,
-                role: user.role,
-                loginTime: new Date().toISOString()
-            };
-            
-            localStorage.setItem('userSession', JSON.stringify(sessionData));
-            return { success: true, user: sessionData };
-        } else {
-            return { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' };
+        } catch (error) {
+            console.error('Supabase 로그인 오류:', error);
+            console.warn('Supabase 로그인 오류로 로컬 방식으로 전환');
         }
+    }
+    
+    // 로컬 로그인 방식
+    console.log('로컬 로그인 방식 사용'); // 디버깅용
+    console.log('users 배열:', users); // 디버깅용
+    
+    const user = users.find(u => u.username === username && u.password === password);
+    console.log('찾은 사용자:', user); // 디버깅용
+    
+    if (user) {
+        console.log('사용자 상태:', user.status); // 디버깅용
+        
+        // 승인 상태 확인
+        if (user.status !== 'approved') {
+            let message = '';
+            switch (user.status) {
+                case 'pending':
+                    message = '회원가입 승인 대기 중입니다. 관리자 승인 후 로그인이 가능합니다.';
+                    break;
+                case 'rejected':
+                    message = '회원가입이 거부되었습니다. 관리자에게 문의해주세요.';
+                    break;
+                default:
+                    message = '계정에 문제가 있습니다. 관리자에게 문의해주세요.';
+            }
+            console.log('로그인 실패 - 승인 상태 문제:', message); // 디버깅용
+            return { success: false, message };
+        }
+        
+        // 로그인 성공 - 세션 저장
+        const sessionData = {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            role: user.role,
+            loginTime: new Date().toISOString()
+        };
+        
+        console.log('로그인 성공, 세션 데이터:', sessionData); // 디버깅용
+        
+        localStorage.setItem('userSession', JSON.stringify(sessionData));
+        return { success: true, user: sessionData };
+    } else {
+        console.log('로그인 실패 - 사용자를 찾을 수 없음'); // 디버깅용
+        return { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' };
     }
 }
 
