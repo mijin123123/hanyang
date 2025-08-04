@@ -181,6 +181,29 @@ export async function getPendingMembers() {
     }
 }
 
+// 승인된 회원 목록 조회 (관리자용)
+export async function getApprovedMembers() {
+    try {
+        console.log('Supabase에서 승인된 회원 조회 시도...');
+        const { data, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false });
+            
+        if (error) {
+            console.error('Supabase 승인된 회원 조회 오류:', error);
+            throw error;
+        }
+        
+        console.log('Supabase 승인된 회원 조회 성공:', data?.length, '명');
+        return { success: true, data };
+    } catch (error) {
+        console.error('승인된 회원 조회 오류:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 // 회원 승인/거부 처리 (관리자용)
 export async function approveMember(memberId, action, adminId, reason = '') {
     try {

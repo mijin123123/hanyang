@@ -467,6 +467,59 @@ async function getPendingMembers() {
     }
 }
 
+// 승인된 회원 목록 조회 (관리자용)
+async function getApprovedMembers() {
+    console.log('getApprovedMembers 호출, USE_SUPABASE:', USE_SUPABASE);
+    
+    // Supabase 모듈 로드 시도
+    await loadSupabaseModule();
+    
+    if (USE_SUPABASE && supabaseModule) {
+        try {
+            console.log('Supabase를 통한 승인된 회원 조회 시도...');
+            const result = await supabaseModule.getApprovedMembers();
+            console.log('Supabase 조회 결과:', result);
+            
+            if (result.success && Array.isArray(result.data)) {
+                console.log('Supabase에서 승인된 회원 조회 성공:', result.data.length, '명');
+                return result.data;
+            } else {
+                console.warn('Supabase 조회 실패 또는 잘못된 데이터 형식:', result);
+                return [];
+            }
+        } catch (error) {
+            console.error('Supabase 승인된 회원 조회 오류:', error);
+            return [];
+        }
+    } else {
+        console.log('로컬 스토리지 방식으로 승인된 회원 조회');
+        
+        // localStorage에서 승인된 사용자 조회
+        let approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+        console.log('localStorage에서 조회된 승인 회원:', approvedUsers);
+        
+        // 메모리의 users 배열에서 승인된 사용자도 확인
+        const memoryApproved = users.filter(user => user.status === 'approved');
+        console.log('메모리에서 조회된 승인 회원:', memoryApproved);
+        
+        // 데이터 병합 (중복 제거)
+        const allApproved = [...approvedUsers];
+        memoryApproved.forEach(user => {
+            if (!allApproved.find(stored => stored.id === user.id)) {
+                allApproved.push(user);
+            }
+        });
+        
+        // approved 상태인 회원만 필터링
+        const finalApproved = allApproved.filter(user => user.status === 'approved');
+        
+        console.log('최종 승인된 회원 목록:', finalApproved);
+        console.log('총 승인된 회원 수:', finalApproved.length);
+        
+        return finalApproved;
+    }
+}
+
 // 회원 승인/거부 처리 (관리자용)
 async function approveMember(memberId, action, reason = '') {
     // Supabase 모듈 로드 시도

@@ -83,16 +83,16 @@
                     </div>
                 </div>
 
-            <!-- 승인 대기 회원 섹션 -->
+            <!-- 전체 회원 목록 섹션 -->
             <div class="admin-section" style="margin-bottom: 30px;">
                 <div class="section-header">
                     <h2 style="color: #333; margin-bottom: 20px;">
-                        <i class="fas fa-user-clock"></i> 승인 대기 회원
+                        <i class="fas fa-users"></i> 전체 회원 목록
                     </h2>
-                    <button class="btn btn-primary" onclick="refreshPendingMembers()">
+                    <button class="btn btn-primary" onclick="refreshMemberList()">
                         <i class="fas fa-sync"></i> 새로고침
                     </button>
-                    <button class="btn btn-info" onclick="testAddPendingMember()" style="margin-left: 10px;">
+                    <button class="btn btn-info" onclick="testAddMember()" style="margin-left: 10px;">
                         <i class="fas fa-plus"></i> 테스트 회원 추가
                     </button>
                     <button class="btn btn-warning" onclick="testSupabaseConnection()" style="margin-left: 10px;">
@@ -101,7 +101,7 @@
                 </div>
                 
                 <div class="admin-table">
-                    <table id="pendingMemberTable">
+                    <table id="memberTable">
                         <thead>
                             <tr>
                                 <th>번호</th>
@@ -111,13 +111,13 @@
                                 <th>연락처</th>
                                 <th>가입일</th>
                                 <th>상태</th>
-                                <th>관리</th>
+                                <th>권한</th>
                             </tr>
                         </thead>
-                        <tbody id="pendingMemberTableBody">
+                        <tbody id="memberTableBody">
                             <tr>
                                 <td colspan="8" style="text-align: center; color: #666; padding: 20px;">
-                                    승인 대기 회원을 불러오는 중...
+                                    회원 목록을 불러오는 중...
                                 </td>
                             </tr>
                         </tbody>
@@ -197,56 +197,88 @@
 
         // 데이터 로드
         async function loadData() {
-            await loadPendingMembers();
-            await loadApprovedMembers();
+            await loadMemberList();
             updateStats();
         }
 
-        // 승인 대기 회원 로드
-        async function loadPendingMembers() {
+        // 전체 회원 목록 로드
+        async function loadMemberList() {
             try {
-                console.log('승인 대기 회원 로드 시작...');
+                console.log('전체 회원 목록 로드 시작...');
                 console.log('USE_SUPABASE 상태:', typeof USE_SUPABASE !== 'undefined' ? USE_SUPABASE : '정의되지 않음');
                 
-                // getPendingMembers 함수가 정의되어 있는지 확인
-                if (typeof getPendingMembers === 'undefined') {
-                    console.error('getPendingMembers 함수가 정의되지 않았습니다!');
-                    document.getElementById('pendingMemberTableBody').innerHTML = 
+                // getApprovedMembers 함수가 정의되어 있는지 확인
+                if (typeof getApprovedMembers === 'undefined') {
+                    console.error('getApprovedMembers 함수가 정의되지 않았습니다!');
+                    document.getElementById('memberTableBody').innerHTML = 
                         '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">auth.js 파일이 제대로 로드되지 않았습니다.</td></tr>';
                     return;
                 }
                 
-                // localStorage 직접 확인
-                const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
-                console.log('localStorage에서 가져온 대기 회원:', storedPending);
+                // localStorage와 메모리에서 승인된 회원 확인
+                const storedApproved = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+                console.log('localStorage에서 가져온 승인 회원:', storedApproved);
                 
-                const pendingMembers = await getPendingMembers();
-                console.log('getPendingMembers() 결과:', pendingMembers);
-                console.log('결과 타입:', typeof pendingMembers);
-                console.log('결과가 배열인가?', Array.isArray(pendingMembers));
+                const approvedMembers = await getApprovedMembers();
+                console.log('getApprovedMembers() 결과:', approvedMembers);
+                console.log('결과 타입:', typeof approvedMembers);
+                console.log('결과가 배열인가?', Array.isArray(approvedMembers));
                 
                 // Supabase 결과가 객체 형태일 수 있으므로 처리
-                let actualMembers = pendingMembers;
-                if (pendingMembers && pendingMembers.data) {
-                    actualMembers = pendingMembers.data;
+                let actualMembers = approvedMembers;
+                if (approvedMembers && approvedMembers.data) {
+                    actualMembers = approvedMembers.data;
                     console.log('Supabase 응답에서 data 추출:', actualMembers);
                 }
                 
-                renderPendingMemberTable(actualMembers);
+                renderMemberTable(actualMembers);
             } catch (error) {
-                console.error('승인 대기 회원 로드 실패:', error);
-                document.getElementById('pendingMemberTableBody').innerHTML = 
+                console.error('회원 목록 로드 실패:', error);
+                document.getElementById('memberTableBody').innerHTML = 
                     `<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">오류: ${error.message}</td></tr>`;
             }
         }
 
-        // 승인 대기 회원 테이블 렌더링
-        function renderPendingMemberTable(pendingMembers) {
-            const tbody = document.getElementById('pendingMemberTableBody');
+        // 회원 테이블 렌더링
+        function renderMemberTable(members) {
+            const tbody = document.getElementById('memberTableBody');
             
-            console.log('renderPendingMemberTable 호출됨:', pendingMembers);
+            console.log('renderMemberTable 호출됨:', members);
             
-            // pendingMembers가 배열이 아닌 경우 처리
+            // members가 배열이 아닌 경우 처리
+            if (!Array.isArray(members)) {
+                console.warn('members가 배열이 아닙니다:', typeof members, members);
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">데이터 형식 오류가 발생했습니다.</td></tr>';
+                return;
+            }
+            
+            if (members.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">등록된 회원이 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = members.map((member, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${member.name || 'N/A'}</td>
+                    <td>${member.username || 'N/A'}</td>
+                    <td>${member.email || 'N/A'}</td>
+                    <td>${member.phone || '-'}</td>
+                    <td>${formatDate(member.created_at)}</td>
+                    <td>
+                        <span class="status-badge ${member.status === 'approved' ? 'status-approved' : 'status-pending'}">
+                            <i class="fas ${member.status === 'approved' ? 'fa-check-circle' : 'fa-clock'}"></i> 
+                            ${member.status === 'approved' ? '승인됨' : '대기중'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="role-badge ${member.role === 'admin' ? 'role-admin' : 'role-user'}">
+                            ${member.role === 'admin' ? '관리자' : '일반회원'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
             if (!Array.isArray(pendingMembers)) {
                 console.warn('pendingMembers가 배열이 아닙니다:', typeof pendingMembers, pendingMembers);
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">데이터 형식 오류가 발생했습니다.</td></tr>';
@@ -498,14 +530,9 @@
         }
 
         // 새로고침 함수들
-        function refreshPendingMembers() {
-            loadPendingMembers();
-            alert('승인 대기 회원 목록을 새로고침했습니다.');
-        }
-
-        function refreshApprovedMembers() {
-            loadApprovedMembers();
-            alert('승인된 회원 목록을 새로고침했습니다.');
+        function refreshMemberList() {
+            loadMemberList();
+            alert('회원 목록을 새로고침했습니다.');
         }
 
         // 검색 기능 설정
@@ -587,7 +614,8 @@
         }
 
         // 테스트용 대기 회원 추가 함수
-        function testAddPendingMember() {
+        // 테스트용 회원 추가 함수
+        function testAddMember() {
             const testMember = {
                 id: Date.now().toString(),
                 username: 'test_' + Date.now(),
@@ -595,20 +623,21 @@
                 email: 'test@example.com',
                 phone: '010-1234-5678',
                 address: '서울시 테스트구',
-                status: 'pending',
+                status: 'approved', // 즉시 승인
+                role: 'user',
                 created_at: new Date().toISOString()
             };
 
             // localStorage에 추가
-            const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
-            storedPending.push(testMember);
-            localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
+            const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+            approvedUsers.push(testMember);
+            localStorage.setItem('approvedUsers', JSON.stringify(approvedUsers));
             
             console.log('테스트 회원 추가됨:', testMember);
             alert('테스트 회원이 추가되었습니다: ' + testMember.name);
             
             // 목록 새로고침
-            loadPendingMembers();
+            loadMemberList();
         }
 
         // localStorage 데이터 확인 함수 (강화 버전)
