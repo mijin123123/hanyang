@@ -6,7 +6,7 @@
     <title>회원 관리 - 한양에너지 관리자</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="admin.css">
 </head>
 <body>
     <!-- 사이드바 -->
@@ -93,7 +93,43 @@
                 </div>
             </div>
 
-            <!-- 회원 목록 -->
+            <!-- 승인 대기 회원 섹션 -->
+            <div class="admin-section" style="margin-bottom: 30px;">
+                <div class="section-header">
+                    <h2 style="color: #333; margin-bottom: 20px;">
+                        <i class="fas fa-user-clock"></i> 승인 대기 회원
+                    </h2>
+                    <button class="btn btn-primary" onclick="refreshPendingMembers()">
+                        <i class="fas fa-sync"></i> 새로고침
+                    </button>
+                </div>
+                
+                <div class="admin-table">
+                    <table id="pendingMemberTable">
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>이름</th>
+                                <th>아이디</th>
+                                <th>이메일</th>
+                                <th>연락처</th>
+                                <th>가입일</th>
+                                <th>상태</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingMemberTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: #666; padding: 20px;">
+                                    승인 대기 회원을 불러오는 중...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 승인된 회원 목록 -->
             <div class="admin-table">
                 <table id="memberTable">
                     <thead>
@@ -282,12 +318,130 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateMemberStats();
             renderMemberTable();
+            loadPendingMembers(); // 승인 대기 회원 로드
             
             // 검색 기능 설정
             const searchInput = document.getElementById('searchInput');
             const table = document.getElementById('memberTable');
             setupTableSearch(searchInput, table);
         });
+
+        // 승인 대기 회원 로드
+        async function loadPendingMembers() {
+            try {
+                const pendingMembers = await getPendingMembers();
+                console.log('승인 대기 회원 로드됨:', pendingMembers);
+                renderPendingMemberTable(pendingMembers);
+            } catch (error) {
+                console.error('승인 대기 회원 로드 실패:', error);
+                document.getElementById('pendingMemberTableBody').innerHTML = 
+                    '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">승인 대기 회원을 불러오는 중 오류가 발생했습니다.</td></tr>';
+            }
+        }
+
+        // 승인 대기 회원 테이블 렌더링
+        function renderPendingMemberTable(pendingMembers) {
+            const tbody = document.getElementById('pendingMemberTableBody');
+            
+            if (pendingMembers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">승인 대기 중인 회원이 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pendingMembers.map((member, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${member.name}</td>
+                    <td>${member.username}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone || '-'}</td>
+                    <td>${formatDate(member.created_at)}</td>
+                    <td>
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-clock"></i> 대기중
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="quickApproveMember('${member.id}')" title="승인">
+                            <i class="fas fa-check"></i> 승인
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="quickRejectMember('${member.id}')" title="거부">
+                            <i class="fas fa-times"></i> 거부
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="viewPendingMemberDetail('${member.id}')" title="상세보기">
+                            <i class="fas fa-eye"></i> 상세
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 빠른 승인
+        async function quickApproveMember(memberId) {
+            if (confirm('이 회원을 승인하시겠습니까?')) {
+                try {
+                    const result = await approveMember(memberId, 'approved');
+                    if (result.success) {
+                        showAlert('success', '회원이 성공적으로 승인되었습니다.');
+                        loadPendingMembers(); // 목록 새로고침
+                        updateMemberStats(); // 통계 업데이트
+                        renderMemberTable(); // 승인된 회원 목록 업데이트
+                    } else {
+                        showAlert('error', result.message);
+                    }
+                } catch (error) {
+                    console.error('승인 처리 오류:', error);
+                    showAlert('error', '승인 처리 중 오류가 발생했습니다.');
+                }
+            }
+        }
+
+        // 빠른 거부
+        async function quickRejectMember(memberId) {
+            const reason = prompt('거부 사유를 입력해주세요:');
+            if (reason && reason.trim()) {
+                try {
+                    const result = await approveMember(memberId, 'rejected', reason.trim());
+                    if (result.success) {
+                        showAlert('success', '회원가입이 거부되었습니다.');
+                        loadPendingMembers(); // 목록 새로고침
+                    } else {
+                        showAlert('error', result.message);
+                    }
+                } catch (error) {
+                    console.error('거부 처리 오류:', error);
+                    showAlert('error', '거부 처리 중 오류가 발생했습니다.');
+                }
+            }
+        }
+
+        // 승인 대기 회원 상세보기
+        async function viewPendingMemberDetail(memberId) {
+            try {
+                const pendingMembers = await getPendingMembers();
+                const member = pendingMembers.find(m => m.id === memberId);
+                if (member) {
+                    alert(`승인 대기 회원 상세 정보:\n\n이름: ${member.name}\n아이디: ${member.username}\n이메일: ${member.email}\n연락처: ${member.phone || '미입력'}\n주소: ${member.address || '미입력'}\n가입일: ${formatDate(member.created_at)}\n상태: 승인 대기`);
+                } else {
+                    showAlert('error', '회원 정보를 찾을 수 없습니다.');
+                }
+            } catch (error) {
+                console.error('회원 상세 정보 조회 오류:', error);
+                showAlert('error', '회원 정보 조회 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 승인 대기 회원 새로고침
+        function refreshPendingMembers() {
+            loadPendingMembers();
+            showAlert('info', '승인 대기 회원 목록을 새로고침했습니다.');
+        }
+
+        // 날짜 포맷팅 함수
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR');
+        }
 
         // Helper 함수들
         function showAlert(type, message) {
@@ -323,6 +477,82 @@
             }
         }
     </script>
+
+    <style>
+        /* 승인 대기 상태 배지 */
+        .status-pending {
+            background-color: #ffc107;
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* 섹션 헤더 */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 버튼 크기 조정 */
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin: 0 2px;
+        }
+
+        /* 승인/거부 버튼 색상 */
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+
+        /* 관리자 섹션 여백 */
+        .admin-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 
     <style>
         /* 상태 배지 */
