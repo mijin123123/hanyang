@@ -4,7 +4,7 @@
 let supabaseModule = null;
 
 // Supabase 사용 여부 설정
-const USE_SUPABASE = true; // Supabase 데이터베이스 사용으로 변경
+const USE_SUPABASE = false; // 일시적으로 비활성화하여 로컬 방식 사용
 
 // Supabase 모듈 로드 함수
 async function loadSupabaseModule() {
@@ -21,7 +21,6 @@ async function loadSupabaseModule() {
             alert('데이터베이스 연결에 실패했습니다. 임시로 로컬 저장소를 사용합니다.');
         }
     }
-}
 }
 
 // 임시 사용자 데이터베이스 (Supabase 미사용시 또는 백업용)

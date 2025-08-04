@@ -1023,6 +1023,13 @@ async function processSignup() {
     
     console.log('회원가입 데이터:', formData); // 디버깅용
     
+    // signup 함수가 정의되어 있는지 확인
+    if (typeof signup === 'undefined') {
+        console.error('signup 함수가 정의되지 않았습니다!');
+        showPopup('회원가입 시스템에 오류가 있습니다. auth.js 파일을 확인해주세요.');
+        return;
+    }
+    
     try {
         // auth.js의 signup 함수 호출 (await 추가)
         const result = await signup(formData);

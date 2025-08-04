@@ -207,6 +207,14 @@
             try {
                 console.log('승인 대기 회원 로드 시작...'); // 디버깅
                 
+                // getPendingMembers 함수가 정의되어 있는지 확인
+                if (typeof getPendingMembers === 'undefined') {
+                    console.error('getPendingMembers 함수가 정의되지 않았습니다!');
+                    document.getElementById('pendingMemberTableBody').innerHTML = 
+                        '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">auth.js 파일이 제대로 로드되지 않았습니다.</td></tr>';
+                    return;
+                }
+                
                 // localStorage 직접 확인
                 const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
                 console.log('localStorage에서 가져온 대기 회원:', storedPending); // 디버깅
