@@ -19,7 +19,6 @@
             <ul class="sidebar-menu">
                 <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
                 <li><a href="member-manager.html" class="active"><i class="fas fa-users"></i> 회원 관리</a></li>
-                <li><a href="approval-manager.html"><i class="fas fa-user-check"></i> 회원 승인</a></li>
                 <li><a href="investment-manager.html"><i class="fas fa-chart-bar"></i> 투자 관리</a></li>
                 <li><a href="popup-manager.html"><i class="fas fa-bell"></i> 팝업 관리</a></li>
                 <li><a href="account-manager.html"><i class="fas fa-user-cog"></i> 계정 관리</a></li>
@@ -55,12 +54,12 @@
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon pending">
-                            <i class="fas fa-clock"></i>
+                        <div class="stat-icon admin">
+                            <i class="fas fa-user-cog"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="pendingMembers">0</h3>
-                            <p>승인 대기</p>
+                            <h3 id="adminMembers">0</h3>
+                            <p>관리자</p>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -69,7 +68,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 id="activeMembers">0</h3>
-                            <p>활성 회원</p>
+                            <p>일반 회원</p>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -122,48 +121,6 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-                <!-- 승인된 회원 목록 -->
-                <div class="table-container">
-                    <div class="table-header">
-                        <h2><i class="fas fa-users"></i> 승인된 회원 목록</h2>
-                        <div class="table-actions">
-                            <input type="text" id="searchInput" placeholder="이름이나 아이디로 검색..." class="search-input">
-                            <button class="btn btn-info" onclick="checkLocalStorageData()">
-                                <i class="fas fa-database"></i> 데이터 확인
-                            </button>
-                            <button class="btn btn-primary" onclick="exportMembers()">
-                                <i class="fas fa-download"></i> 내보내기
-                            </button>
-                            <button class="btn btn-secondary" onclick="refreshApprovedMembers()">
-                                <i class="fas fa-sync"></i> 새로고침
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-wrapper">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>이름</th>
-                                    <th>아이디</th>
-                                    <th>연락처</th>
-                                    <th>권한</th>
-                                    <th>가입일</th>
-                                    <th>상태</th>
-                                    <th>관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="memberTableBody">
-                                <tr>
-                                    <td colspan="8" class="loading">데이터를 불러오는 중...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </main>
@@ -346,83 +303,24 @@
 
         // 통계 업데이트
         async function updateStats() {
-            const pendingMembers = await getPendingMembers();
+            const allMembers = await getApprovedMembers();
             
-            // 총 회원수 (승인된 + 대기중)
-            document.getElementById('totalMembers').textContent = approvedMembers.length + pendingMembers.length;
+            // 총 회원수
+            document.getElementById('totalMembers').textContent = allMembers.length;
             
-            // 승인 대기
-            document.getElementById('pendingMembers').textContent = pendingMembers.length;
+            // 관리자 수
+            const adminCount = allMembers.filter(member => member.role === 'admin').length;
+            document.getElementById('adminMembers').textContent = adminCount;
             
-            // 활성 회원
-            document.getElementById('activeMembers').textContent = approvedMembers.length;
+            // 일반 회원 수
+            const userCount = allMembers.filter(member => member.role === 'user').length;
+            document.getElementById('activeMembers').textContent = userCount;
             
             // 투자 회원 (투자금액이 있는 회원)
-            const investmentMembers = approvedMembers.filter(member => 
+            const investmentMembers = allMembers.filter(member => 
                 member.investmentAmount && member.investmentAmount > 0
             ).length;
             document.getElementById('investmentMembers').textContent = investmentMembers;
-        }
-
-        // 빠른 승인
-        async function quickApproveMember(memberId) {
-            if (confirm('이 회원을 승인하시겠습니까?')) {
-                try {
-                    const result = await approveMember(memberId, 'approved');
-                    if (result.success) {
-                        alert('회원이 성공적으로 승인되었습니다.');
-                        loadData(); // 전체 데이터 새로고침
-                    } else {
-                        alert(result.message);
-                    }
-                } catch (error) {
-                    console.error('승인 처리 오류:', error);
-                    alert('승인 처리 중 오류가 발생했습니다.');
-                }
-            }
-        }
-
-        // 빠른 거부
-        async function quickRejectMember(memberId) {
-            const reason = prompt('거부 사유를 입력해주세요:');
-            if (reason && reason.trim()) {
-                try {
-                    const result = await approveMember(memberId, 'rejected', reason.trim());
-                    if (result.success) {
-                        alert('회원가입이 거부되었습니다.');
-                        loadPendingMembers(); // 목록 새로고침
-                    } else {
-                        alert(result.message);
-                    }
-                } catch (error) {
-                    console.error('거부 처리 오류:', error);
-                    alert('거부 처리 중 오류가 발생했습니다.');
-                }
-            }
-        }
-
-        // 승인 대기 회원 상세보기
-        async function viewPendingMemberDetail(memberId) {
-            try {
-                const pendingMembers = await getPendingMembers();
-                const member = pendingMembers.find(m => m.id === memberId);
-                if (member) {
-                    alert(`승인 대기 회원 상세 정보:
-
-이름: ${member.name}
-아이디: ${member.username}
-이메일: ${member.email}
-연락처: ${member.phone || '미입력'}
-주소: ${member.address || '미입력'}
-가입일: ${formatDate(member.created_at)}
-상태: 승인 대기`);
-                } else {
-                    alert('회원 정보를 찾을 수 없습니다.');
-                }
-            } catch (error) {
-                console.error('회원 상세 정보 조회 오류:', error);
-                alert('회원 정보 조회 중 오류가 발생했습니다.');
-            }
         }
 
         // 회원 상세보기
@@ -814,6 +712,7 @@
         /* 통계 카드 아이콘 색상 */
         .pending { background: #ffc107; }
         .approved { background: #28a745; }
+        .admin { background: #e74c3c; }
 
         /* 로딩 및 빈 데이터 스타일 */
         .loading {
