@@ -1,3 +1,12 @@
+// 암호화 모듈 import
+const crypto = require('crypto');
+
+// 비밀번호 해시 함수
+function hashPassword(password) {
+    const salt = 'hanyang_salt'; // 고정 솔트
+    return crypto.createHash('sha256').update(password + salt).digest('hex');
+}
+
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -1147,6 +1156,78 @@ app.use((req, res) => {
     res.status(404).send('페이지를 찾을 수 없습니다.');
 });
 
+// 기본 계정 초기화 함수
+async function initializeDefaultAccounts() {
+    try {
+        console.log('🔍 기본 계정 초기화 중...');
+        
+        // 관리자 계정 (minj0010/minj0010)
+        const adminData = {
+            username: 'minj0010',
+            password_hash: hashPassword('minj0010'),
+            name: '김민정',
+            email: 'minj0010@hanyang.com',
+            role: 'admin',
+            status: 'approved',
+            created_at: new Date().toISOString(),
+            approved_at: new Date().toISOString()
+        };
+
+        const { data: existingAdmin } = await supabase
+            .from('members')
+            .select('username')
+            .eq('username', 'minj0010')
+            .single();
+
+        if (!existingAdmin) {
+            const { error: adminError } = await supabase
+                .from('members')
+                .insert([adminData]);
+
+            if (!adminError) {
+                console.log('✅ 관리자 계정 생성: minj0010/minj0010');
+            } else {
+                console.error('❌ 관리자 계정 생성 실패:', adminError);
+            }
+        } else {
+            console.log('✅ 관리자 계정 이미 존재');
+        }
+
+        // 테스트 사용자 계정 (test/test123)
+        const testData = {
+            username: 'test',
+            password_hash: hashPassword('test123'),
+            name: '테스트사용자',
+            email: 'test@hanyang.com',
+            role: 'user',
+            status: 'approved',
+            created_at: new Date().toISOString(),
+            approved_at: new Date().toISOString()
+        };
+
+        const { data: existingTest } = await supabase
+            .from('members')
+            .select('username')
+            .eq('username', 'test')
+            .single();
+
+        if (!existingTest) {
+            const { error: testError } = await supabase
+                .from('members')
+                .insert([testData]);
+
+            if (!testError) {
+                console.log('✅ 테스트 사용자 계정 생성: test/test123');
+            }
+        } else {
+            console.log('✅ 테스트 사용자 계정 이미 존재');
+        }
+
+    } catch (error) {
+        console.error('기본 계정 초기화 중 오류:', error);
+    }
+}
+
 // 서버 시작
 async function startServer() {
     try {
@@ -1155,6 +1236,9 @@ async function startServer() {
         
         // HTML 파일을 EJS로 변환
         await convertHtmlToEjs();
+        
+        // 기본 계정 초기화
+        await initializeDefaultAccounts();
         
         app.listen(PORT, () => {
             console.log(`한양에너지 서버가 포트 ${PORT}에서 실행 중입니다.`);
