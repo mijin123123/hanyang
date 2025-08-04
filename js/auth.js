@@ -322,7 +322,13 @@ async function signup(userData) {
         // 임시로 pendingMembers에 추가
         pendingMembers.push(newUser);
         
+        // localStorage에도 저장하여 관리자 페이지에서 접근 가능하도록 함
+        const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+        storedPending.push(newUser);
+        localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
+        
         console.log('pendingMembers 업데이트됨, 총 개수:', pendingMembers.length); // 디버깅용
+        console.log('localStorage에 저장된 pendingMembers:', storedPending); // 디버깅용
         
         return { 
             success: true, 
@@ -341,7 +347,49 @@ async function getPendingMembers() {
         const result = await supabaseModule.getPendingMembers();
         return result.success ? result.data : [];
     } else {
-        return pendingMembers.filter(member => member.status === 'pending');
+        // localStorage 초기화 확인
+        let storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+        
+        // localStorage가 비어있으면 기본 데이터로 초기화
+        if (storedPending.length === 0) {
+            storedPending = [
+                {
+                    id: '6',
+                    username: 'newuser1',
+                    name: '박신청',
+                    email: 'newuser1@example.com',
+                    phone: '010-1234-5678',
+                    address: '서울시 강남구',
+                    status: 'pending',
+                    created_at: '2024-01-15T10:30:00Z'
+                },
+                {
+                    id: '7',
+                    username: 'newuser2',
+                    name: '최대기',
+                    email: 'newuser2@example.com',
+                    phone: '010-9876-5432',
+                    address: '서울시 서초구',
+                    status: 'pending',
+                    created_at: '2024-01-14T15:20:00Z'
+                }
+            ];
+            localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
+            console.log('localStorage에 기본 대기 회원 초기화됨:', storedPending); // 디버깅용
+        }
+        
+        const memoryPending = pendingMembers.filter(member => member.status === 'pending');
+        
+        // 중복 제거 (ID 기준)
+        const allPending = [...storedPending];
+        memoryPending.forEach(member => {
+            if (!storedPending.find(stored => stored.id === member.id)) {
+                allPending.push(member);
+            }
+        });
+        
+        console.log('getPendingMembers 결과:', allPending); // 디버깅용
+        return allPending.filter(member => member.status === 'pending');
     }
 }
 
@@ -357,14 +405,24 @@ async function approveMember(memberId, action, reason = '') {
         }
         return await supabaseModule.approveMember(memberId, action, admin.id, reason);
     } else {
-        // 기존 로컬 방식
+        // 기존 로컬 방식 - localStorage에서도 처리
+        // localStorage에서 찾기
+        const storedPending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+        const storedIndex = storedPending.findIndex(m => m.id === memberId);
+        
+        // 메모리에서 찾기
         const memberIndex = pendingMembers.findIndex(m => m.id === memberId);
         
-        if (memberIndex === -1) {
-            return { success: false, message: '회원을 찾을 수 없습니다.' };
+        let member = null;
+        if (storedIndex !== -1) {
+            member = storedPending[storedIndex];
+        } else if (memberIndex !== -1) {
+            member = pendingMembers[memberIndex];
         }
         
-        const member = pendingMembers[memberIndex];
+        if (!member) {
+            return { success: false, message: '회원을 찾을 수 없습니다.' };
+        }
         
         if (action === 'approved') {
             // 승인: users 배열에 추가
@@ -373,7 +431,20 @@ async function approveMember(memberId, action, reason = '') {
             users.push(member);
             
             // pendingMembers에서 제거
-            pendingMembers.splice(memberIndex, 1);
+            if (memberIndex !== -1) {
+                pendingMembers.splice(memberIndex, 1);
+            }
+            
+            // localStorage에서도 제거
+            if (storedIndex !== -1) {
+                storedPending.splice(storedIndex, 1);
+                localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
+            }
+            
+            // 승인된 사용자를 localStorage에 저장
+            const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+            approvedUsers.push(member);
+            localStorage.setItem('approvedUsers', JSON.stringify(approvedUsers));
             
             return { success: true, message: '회원이 승인되었습니다.', member };
         } else if (action === 'rejected') {
@@ -381,6 +452,17 @@ async function approveMember(memberId, action, reason = '') {
             member.status = 'rejected';
             member.rejected_at = new Date().toISOString();
             member.reject_reason = reason;
+            
+            // localStorage 업데이트
+            if (storedIndex !== -1) {
+                storedPending[storedIndex] = member;
+                localStorage.setItem('pendingMembers', JSON.stringify(storedPending));
+            }
+            
+            // 메모리 업데이트
+            if (memberIndex !== -1) {
+                pendingMembers[memberIndex] = member;
+            }
             
             return { success: true, message: '회원가입이 거부되었습니다.', member };
         }
