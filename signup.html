@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="css/global.css?v=1754220183">
     <link rel="stylesheet" href="css/header.css?v=1754220183">
     <link rel="stylesheet" href="css/utilities.css?v=1754220183">
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js" type="module"></script>
     <title>회원가입 | 한양에너지</title>
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <style>
@@ -991,7 +991,7 @@ function validateForm() {
 }
 
 // 회원가입 처리 함수
-function processSignup() {
+async function processSignup() {
     const formData = {
         username: document.getElementById('username').value,
         password: document.getElementById('password').value,
@@ -1001,8 +1001,8 @@ function processSignup() {
         address: document.getElementById('address').value + ' ' + (document.getElementById('detailAddress').value || '')
     };
     
-    // auth.js의 signup 함수 호출
-    const result = signup(formData);
+    // auth.js의 signup 함수 호출 (await 추가)
+    const result = await signup(formData);
     
     if (result.success) {
         showPopup(result.message, function() {

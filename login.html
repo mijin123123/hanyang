@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="css/utilities.css?v=1754220183">
     
     <!-- JavaScript 파일 -->
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js" type="module"></script>
     <title>로그인 | 한양에너지</title>
     <style>
 
@@ -838,7 +838,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 로그인 폼 처리
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
+        loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
@@ -850,8 +850,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // 로그인 시도
-            const result = login(username, password);
+            // 로그인 시도 (await 추가)
+            const result = await login(username, password);
             
             if (result.success) {
                 showPopup(`환영합니다, ${result.user.name}님! 로그인 완료!`);

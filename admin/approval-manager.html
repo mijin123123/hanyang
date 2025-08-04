@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
-    <script src="../js/auth.js"></script>
+    <script src="../js/auth.js" type="module"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -201,15 +201,15 @@
         });
 
         // 데이터 로드
-        function loadData() {
-            loadPendingMembers();
+        async function loadData() {
+            await loadPendingMembers();
             loadRecentActions();
             updateStats();
         }
 
         // 승인 대기 회원 목록 로드
-        function loadPendingMembers() {
-            const pendingMembers = getPendingMembers();
+        async function loadPendingMembers() {
+            const pendingMembers = await getPendingMembers();
             const tableBody = document.getElementById('pendingMembersTable');
             
             if (pendingMembers.length === 0) {
@@ -271,8 +271,8 @@
         }
 
         // 통계 업데이트
-        function updateStats() {
-            const pendingMembers = getPendingMembers();
+        async function updateStats() {
+            const pendingMembers = await getPendingMembers();
             
             document.getElementById('pendingCount').textContent = pendingMembers.length;
             
@@ -286,8 +286,8 @@
         }
 
         // 승인/거부 모달 열기
-        function openApprovalModal(memberId) {
-            const pendingMembers = getPendingMembers();
+        async function openApprovalModal(memberId) {
+            const pendingMembers = await getPendingMembers();
             const member = pendingMembers.find(m => m.id === memberId);
             
             if (!member) {
@@ -314,7 +314,7 @@
         }
 
         // 회원 승인/거부 처리
-        function processMemberAction(action) {
+        async function processMemberAction(action) {
             if (!currentMemberId) {
                 alert('처리할 회원을 선택해주세요.');
                 return;
@@ -330,7 +330,7 @@
             }
 
             const admin = getCurrentUser();
-            const result = approveMember(currentMemberId, action, reason);
+            const result = await approveMember(currentMemberId, action, reason);
             
             if (result.success) {
                 alert(result.message);
@@ -373,8 +373,8 @@
         }
 
         // 데이터 새로고침
-        function refreshData() {
-            loadData();
+        async function refreshData() {
+            await loadData();
             alert('데이터를 새로고침했습니다.');
         }
 

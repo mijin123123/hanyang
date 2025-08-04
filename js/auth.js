@@ -1,9 +1,12 @@
 // 인증 관련 JavaScript 파일
 
-// Supabase 연동을 위한 import (실제 Supabase 설정 후 활성화)
-// import { supabase, signupUser, loginUser, getPendingMembers, approveMember, getAllMembers } from './supabase-config.js';
+// Supabase 연동 (실제 연동 활성화)
+import { supabase, signupUser, loginUser, getPendingMembers as getSupabasePendingMembers, approveMember as supabaseApproveMember, getAllMembers } from './supabase-config.js';
 
-// 임시 사용자 데이터베이스 (Supabase 연동 전까지 사용)
+// Supabase 사용 여부 설정
+const USE_SUPABASE = true; // true로 변경하여 Supabase 연동 활성화
+
+// 임시 사용자 데이터베이스 (Supabase 미사용시 또는 백업용)
 const users = [
     { id: '1', username: 'minj0010', password: 'minj0010', name: '김민정', role: 'admin', status: 'approved' },
     { id: '2', username: 'admin', password: 'admin123', name: '관리자', role: 'admin', status: 'approved' },
@@ -51,39 +54,45 @@ const protectedPages = [
 ];
 
 // 로그인 함수 (승인 상태 확인 포함)
-function login(username, password) {
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-        // 승인 상태 확인
-        if (user.status !== 'approved') {
-            let message = '';
-            switch (user.status) {
-                case 'pending':
-                    message = '회원가입 승인 대기 중입니다. 관리자 승인 후 로그인이 가능합니다.';
-                    break;
-                case 'rejected':
-                    message = '회원가입이 거부되었습니다. 관리자에게 문의해주세요.';
-                    break;
-                default:
-                    message = '계정에 문제가 있습니다. 관리자에게 문의해주세요.';
-            }
-            return { success: false, message };
-        }
-        
-        // 로그인 성공 - 세션 저장
-        const sessionData = {
-            id: user.id,
-            username: user.username,
-            name: user.name,
-            role: user.role,
-            loginTime: new Date().toISOString()
-        };
-        
-        localStorage.setItem('userSession', JSON.stringify(sessionData));
-        return { success: true, user: sessionData };
+async function login(username, password) {
+    if (USE_SUPABASE) {
+        // Supabase 로그인 사용
+        return await loginUser(username, password);
     } else {
-        return { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' };
+        // 기존 로컬 로그인 방식
+        const user = users.find(u => u.username === username && u.password === password);
+        
+        if (user) {
+            // 승인 상태 확인
+            if (user.status !== 'approved') {
+                let message = '';
+                switch (user.status) {
+                    case 'pending':
+                        message = '회원가입 승인 대기 중입니다. 관리자 승인 후 로그인이 가능합니다.';
+                        break;
+                    case 'rejected':
+                        message = '회원가입이 거부되었습니다. 관리자에게 문의해주세요.';
+                        break;
+                    default:
+                        message = '계정에 문제가 있습니다. 관리자에게 문의해주세요.';
+                }
+                return { success: false, message };
+            }
+            
+            // 로그인 성공 - 세션 저장
+            const sessionData = {
+                id: user.id,
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                loginTime: new Date().toISOString()
+            };
+            
+            localStorage.setItem('userSession', JSON.stringify(sessionData));
+            return { success: true, user: sessionData };
+        } else {
+            return { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' };
+        }
     }
 }
 
@@ -251,74 +260,94 @@ function updateUserProfile(userData) {
 }
 
 // 회원가입 함수 (승인 대기 상태로 등록)
-function signup(userData) {
-    // 중복 확인
-    const existingUser = users.find(u => u.username === userData.username || u.email === userData.email);
-    const existingPending = pendingMembers.find(u => u.username === userData.username || u.email === userData.email);
-    
-    if (existingUser || existingPending) {
-        return { success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' };
+async function signup(userData) {
+    if (USE_SUPABASE) {
+        // Supabase 회원가입 사용
+        return await signupUser(userData);
+    } else {
+        // 기존 로컬 방식
+        // 중복 확인
+        const existingUser = users.find(u => u.username === userData.username || u.email === userData.email);
+        const existingPending = pendingMembers.find(u => u.username === userData.username || u.email === userData.email);
+        
+        if (existingUser || existingPending) {
+            return { success: false, message: '이미 사용 중인 아이디 또는 이메일입니다.' };
+        }
+        
+        // 새 회원 추가 (승인 대기 상태)
+        const newUser = {
+            id: Date.now().toString(),
+            username: userData.username,
+            password: userData.password,
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone,
+            address: userData.address,
+            role: 'user',
+            status: 'pending', // 승인 대기 상태
+            created_at: new Date().toISOString()
+        };
+        
+        // 임시로 pendingMembers에 추가
+        pendingMembers.push(newUser);
+        
+        return { 
+            success: true, 
+            message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.',
+            user: newUser 
+        };
     }
-    
-    // 새 회원 추가 (승인 대기 상태)
-    const newUser = {
-        id: Date.now().toString(),
-        username: userData.username,
-        password: userData.password,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        address: userData.address,
-        role: 'user',
-        status: 'pending', // 승인 대기 상태
-        created_at: new Date().toISOString()
-    };
-    
-    // 임시로 pendingMembers에 추가
-    pendingMembers.push(newUser);
-    
-    return { 
-        success: true, 
-        message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.',
-        user: newUser 
-    };
 }
 
 // 승인 대기 회원 목록 조회 (관리자용)
-function getPendingMembers() {
-    return pendingMembers.filter(member => member.status === 'pending');
+async function getPendingMembers() {
+    if (USE_SUPABASE) {
+        const result = await getSupabasePendingMembers();
+        return result.success ? result.data : [];
+    } else {
+        return pendingMembers.filter(member => member.status === 'pending');
+    }
 }
 
 // 회원 승인/거부 처리 (관리자용)
-function approveMember(memberId, action, reason = '') {
-    const memberIndex = pendingMembers.findIndex(m => m.id === memberId);
-    
-    if (memberIndex === -1) {
-        return { success: false, message: '회원을 찾을 수 없습니다.' };
+async function approveMember(memberId, action, reason = '') {
+    if (USE_SUPABASE) {
+        const admin = getCurrentUser();
+        if (!admin) {
+            return { success: false, message: '관리자 권한이 필요합니다.' };
+        }
+        return await supabaseApproveMember(memberId, action, admin.id, reason);
+    } else {
+        // 기존 로컬 방식
+        const memberIndex = pendingMembers.findIndex(m => m.id === memberId);
+        
+        if (memberIndex === -1) {
+            return { success: false, message: '회원을 찾을 수 없습니다.' };
+        }
+        
+        const member = pendingMembers[memberIndex];
+        
+        if (action === 'approved') {
+            // 승인: users 배열에 추가
+            member.status = 'approved';
+            member.approved_at = new Date().toISOString();
+            users.push(member);
+            
+            // pendingMembers에서 제거
+            pendingMembers.splice(memberIndex, 1);
+            
+            return { success: true, message: '회원이 승인되었습니다.', member };
+        } else if (action === 'rejected') {
+            // 거부: 상태만 변경
+            member.status = 'rejected';
+            member.rejected_at = new Date().toISOString();
+            member.reject_reason = reason;
+            
+            return { success: true, message: '회원가입이 거부되었습니다.', member };
+        }
+        
+        return { success: false, message: '올바르지 않은 처리 방식입니다.' };
     }
-    
-    const member = pendingMembers[memberIndex];
-    
-    if (action === 'approved') {
-        // 승인: users 배열에 추가
-        member.status = 'approved';
-        member.approved_at = new Date().toISOString();
-        users.push(member);
-        
-        // pendingMembers에서 제거
-        pendingMembers.splice(memberIndex, 1);
-        
-        return { success: true, message: '회원이 승인되었습니다.', member };
-    } else if (action === 'rejected') {
-        // 거부: 상태만 변경
-        member.status = 'rejected';
-        member.rejected_at = new Date().toISOString();
-        member.reject_reason = reason;
-        
-        return { success: true, message: '회원가입이 거부되었습니다.', member };
-    }
-    
-    return { success: false, message: '올바르지 않은 처리 방식입니다.' };
 }
 
 // 사용자 통계 데이터 가져오기 (샘플 데이터)

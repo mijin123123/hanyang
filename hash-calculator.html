@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>비밀번호 해시 계산기</title>
+</head>
+<body>
+    <h1>비밀번호 해시 계산기</h1>
+    <div id="results"></div>
+
+    <script>
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + 'hanyang_salt'); // 솔트 추가
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function calculateHashes() {
+            const passwords = ['minj0010', 'admin123'];
+            const results = document.getElementById('results');
+            
+            for (const password of passwords) {
+                const hash = await hashPassword(password);
+                results.innerHTML += `<p><strong>Password:</strong> ${password}<br><strong>Hash:</strong> ${hash}</p><hr>`;
+            }
+        }
+
+        // 페이지 로드시 실행
+        calculateHashes();
+    </script>
+</body>
+</html>

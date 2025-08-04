@@ -1,9 +1,14 @@
 // Supabase 설정 파일
 import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
 
-// Supabase 설정 (실제 환경에서는 환경변수로 관리)
-const supabaseUrl = 'YOUR_SUPABASE_URL'; // 나중에 실제 URL로 교체
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // 나중에 실제 키로 교체
+// Supabase 연결 정보
+// Project URL: https://aqcewkutnssgrioxlqba.supabase.co
+// Database Password: dkdlfltm1640
+// Direct Connection URL: postgresql://postgres:dkdlfltm1640@db.aqcewkutnssgrioxlqba.supabase.co:5432/postgres
+
+// Supabase 설정
+const supabaseUrl = 'https://aqcewkutnssgrioxlqba.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyOTAxNDgsImV4cCI6MjA2OTg2NjE0OH0.CdU2UhkIu6Wcyl4GWTg4a0z9eovgkFSSNn9sZfUKSAw';
 
 // Supabase 클라이언트 생성
 export const supabase = createClient(supabaseUrl, supabaseKey);
