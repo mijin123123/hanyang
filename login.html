@@ -860,7 +860,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     handleLoginSuccess();
                 }, 2000);
             } else {
-                showError(result.message);
+                // 승인 대기 상태인 경우 특별한 스타일로 표시
+                if (result.message.includes('승인 대기')) {
+                    showPendingMessage(result.message);
+                } else {
+                    showError(result.message);
+                }
             }
         });
     }
@@ -877,6 +882,34 @@ function showError(message) {
         setTimeout(() => {
             errorElement.style.display = 'none';
         }, 3000);
+    }
+}
+
+// 승인 대기 메시지 특별 표시 함수
+function showPendingMessage(message) {
+    const errorElement = document.getElementById('errorMessage');
+    if (errorElement) {
+        errorElement.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-clock" style="color: #ffc107; font-size: 18px;"></i>
+                <div>
+                    <strong style="color: #ffc107;">승인 대기 중</strong><br>
+                    <span style="font-size: 0.9rem;">${message}</span>
+                </div>
+            </div>
+        `;
+        errorElement.style.display = 'block';
+        errorElement.style.background = '#fff3cd';
+        errorElement.style.border = '1px solid #ffeaa7';
+        errorElement.style.color = '#856404';
+        
+        // 5초 후 자동으로 숨기기
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+            errorElement.style.background = '';
+            errorElement.style.border = '';
+            errorElement.style.color = '';
+        }, 5000);
     }
 }
 

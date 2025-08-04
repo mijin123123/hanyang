@@ -866,11 +866,26 @@ document.addEventListener('DOMContentLoaded', function() {
 // 회원가입 폼 검증 함수들
 function closePopup() {
     document.getElementById('popup').classList.remove('active');
+    
+    // 콜백 함수가 있으면 실행
+    if (window.tempCallback) {
+        window.tempCallback();
+        window.tempCallback = null;
+    }
 }
 
-function showPopup(message) {
+function showPopup(message, callback) {
     document.getElementById('popupMessage').textContent = message;
     document.getElementById('popup').classList.add('active');
+    
+    // 콜백 함수가 있으면 확인 버튼 클릭 시 실행
+    if (callback) {
+        document.getElementById('popup').setAttribute('data-callback', 'true');
+        window.tempCallback = callback;
+    } else {
+        document.getElementById('popup').removeAttribute('data-callback');
+        window.tempCallback = null;
+    }
 }
 
 function validateUsername() {
@@ -967,11 +982,36 @@ function validateForm() {
     }
     
     if (isUsernameValid && isPasswordValid && isPasswordMatch) {
-        showPopup('회원가입이 완료되었습니다. (실제 서버 연동 후 기능 활성화)');
-        return false; // 실제 서버 연동 시 true로 변경
+        // 실제 회원가입 처리
+        processSignup();
+        return false; // 폼 제출 방지
     }
     
     return false;
+}
+
+// 회원가입 처리 함수
+function processSignup() {
+    const formData = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value + ' ' + (document.getElementById('detailAddress').value || '')
+    };
+    
+    // auth.js의 signup 함수 호출
+    const result = signup(formData);
+    
+    if (result.success) {
+        showPopup(result.message, function() {
+            // 성공 시 로그인 페이지로 이동
+            window.location.href = 'login.html';
+        });
+    } else {
+        showPopup(result.message);
+    }
 }
 
 // Channel.io 설정

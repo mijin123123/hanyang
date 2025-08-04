@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 승인 관리 | 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="../js/auth.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 사이드바 -->
+        <nav class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-cog"></i> 한양에너지 관리자</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="member-manager.html"><i class="fas fa-users"></i> 회원 관리</a></li>
+                <li><a href="approval-manager.html" class="active"><i class="fas fa-user-check"></i> 회원 승인</a></li>
+                <li><a href="investment-manager.html"><i class="fas fa-chart-bar"></i> 투자 관리</a></li>
+                <li><a href="popup-manager.html"><i class="fas fa-bell"></i> 팝업 관리</a></li>
+                <li><a href="account-manager.html"><i class="fas fa-user-cog"></i> 계정 관리</a></li>
+                <li><a href="notice-manager.html"><i class="fas fa-bullhorn"></i> 공지사항</a></li>
+                <li><a href="inquiry-manager.html"><i class="fas fa-envelope"></i> 문의 관리</a></li>
+                <li><a href="../index.html"><i class="fas fa-home"></i> 메인사이트</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
+            </ul>
+        </nav>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1><i class="fas fa-user-check"></i> 회원 승인 관리</h1>
+                <div class="admin-user-info">
+                    <span id="adminName">로딩중...</span>
+                    <button onclick="logout()" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> 로그아웃
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <!-- 승인 대기 통계 -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon pending">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pendingCount">0</h3>
+                            <p>승인 대기</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon approved">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="approvedCount">0</h3>
+                            <p>승인 완료</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon rejected">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="rejectedCount">0</h3>
+                            <p>승인 거부</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 승인 대기 회원 목록 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="fas fa-clock"></i> 승인 대기 회원</h2>
+                        <button onclick="refreshData()" class="refresh-btn">
+                            <i class="fas fa-sync"></i> 새로고침
+                        </button>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>아이디</th>
+                                    <th>이름</th>
+                                    <th>이메일</th>
+                                    <th>전화번호</th>
+                                    <th>주소</th>
+                                    <th>가입일</th>
+                                    <th>상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingMembersTable">
+                                <tr>
+                                    <td colspan="9" class="loading">데이터를 불러오는 중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 최근 처리된 회원 목록 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="fas fa-history"></i> 최근 처리 내역</h2>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>아이디</th>
+                                    <th>이름</th>
+                                    <th>처리 결과</th>
+                                    <th>처리일</th>
+                                    <th>거부 사유</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActionsTable">
+                                <tr>
+                                    <td colspan="6" class="loading">데이터를 불러오는 중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 승인/거부 모달 -->
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">회원 승인/거부</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="member-info">
+                    <h4>회원 정보</h4>
+                    <p><strong>아이디:</strong> <span id="modalUsername"></span></p>
+                    <p><strong>이름:</strong> <span id="modalName"></span></p>
+                    <p><strong>이메일:</strong> <span id="modalEmail"></span></p>
+                    <p><strong>전화번호:</strong> <span id="modalPhone"></span></p>
+                    <p><strong>주소:</strong> <span id="modalAddress"></span></p>
+                    <p><strong>가입일:</strong> <span id="modalCreatedAt"></span></p>
+                </div>
+                
+                <div class="action-section">
+                    <h4>처리 선택</h4>
+                    <div class="action-buttons">
+                        <button id="approveBtn" class="btn-approve" onclick="processMemberAction('approved')">
+                            <i class="fas fa-check"></i> 승인
+                        </button>
+                        <button id="rejectBtn" class="btn-reject" onclick="processMemberAction('rejected')">
+                            <i class="fas fa-times"></i> 거부
+                        </button>
+                    </div>
+                    
+                    <div id="rejectReasonSection" class="reject-reason" style="display: none;">
+                        <label for="rejectReason">거부 사유:</label>
+                        <textarea id="rejectReason" placeholder="거부 사유를 입력해주세요..." rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentMemberId = null;
+        let currentAction = null;
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            // 관리자 권한 체크
+            if (!checkAdminAuth()) {
+                return;
+            }
+
+            // 관리자 정보 표시
+            const admin = getCurrentUser();
+            if (admin) {
+                document.getElementById('adminName').textContent = admin.name + ' 관리자';
+            }
+
+            // 데이터 로드
+            loadData();
+
+            // 모달 이벤트 리스너
+            setupModalEvents();
+        });
+
+        // 데이터 로드
+        function loadData() {
+            loadPendingMembers();
+            loadRecentActions();
+            updateStats();
+        }
+
+        // 승인 대기 회원 목록 로드
+        function loadPendingMembers() {
+            const pendingMembers = getPendingMembers();
+            const tableBody = document.getElementById('pendingMembersTable');
+            
+            if (pendingMembers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" class="no-data">승인 대기 회원이 없습니다.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = pendingMembers.map((member, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${member.username}</td>
+                    <td>${member.name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone || '-'}</td>
+                    <td>${member.address || '-'}</td>
+                    <td>${formatDate(member.created_at)}</td>
+                    <td>
+                        <span class="status-badge pending">
+                            <i class="fas fa-clock"></i> 대기중
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="openApprovalModal('${member.id}')" class="btn-action">
+                            <i class="fas fa-edit"></i> 처리
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 최근 처리 내역 로드
+        function loadRecentActions() {
+            const tableBody = document.getElementById('recentActionsTable');
+            
+            // 실제로는 서버에서 최근 처리 내역을 가져와야 함
+            // 임시 데이터
+            const recentActions = [];
+            
+            if (recentActions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="no-data">최근 처리 내역이 없습니다.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = recentActions.map((action, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${action.username}</td>
+                    <td>${action.name}</td>
+                    <td>
+                        <span class="status-badge ${action.action}">
+                            <i class="fas fa-${action.action === 'approved' ? 'check' : 'times'}"></i> 
+                            ${action.action === 'approved' ? '승인' : '거부'}
+                        </span>
+                    </td>
+                    <td>${formatDate(action.processed_at)}</td>
+                    <td>${action.reason || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            const pendingMembers = getPendingMembers();
+            
+            document.getElementById('pendingCount').textContent = pendingMembers.length;
+            
+            // 전체 사용자에서 승인된 회원 수 계산
+            const allUsers = users || [];
+            const approvedCount = allUsers.filter(user => user.status === 'approved').length;
+            document.getElementById('approvedCount').textContent = approvedCount;
+            
+            // 거부된 회원 수 (임시로 0으로 설정)
+            document.getElementById('rejectedCount').textContent = 0;
+        }
+
+        // 승인/거부 모달 열기
+        function openApprovalModal(memberId) {
+            const pendingMembers = getPendingMembers();
+            const member = pendingMembers.find(m => m.id === memberId);
+            
+            if (!member) {
+                alert('회원 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            currentMemberId = memberId;
+            
+            // 모달에 회원 정보 표시
+            document.getElementById('modalUsername').textContent = member.username;
+            document.getElementById('modalName').textContent = member.name;
+            document.getElementById('modalEmail').textContent = member.email;
+            document.getElementById('modalPhone').textContent = member.phone || '-';
+            document.getElementById('modalAddress').textContent = member.address || '-';
+            document.getElementById('modalCreatedAt').textContent = formatDate(member.created_at);
+            
+            // 거부 사유 섹션 숨기기
+            document.getElementById('rejectReasonSection').style.display = 'none';
+            document.getElementById('rejectReason').value = '';
+            
+            // 모달 표시
+            document.getElementById('approvalModal').style.display = 'block';
+        }
+
+        // 회원 승인/거부 처리
+        function processMemberAction(action) {
+            if (!currentMemberId) {
+                alert('처리할 회원을 선택해주세요.');
+                return;
+            }
+
+            let reason = '';
+            if (action === 'rejected') {
+                reason = document.getElementById('rejectReason').value.trim();
+                if (!reason) {
+                    alert('거부 사유를 입력해주세요.');
+                    return;
+                }
+            }
+
+            const admin = getCurrentUser();
+            const result = approveMember(currentMemberId, action, reason);
+            
+            if (result.success) {
+                alert(result.message);
+                closeModal();
+                loadData(); // 데이터 새로고침
+            } else {
+                alert(result.message);
+            }
+        }
+
+        // 모달 이벤트 설정
+        function setupModalEvents() {
+            const modal = document.getElementById('approvalModal');
+            const closeBtn = modal.querySelector('.close');
+            
+            // 닫기 버튼
+            closeBtn.onclick = closeModal;
+            
+            // 모달 외부 클릭시 닫기
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            };
+            
+            // 거부 버튼 클릭시 사유 입력란 표시
+            document.getElementById('rejectBtn').onclick = function() {
+                document.getElementById('rejectReasonSection').style.display = 'block';
+                setTimeout(() => {
+                    processMemberAction('rejected');
+                }, 100);
+            };
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('approvalModal').style.display = 'none';
+            currentMemberId = null;
+            currentAction = null;
+        }
+
+        // 데이터 새로고침
+        function refreshData() {
+            loadData();
+            alert('데이터를 새로고침했습니다.');
+        }
+
+        // 날짜 포맷팅
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR') + ' ' + date.toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 관리자 권한 체크
+        function checkAdminAuth() {
+            const user = getCurrentUser();
+            if (!user || user.role !== 'admin') {
+                alert('관리자 권한이 필요합니다.');
+                window.location.href = '../login.html';
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+    <style>
+        .pending { background: #ffc107; }
+        .approved { background: #28a745; }
+        .rejected { background: #dc3545; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .close {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .member-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .member-info h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .member-info p {
+            margin: 5px 0;
+            padding: 5px 0;
+        }
+
+        .action-section h4 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-approve, .btn-reject {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c82333;
+        }
+
+        .reject-reason {
+            margin-top: 15px;
+        }
+
+        .reject-reason label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .reject-reason textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Pretendard', sans-serif;
+            resize: vertical;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-badge.pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .status-badge.approved {
+            background: #28a745;
+        }
+
+        .status-badge.rejected {
+            background: #dc3545;
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-action:hover {
+            background: #0056b3;
+        }
+
+        .refresh-btn {
+            padding: 8px 15px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn:hover {
+            background: #138496;
+        }
+    </style>
+</body>
+</html>
