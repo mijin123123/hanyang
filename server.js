@@ -890,23 +890,42 @@ app.get('/my_investments', requireLogin, async (req, res) => {
         
         if (error) {
             console.error('투자 데이터 조회 오류:', error);
-            return res.status(500).render('error', { 
-                message: '투자 데이터를 불러오는 중 오류가 발생했습니다.' 
+            return res.render('my_investments', { 
+                user: req.session.user,
+                investments: [],
+                currentBalance: 0,
+                error: '투자 데이터를 불러오는 중 오류가 발생했습니다.'
             });
         }
+        
+        // 템플릿 호환성을 위해 데이터 변환 (amount -> investment_amount)
+        const formattedInvestments = (investments || []).map(investment => ({
+            ...investment,
+            investment_amount: investment.amount || investment.investment_amount || 0,
+            // 상품 이름이 없으면 product_type이나 product_name에서 가져오기
+            product_name: investment.product_name || 
+                         getProductNameFromType(investment.product_type) || 
+                         investment.product || 
+                         '알 수 없는 상품'
+        }));
         
         // 사용자 잔액 조회
         const currentBalance = await getMemberBalance(memberId);
         
+        console.log(`✅ ${req.session.user.username} 투자 현황 조회 성공: ${formattedInvestments.length}건`);
+        
         res.render('my_investments', { 
             user: req.session.user,
-            investments: investments || [],
+            investments: formattedInvestments,
             currentBalance: currentBalance
         });
     } catch (error) {
         console.error('투자 현황 페이지 오류:', error);
-        res.status(500).render('error', { 
-            message: '페이지를 불러오는 중 오류가 발생했습니다.' 
+        res.render('my_investments', { 
+            user: req.session.user,
+            investments: [],
+            currentBalance: 0,
+            error: '페이지를 불러오는 중 오류가 발생했습니다.'
         });
     }
 });
