@@ -519,7 +519,7 @@
                     HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
                 </div>
             </div>
-            <p>청정에너지로 만드는 지속가능한 미래</p>
+            <p id="footer-description-text">청정에너지로 만드는 지속가능한 미래</p>
             
             <div class="sns-links">
                 <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
@@ -566,12 +566,19 @@
                         02-1234-5678
                     </div>
                 </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-fax"></i></div>
+                    <div class="contact-text" id="footer-fax">
+                        02-1234-5679
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
     <div class="footer-bottom">
-        <p>대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409  | © 2023 주식회사 한양에너지. All Rights Reserved.</p>
+        <p id="footer-copyright-text">대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409  | © 2023 주식회사 한양에너지. All Rights Reserved.</p>
     </div>
 </footer>
 
@@ -705,9 +712,63 @@
         // 사이트 설정 로드
         loadSiteSettings();
         
+        // 푸터 설정 로드
+        loadFooterSettings();
+        
         // 약간의 지연 후 팝업 로드 (페이지 로딩 완료 후)
         setTimeout(loadAndShowPopups, 1000);
     });
+
+    // 푸터 설정 로드 함수
+    function loadFooterSettings() {
+        fetch('/api/admin/settings')
+            .then(response => response.json())
+            .then(result => {
+                if (result.success && result.data) {
+                    const settings = result.data;
+                    
+                    // 푸터 설명 업데이트
+                    if (settings.footerDescription) {
+                        document.getElementById('footer-description-text').textContent = settings.footerDescription;
+                    }
+                    
+                    // 연락처 정보 업데이트
+                    if (settings.address) {
+                        document.getElementById('footer-address').textContent = settings.address;
+                    }
+                    if (settings.contactEmail) {
+                        document.getElementById('footer-email').textContent = settings.contactEmail;
+                    }
+                    if (settings.contactPhone) {
+                        document.getElementById('footer-phone').textContent = settings.contactPhone;
+                    }
+                    if (settings.faxNumber) {
+                        document.getElementById('footer-fax').textContent = settings.faxNumber;
+                    }
+                    
+                    // 저작권 정보 업데이트
+                    if (settings.footerCopyright) {
+                        const copyrightText = document.getElementById('footer-copyright-text');
+                        let fullText = '';
+                        
+                        if (settings.representativeName) {
+                            fullText += `대표자: ${settings.representativeName} | `;
+                        }
+                        if (settings.businessNumber) {
+                            fullText += `사업자등록번호: ${settings.businessNumber} | `;
+                        }
+                        fullText += settings.footerCopyright;
+                        
+                        copyrightText.textContent = fullText;
+                    }
+                    
+                    console.log('✅ 푸터 설정 로드 완료');
+                }
+            })
+            .catch(error => {
+                console.error('푸터 설정 로드 오류:', error);
+            });
+    }
 
     (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
 

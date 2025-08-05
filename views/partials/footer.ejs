@@ -1,47 +1,139 @@
-    <!-- 푸터 시작 -->
-    <footer class="hy-footer">
-        <div class="hy-footer-container">
-            <div class="hy-footer-content">
-                <div class="hy-footer-section">
-                    <div class="hy-footer-logo">
-                        <img src="/img/hanyang_energy_logo.png" alt="한양에너지 로고">
-                        <p>청정에너지로 만드는 지속가능한 미래</p>
+    <!-- 공통 푸터 컴포넌트 -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <!-- 왼쪽: 로고 및 SNS -->
+            <div class="footer-section logo-section">
+                <div class="footer-logo">
+                    <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
+                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
                     </div>
                 </div>
+                <p id="footer-description">청정에너지로 만드는 지속가능한 미래</p>
                 
-                <div class="hy-footer-section">
-                    <h4>바로가기</h4>
-                    <ul>
-                        <li><a href="/introduce_service">회사소개</a></li>
-                        <li><a href="/introduce_product">조합상품</a></li>
-                        <li><a href="/faq">고객센터</a></li>
-                        <li><a href="/project_gallery">프로젝트</a></li>
-                    </ul>
-                </div>
-                
-                <div class="hy-footer-section">
-                    <h4>연락처</h4>
-                    <p><i class="fas fa-map-marker-alt"></i> 전라남도 목포시 구주소-주소</p>
-                    <p><i class="fas fa-envelope"></i> hanenergy@example.com</p>
-                    <p><i class="fas fa-phone"></i> 02-1234-5678</p>
-                </div>
-                
-                <div class="hy-footer-section">
-                    <h4>소셜미디어</h4>
-                    <div class="hy-social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-blog"></i></a>
-                    </div>
+                <div class="sns-links">
+                    <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="인스타그램"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="블로그"><i class="fab fa-blogger-b"></i></a>
                 </div>
             </div>
-            
-            <div class="hy-footer-bottom">
-                <p>&copy; 2024 한양에너지. All rights reserved.</p>
+
+            <!-- 중앙: 통합 링크 섹션 -->
+            <div class="footer-section links-section">
+                <h4>바로가기</h4>
+                <ul class="footer-links">
+                    <li><a href="/ceo_message">인사말</a></li>
+                    <li><a href="/history">연혁</a></li>
+                    <li><a href="/introduce_service">서비스 소개</a></li>
+                    <li><a href="/announcements">공지사항</a></li>
+                    <li><a href="/faq">자주 묻는 질문</a></li>
+                </ul>
+            </div>
+
+            <!-- 오른쪽: 연락처 섹션 -->
+            <div class="footer-section contact-section">
+                <h4>연락처</h4>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                        <div class="contact-text" id="footer-phone">
+                            02-123-4567
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="contact-text" id="footer-address">
+                            전라남도 보성군 보성읍 구교길2-1
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="contact-text" id="footer-email">
+                            hanenergy@example.com
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-fax"></i></div>
+                        <div class="contact-text" id="footer-fax">
+                            02-1234-5679
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        
+        <div class="footer-bottom">
+            <p><span id="footer-representative">대표자: 정용우 / 정우영 (Co-Owner)</span> | <span id="footer-business-number">사업자등록번호: 257-88-01409</span> | <span id="footer-copyright">© 2025 한양에너지협동조합. All rights reserved.</span></p>
+        </div>
     </footer>
+
+    <!-- 푸터 설정 로드 스크립트 -->
+    <script>
+    function loadFooterSettings() {
+        fetch('/api/admin/settings')
+            .then(response => response.json())
+            .then(data => {
+                console.log('📥 설정 데이터:', data);
+                
+                if (data.success && data.data) {
+                    const settings = data.data;
+                    
+                    // 푸터 정보 업데이트
+                    if (settings.footerDescription) {
+                        const descElement = document.getElementById('footer-description');
+                        if (descElement) descElement.textContent = settings.footerDescription;
+                    }
+                    
+                    if (settings.contactPhone) {
+                        const phoneElement = document.getElementById('footer-phone');
+                        if (phoneElement) phoneElement.textContent = settings.contactPhone;
+                    }
+                    
+                    if (settings.address) {
+                        const addressElement = document.getElementById('footer-address');
+                        if (addressElement) addressElement.textContent = settings.address;
+                    }
+                    
+                    if (settings.contactEmail) {
+                        const emailElement = document.getElementById('footer-email');
+                        if (emailElement) emailElement.textContent = settings.contactEmail;
+                    }
+                    
+                    if (settings.faxNumber) {
+                        const faxElement = document.getElementById('footer-fax');
+                        if (faxElement) faxElement.textContent = settings.faxNumber;
+                    }
+                    
+                    if (settings.representativeName) {
+                        const repElement = document.getElementById('footer-representative');
+                        if (repElement) repElement.textContent = `대표자: ${settings.representativeName}`;
+                    }
+                    
+                    if (settings.businessNumber) {
+                        const businessElement = document.getElementById('footer-business-number');
+                        if (businessElement) businessElement.textContent = `사업자등록번호: ${settings.businessNumber}`;
+                    }
+                    
+                    if (settings.footerCopyright) {
+                        const copyrightElement = document.getElementById('footer-copyright');
+                        if (copyrightElement) copyrightElement.textContent = settings.footerCopyright;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('푸터 설정 로드 오류:', error);
+            });
+    }
+
+    // 페이지 로드 시 푸터 설정 로드
+    document.addEventListener('DOMContentLoaded', function() {
+        loadFooterSettings();
+    });
+    </script>
     
     <!-- 기존 JavaScript 파일들 -->
     <script src="/js/header.js"></script>

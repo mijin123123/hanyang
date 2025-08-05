@@ -138,3 +138,189 @@ body {
         text-shadow: none !important;
     }
 }
+
+/* 공통 푸터 스타일 */
+.modern-footer {
+    background-color: #535353;
+    color: #ecf0f1;
+    font-family: 'Pretendard', sans-serif;
+    padding: 40px 20px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 80px;
+}
+
+.modern-footer .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 30px;
+}
+
+.modern-footer .footer-section {
+    flex: 1;
+    min-width: 220px;
+    margin-bottom: 20px;
+}
+
+.modern-footer .logo-section {
+    max-width: 300px;
+}
+
+.modern-footer .footer-logo {
+    margin-bottom: 15px;
+}
+
+.modern-footer .logo-img {
+    width: 180px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.modern-footer .sns-links {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modern-footer .sns-links a {
+    color: #bdc3c7;
+    font-size: 18px;
+    text-decoration: none;
+    transition: all 0.3s;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.modern-footer .sns-links a:hover {
+    color: #3498db;
+    background-color: rgba(255,255,255,0.2);
+}
+
+.modern-footer .links-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .links-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modern-footer .footer-links li {
+    margin-bottom: 12px;
+}
+
+.modern-footer .footer-links a {
+    text-decoration: none;
+    color: #bdc3c7;
+    transition: all 0.3s;
+    display: block;
+    padding: 5px 0;
+}
+
+.modern-footer .footer-links a:hover {
+    color: #ffffff;
+    padding-left: 10px;
+}
+
+.modern-footer .contact-section h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.modern-footer .contact-section h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #3498db;
+}
+
+.modern-footer .contact-info {
+    margin-top: 15px;
+}
+
+.modern-footer .contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.modern-footer .contact-icon {
+    color: #3498db;
+    font-size: 16px;
+    margin-right: 12px;
+    margin-top: 2px;
+}
+
+.modern-footer .contact-text {
+    color: #bdc3c7;
+    line-height: 1.5;
+}
+
+.modern-footer .footer-bottom {
+    text-align: center;
+    color: #bdc3c7;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    margin-top: 30px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .modern-footer .footer-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .modern-footer .footer-section {
+        min-width: 100%;
+    }
+    
+    .modern-footer .footer-links a {
+        padding: 8px 0;
+    }
+    
+    .modern-footer .logo-img {
+        width: 220px;
+    }
+    
+    .modern-footer .footer-bottom {
+        font-size: 12px;
+        padding-top: 15px;
+        margin-top: 20px;
+    }
+}

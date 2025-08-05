@@ -74,6 +74,35 @@
                             <input type="email" id="contactEmail" name="contactEmail" placeholder="info@hanyang-energy.co.kr">
                         </div>
                     </div>
+
+                    <!-- 푸터 설정 섹션 -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-file-alt"></i> 푸터 설정</h3>
+                        <div class="form-group">
+                            <label for="footerCopyright">저작권 정보</label>
+                            <input type="text" id="footerCopyright" name="footerCopyright" placeholder="© 2025 한양에너지협동조합. All rights reserved.">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="footerDescription">푸터 설명</label>
+                            <textarea id="footerDescription" name="footerDescription" rows="3" placeholder="한양에너지협동조합은 신재생에너지 사업을 통해 지속가능한 미래를 만들어갑니다."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="businessNumber">사업자등록번호</label>
+                            <input type="text" id="businessNumber" name="businessNumber" placeholder="123-45-67890">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="representativeName">대표자명</label>
+                            <input type="text" id="representativeName" name="representativeName" placeholder="김한양">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="faxNumber">팩스번호</label>
+                            <input type="tel" id="faxNumber" name="faxNumber" placeholder="02-1234-5679">
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -123,6 +152,24 @@
                         if (settings.contactEmail) {
                             document.getElementById('contactEmail').value = settings.contactEmail;
                         }
+                        
+                        // 푸터 설정 로드
+                        if (settings.footerCopyright) {
+                            document.getElementById('footerCopyright').value = settings.footerCopyright;
+                        }
+                        if (settings.footerDescription) {
+                            document.getElementById('footerDescription').value = settings.footerDescription;
+                        }
+                        if (settings.businessNumber) {
+                            document.getElementById('businessNumber').value = settings.businessNumber;
+                        }
+                        if (settings.representativeName) {
+                            document.getElementById('representativeName').value = settings.representativeName;
+                        }
+                        if (settings.faxNumber) {
+                            document.getElementById('faxNumber').value = settings.faxNumber;
+                        }
+                        
                         console.log('✅ 설정 로드 완료');
                     }
                 })
@@ -143,8 +190,16 @@
             const contactPhone = document.getElementById('contactPhone').value;
             const contactEmail = document.getElementById('contactEmail').value;
             
+            // 푸터 설정 값들 수집
+            const footerCopyright = document.getElementById('footerCopyright').value;
+            const footerDescription = document.getElementById('footerDescription').value;
+            const businessNumber = document.getElementById('businessNumber').value;
+            const representativeName = document.getElementById('representativeName').value;
+            const faxNumber = document.getElementById('faxNumber').value;
+            
             console.log('📤 전송할 데이터:', {
-                companyName, address, accountNumber, accountHolder, contactPhone, contactEmail
+                companyName, address, accountNumber, accountHolder, contactPhone, contactEmail,
+                footerCopyright, footerDescription, businessNumber, representativeName, faxNumber
             });
             
             // 직접 fetch 호출
@@ -159,7 +214,12 @@
                     accountNumber: accountNumber,
                     accountHolder: accountHolder,
                     contactPhone: contactPhone,
-                    contactEmail: contactEmail
+                    contactEmail: contactEmail,
+                    footerCopyright: footerCopyright,
+                    footerDescription: footerDescription,
+                    businessNumber: businessNumber,
+                    representativeName: representativeName,
+                    faxNumber: faxNumber
                 })
             })
             .then(response => {

@@ -85,11 +85,12 @@
                                 <th>가입일</th>
                                 <th>상태</th>
                                 <th>권한</th>
+                                <th>작업</th>
                             </tr>
                         </thead>
                         <tbody id="memberTableBody">
                             <tr>
-                                <td colspan="8" style="text-align: center; color: #666; padding: 20px;">
+                                <td colspan="9" style="text-align: center; color: #666; padding: 20px;">
                                     회원 목록을 불러오는 중...
                                 </td>
                             </tr>
@@ -167,17 +168,21 @@
             // members가 배열이 아닌 경우 처리
             if (!Array.isArray(members)) {
                 console.warn('members가 배열이 아닙니다:', typeof members, members);
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">데이터 형식 오류가 발생했습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666; padding: 20px;">데이터 형식 오류가 발생했습니다.</td></tr>';
                 return;
             }
             
             if (members.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 20px;">등록된 회원이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666; padding: 20px;">등록된 회원이 없습니다.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = members.map((member, index) => `
-                <tr>
+            tbody.innerHTML = members.map((member, index) => {
+                const isBlocked = member.status === 'blocked';
+                const isCurrentUser = member.username === '<%= user ? user.username : "" %>';
+                
+                return `
+                <tr ${isBlocked ? 'style="background-color: #fff5f5;"' : ''}>
                     <td>${index + 1}</td>
                     <td>${member.name || 'N/A'}</td>
                     <td>${member.username || 'N/A'}</td>
@@ -185,9 +190,9 @@
                     <td>${member.phone || '-'}</td>
                     <td>${formatDate(member.created_at)}</td>
                     <td>
-                        <span class="status-badge ${member.status === 'approved' ? 'status-approved' : 'status-pending'}">
-                            <i class="fas ${member.status === 'approved' ? 'fa-check-circle' : 'fa-clock'}"></i> 
-                            ${member.status === 'approved' ? '승인됨' : '대기중'}
+                        <span class="status-badge ${getStatusClass(member.status)}">
+                            <i class="fas ${getStatusIcon(member.status)}"></i> 
+                            ${getStatusText(member.status)}
                         </span>
                     </td>
                     <td>
@@ -195,8 +200,51 @@
                             ${member.role === 'admin' ? '관리자' : '일반회원'}
                         </span>
                     </td>
-                </tr>
-            `).join('');
+                    <td>
+                        ${!isCurrentUser ? `
+                            <button class="btn ${isBlocked ? 'btn-success' : 'btn-danger'} btn-sm" 
+                                    onclick="${isBlocked ? 'unblockMember' : 'blockMember'}('${member.id}', '${member.username}')" 
+                                    title="${isBlocked ? '로그인 허용' : '로그인 차단'}">
+                                <i class="fas ${isBlocked ? 'fa-unlock' : 'fa-ban'}"></i>
+                                ${isBlocked ? '해제' : '차단'}
+                            </button>
+                        ` : '<span class="text-muted">본인</span>'}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            // 통계 업데이트
+            updateMemberStats(members);
+        }
+
+        // 상태별 CSS 클래스 반환
+        function getStatusClass(status) {
+            switch(status) {
+                case 'approved': return 'status-approved';
+                case 'blocked': return 'status-blocked';
+                case 'pending': return 'status-pending';
+                default: return 'status-pending';
+            }
+        }
+
+        // 상태별 아이콘 반환
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'approved': return 'fa-check-circle';
+                case 'blocked': return 'fa-ban';
+                case 'pending': return 'fa-clock';
+                default: return 'fa-clock';
+            }
+        }
+
+        // 상태별 텍스트 반환
+        function getStatusText(status) {
+            switch(status) {
+                case 'approved': return '승인됨';
+                case 'blocked': return '차단됨';
+                case 'pending': return '대기중';
+                default: return '대기중';
+            }
         }
 
         // 승인된 회원 로드
@@ -572,6 +620,77 @@
 자세한 내용은 콘솔을 확인하세요.`);
             }
         }
+
+        // 회원 차단 함수
+        async function blockMember(memberId, username) {
+            if (!confirm(`${username} 회원의 로그인을 차단하시겠습니까?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/members/${memberId}/block`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`${username} 회원이 차단되었습니다.`);
+                    loadMemberList(); // 목록 새로고침
+                } else {
+                    alert('차단에 실패했습니다: ' + result.message);
+                }
+            } catch (error) {
+                console.error('회원 차단 오류:', error);
+                alert('차단 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 회원 차단 해제 함수
+        async function unblockMember(memberId, username) {
+            if (!confirm(`${username} 회원의 로그인 차단을 해제하시겠습니까?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/members/${memberId}/unblock`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`${username} 회원의 차단이 해제되었습니다.`);
+                    loadMemberList(); // 목록 새로고침
+                } else {
+                    alert('차단 해제에 실패했습니다: ' + result.message);
+                }
+            } catch (error) {
+                console.error('회원 차단 해제 오류:', error);
+                alert('차단 해제 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 통계 업데이트
+        function updateMemberStats(members) {
+            const totalMembers = members.length;
+            const adminMembers = members.filter(m => m.role === 'admin').length;
+            const activeMembers = members.filter(m => m.status === 'approved').length;
+            const blockedMembers = members.filter(m => m.status === 'blocked').length;
+
+            document.getElementById('totalMembers').textContent = totalMembers;
+            document.getElementById('adminMembers').textContent = adminMembers;
+            document.getElementById('activeMembers').textContent = activeMembers;
+            
+            // 투자 회원 수는 임시로 활성 회원과 동일하게 설정
+            document.getElementById('investmentMembers').textContent = activeMembers;
+        }
     </script>
 
     <style>
@@ -579,6 +698,24 @@
         .status-pending {
             background-color: #ffc107;
             color: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-blocked {
+            background-color: #dc3545;
+            color: white;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.85rem;

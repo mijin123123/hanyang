@@ -271,6 +271,11 @@ app.post('/login', async (req, res) => {
         }
         
         // 승인 상태 확인
+        if (existingUser.status === 'blocked') {
+            console.log('❌ 차단된 사용자:', existingUser.status);
+            return res.json({ success: false, message: '로그인이 차단된 계정입니다. 관리자에게 문의하세요.' });
+        }
+        
         if (existingUser.status !== 'approved') {
             console.log('❌ 승인되지 않은 사용자:', existingUser.status);
             return res.json({ success: false, message: '계정이 승인되지 않았습니다.' });
@@ -1080,7 +1085,10 @@ app.get('/api/admin/settings', async (req, res) => {
 app.put('/api/admin/settings', async (req, res) => {
     console.log('📝 사이트 설정 업데이트 요청:', req.body);
     
-    const { companyName, accountNumber, accountHolder, contactPhone, contactEmail, address } = req.body;
+    const { 
+        companyName, accountNumber, accountHolder, contactPhone, contactEmail, address,
+        footerCopyright, footerDescription, businessNumber, representativeName, faxNumber
+    } = req.body;
     
     const settingsToUpdate = [
         { key: 'company_name', value: companyName },
@@ -1088,7 +1096,12 @@ app.put('/api/admin/settings', async (req, res) => {
         { key: 'account_holder', value: accountHolder },
         { key: 'contact_phone', value: contactPhone },
         { key: 'contact_email', value: contactEmail },
-        { key: 'address', value: address }
+        { key: 'address', value: address },
+        { key: 'footer_copyright', value: footerCopyright },
+        { key: 'footer_description', value: footerDescription },
+        { key: 'business_number', value: businessNumber },
+        { key: 'representative_name', value: representativeName },
+        { key: 'fax_number', value: faxNumber }
     ];
 
     try {
@@ -1403,6 +1416,79 @@ app.get('/api/members', requireAdmin, async (req, res) => {
         res.json({ success: true, data: members });
     } catch (error) {
         console.error('회원 목록 조회 중 오류:', error);
+        res.json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
+});
+
+// 회원 차단 API (관리자용)
+app.post('/api/admin/members/:id/block', requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        console.log('🚫 회원 차단 요청:', id);
+        
+        // 본인은 차단할 수 없음
+        if (req.session.user.id === id) {
+            return res.json({ success: false, message: '본인 계정은 차단할 수 없습니다.' });
+        }
+        
+        const { data: updatedMember, error } = await supabase
+            .from('members')
+            .update({ 
+                status: 'blocked',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('회원 차단 오류:', error);
+            return res.json({ success: false, message: '회원 차단에 실패했습니다.' });
+        }
+
+        console.log('✅ 회원 차단 성공:', updatedMember.username);
+        res.json({ 
+            success: true, 
+            message: '회원이 성공적으로 차단되었습니다.',
+            member: updatedMember
+        });
+    } catch (error) {
+        console.error('회원 차단 중 오류:', error);
+        res.json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
+});
+
+// 회원 차단 해제 API (관리자용)
+app.post('/api/admin/members/:id/unblock', requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        console.log('✅ 회원 차단 해제 요청:', id);
+        
+        const { data: updatedMember, error } = await supabase
+            .from('members')
+            .update({ 
+                status: 'approved',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('회원 차단 해제 오류:', error);
+            return res.json({ success: false, message: '회원 차단 해제에 실패했습니다.' });
+        }
+
+        console.log('✅ 회원 차단 해제 성공:', updatedMember.username);
+        res.json({ 
+            success: true, 
+            message: '회원 차단이 성공적으로 해제되었습니다.',
+            member: updatedMember
+        });
+    } catch (error) {
+        console.error('회원 차단 해제 중 오류:', error);
         res.json({ success: false, message: '서버 오류가 발생했습니다.' });
     }
 });
