@@ -40,8 +40,13 @@ console.log('🔧 Supabase Key:', supabaseKey ? '설정됨' : '설정안됨');
 
 let supabase;
 try {
-    supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('✅ Supabase 클라이언트 초기화 완료');
+    supabase = createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+    console.log('✅ Supabase 클라이언트 초기화 완료 (키 타입:', supabaseKey.includes('service_role') ? 'service_role' : 'anon', ')');
 } catch (error) {
     console.error('❌ Supabase 클라이언트 초기화 실패:', error);
     // 앱은 계속 실행되지만 데이터베이스 기능은 제한됨
@@ -340,14 +345,28 @@ app.post('/login', async (req, res) => {
         }
         
         // 먼저 사용자가 존재하는지 확인
+        console.log('🔍 DB 조회 시작:', { username, passwordHash });
         const { data: existingUser, error: userError } = await supabase
             .from('members')
             .select('username, password_hash, status, role')
             .eq('username', username)
             .single();
             
+        console.log('🔍 DB 조회 결과:', { existingUser, userError });
+            
         if (userError) {
             console.log('❌ 사용자 조회 오류:', userError);
+            
+            // 모든 사용자 조회로 재시도
+            const { data: allUsers, error: allError } = await supabase
+                .from('members')
+                .select('username, password_hash, status, role');
+            
+            console.log('🔍 전체 사용자 재조회:', { count: allUsers?.length || 0, allError });
+            if (allUsers && allUsers.length > 0) {
+                console.log('📋 첫 번째 사용자:', allUsers[0]);
+            }
+            
             return res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
         }
         
