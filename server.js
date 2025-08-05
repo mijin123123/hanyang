@@ -498,28 +498,112 @@ app.get('/withdraw_request', requireLogin, async (req, res) => {
     }
 });
 
-app.get('/investment_detail', requireLogin, (req, res) => {
-    res.render('investment_detail', { user: req.session.user });
+app.get('/investment_detail', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const currentBalance = await getMemberBalance(memberId);
+        
+        res.render('investment_detail', { 
+            user: req.session.user,
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('투자 상세 페이지 로드 오류:', error);
+        res.render('investment_detail', { 
+            user: req.session.user,
+            currentBalance: 0
+        });
+    }
 });
 
-app.get('/investment_detail_300kw', requireLogin, (req, res) => {
-    res.render('investment_detail_300kw', { user: req.session.user });
+app.get('/investment_detail_300kw', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const currentBalance = await getMemberBalance(memberId);
+        
+        res.render('investment_detail_300kw', { 
+            user: req.session.user,
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('300kw 투자 상세 페이지 로드 오류:', error);
+        res.render('investment_detail_300kw', { 
+            user: req.session.user,
+            currentBalance: 0
+        });
+    }
 });
 
-app.get('/investment_detail_500kw', requireLogin, (req, res) => {
-    res.render('investment_detail_500kw', { user: req.session.user });
+app.get('/investment_detail_500kw', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const currentBalance = await getMemberBalance(memberId);
+        
+        res.render('investment_detail_500kw', { 
+            user: req.session.user,
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('500kw 투자 상세 페이지 로드 오류:', error);
+        res.render('investment_detail_500kw', { 
+            user: req.session.user,
+            currentBalance: 0
+        });
+    }
 });
 
-app.get('/investment_detail_green_starter', requireLogin, (req, res) => {
-    res.render('investment_detail_green_starter', { user: req.session.user });
+app.get('/investment_detail_green_starter', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const currentBalance = await getMemberBalance(memberId);
+        
+        res.render('investment_detail_green_starter', { 
+            user: req.session.user,
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('그린 스타터 투자 상세 페이지 로드 오류:', error);
+        res.render('investment_detail_green_starter', { 
+            user: req.session.user,
+            currentBalance: 0
+        });
+    }
 });
 
-app.get('/investment_detail_laon', requireLogin, (req, res) => {
-    res.render('investment_detail_laon', { user: req.session.user });
+app.get('/investment_detail_laon', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const currentBalance = await getMemberBalance(memberId);
+        
+        res.render('investment_detail_laon', { 
+            user: req.session.user,
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('라온 투자 상세 페이지 로드 오류:', error);
+        res.render('investment_detail_laon', { 
+            user: req.session.user,
+            currentBalance: 0
+        });
+    }
 });
 
-app.get('/investment_detail_simple_eco', requireLogin, (req, res) => {
-    res.render('investment_detail_simple_eco', { user: req.session.user });
+app.get('/investment_detail_simple_eco', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const currentBalance = await getMemberBalance(memberId);
+        
+        res.render('investment_detail_simple_eco', { 
+            user: req.session.user,
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('심플 에코 투자 상세 페이지 로드 오류:', error);
+        res.render('investment_detail_simple_eco', { 
+            user: req.session.user,
+            currentBalance: 0
+        });
+    }
 });
 
 // 기업 소개 페이지들

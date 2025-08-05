@@ -528,98 +528,6 @@
 
     </style>
     
-    <!-- JavaScript 파일 -->
-    <script>
-        // 탭 전환 기능
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const formSections = document.querySelectorAll('.form-section');
-        
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.getAttribute('data-tab');
-                
-                // 모든 탭 버튼 비활성화
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                // 모든 폼 섹션 숨기기
-                formSections.forEach(section => section.classList.remove('active'));
-                
-                // 현재 탭 활성화
-                button.classList.add('active');
-                document.getElementById(`${tabId}-form`).classList.add('active');
-            });
-        });
-        
-        // 금액 버튼 기능
-        const amountButtons = document.querySelectorAll('.amount-button');
-        amountButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const amount = button.getAttribute('data-amount');
-                const activeForm = document.querySelector('.form-section.active');
-                activeForm.querySelector('input[type="text"]').value = parseInt(amount).toLocaleString('ko-KR');
-            });
-        });
-        
-        // 팝업 닫기 기능
-        function closePopup() {
-            document.getElementById('popup-overlay').classList.remove('active');
-        }
-        
-        // 입력 금액 포맷팅
-        const amountInputs = document.querySelectorAll('input[type="text"]');
-        amountInputs.forEach(input => {
-            input.addEventListener('blur', () => {
-                if (input.value) {
-                    const num = parseInt(input.value.replace(/,/g, ''));
-                    if (!isNaN(num)) {
-                        input.value = num.toLocaleString('ko-KR');
-                    }
-                }
-            });
-            
-            input.addEventListener('focus', () => {
-                input.value = input.value.replace(/,/g, '');
-            });
-            
-            // 숫자만 입력 가능하도록
-            input.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
-        });
-
-        // 폼 제출 처리
-        document.getElementById('deposit-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const amount = document.getElementById('deposit-amount').value.replace(/,/g, '');
-            if (parseInt(amount) < 50000) {
-                showPopup('error', '입금 금액은 최소 50,000원 이상이어야 합니다.');
-                return;
-            }
-            showPopup('success', '입금 신청이 완료되었습니다.');
-        });
-
-        document.getElementById('withdraw-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const amount = document.getElementById('withdraw-amount').value.replace(/,/g, '');
-            if (parseInt(amount) < 10000) {
-                showPopup('error', '출금 금액은 최소 10,000원 이상이어야 합니다.');
-                return;
-            }
-            showPopup('success', '출금 신청이 완료되었습니다.');
-        });
-
-        function showPopup(type, message) {
-            const popup = document.getElementById('popup-overlay');
-            const icon = popup.querySelector('.popup-icon');
-            const messageElement = popup.querySelector('.popup-message');
-            
-            icon.className = `popup-icon ${type}`;
-            icon.innerHTML = type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>';
-            messageElement.textContent = message;
-            
-            popup.classList.add('active');
-        }
-    </script>
-    
     <title>입출금 신청 | 한양에너지</title>
 </head>
 <body>
@@ -905,13 +813,32 @@
             loadSiteSettings(); // 사이트 설정 로드
             loadTransactionHistory(); // 거래 내역 로드
             
+            // 탭 전환 기능
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const formSections = document.querySelectorAll('.form-section');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // 모든 탭 버튼 비활성화
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    // 모든 폼 섹션 숨기기
+                    formSections.forEach(section => section.classList.remove('active'));
+                    
+                    // 현재 탭 활성화
+                    button.classList.add('active');
+                    document.getElementById(`${tabId}-form`).classList.add('active');
+                });
+            });
+            
             // 입금 폼 이벤트
             document.getElementById('deposit-form').addEventListener('submit', handleDepositSubmit);
             
             // 출금 폼 이벤트
             document.getElementById('withdraw-form').addEventListener('submit', handleWithdrawSubmit);
             
-            // 금액 버튼 이벤트
+            // 금액 버튼 이벤트 (통합)
             document.querySelectorAll('.amount-button').forEach(button => {
                 button.addEventListener('click', function() {
                     const amount = this.getAttribute('data-amount');
@@ -920,7 +847,31 @@
                         document.getElementById('deposit-amount') : 
                         document.getElementById('withdraw-amount');
                     
-                    targetInput.value = parseInt(amount).toLocaleString();
+                    if (targetInput) {
+                        targetInput.value = parseInt(amount).toLocaleString();
+                    }
+                });
+            });
+            
+            // 입력 금액 포맷팅
+            const amountInputs = document.querySelectorAll('input[type="text"]');
+            amountInputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    if (input.value) {
+                        const num = parseInt(input.value.replace(/,/g, ''));
+                        if (!isNaN(num)) {
+                            input.value = num.toLocaleString('ko-KR');
+                        }
+                    }
+                });
+                
+                input.addEventListener('focus', () => {
+                    input.value = input.value.replace(/,/g, '');
+                });
+                
+                // 숫자만 입력 가능하도록
+                input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
                 });
             });
         });
@@ -1118,8 +1069,14 @@
 
         // 팝업 표시
         function showPopup(message) {
-            document.getElementById('popup-message').textContent = message;
-            document.getElementById('popup-overlay').classList.add('active');
+            const messageElement = document.querySelector('.popup-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
+            const overlayElement = document.getElementById('popup-overlay');
+            if (overlayElement) {
+                overlayElement.classList.add('active');
+            }
         }
 
         // 팝업 닫기

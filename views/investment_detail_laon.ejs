@@ -829,7 +829,7 @@ function handleLogout() {
                 <div class="balance-title">내 보유 금액</div>
                 <div class="balance-amount">
                     <i class="fas fa-wallet"></i>
-                    ₩4,623,000
+                    ₩<%= typeof currentBalance !== 'undefined' ? currentBalance.toLocaleString() : '0' %>
                 </div>
             </div>
             

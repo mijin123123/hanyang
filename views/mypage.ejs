@@ -9,8 +9,13 @@
     <link rel="icon" href="img/favi.ico" type="image/jpeg">
     
     <!-- 폰트 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                <div class="stat-title">계좌 잔액</div>
+                <div class="stat-value" id="statBalance">
+                    ₩<%= typeof currentBalance !== 'undefined' ? currentBalance.toLocaleString() : '0' %>
+                </div>
+            </div>link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- CSS 파일 -->
     <link rel="stylesheet" href="css/global.css?v=1754220183">
