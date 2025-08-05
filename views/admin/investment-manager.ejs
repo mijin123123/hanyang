@@ -106,13 +106,51 @@
     <script src="/admin/js/admin.js"></script>
     <script src="../js/auth.js"></script>
     <script>
+        // 전역 오류 처리
+        window.addEventListener('error', function(e) {
+            console.error('❌ 전역 오류:', e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('❌ 처리되지 않은 Promise 오류:', e.reason);
+        });
+
         // 로그인 체크
-        checkAdminAuth();
+        console.log('🔍 checkAdminAuth 함수 확인:', typeof checkAdminAuth);
+        console.log('🔍 getCurrentAdmin 함수 확인:', typeof getCurrentAdmin);
+        
+        try {
+            if (typeof checkAdminAuth === 'function') {
+                checkAdminAuth();
+            } else {
+                console.error('❌ checkAdminAuth 함수가 정의되지 않음');
+                // 직접 관리자 확인
+                if (typeof getCurrentUser === 'function') {
+                    const user = getCurrentUser();
+                    console.log('🔍 현재 사용자:', user);
+                    if (!user || user.role !== 'admin') {
+                        alert('관리자 권한이 필요합니다.');
+                        window.location.href = '/login';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ 관리자 인증 확인 중 오류:', error);
+        }
         
         // 관리자 정보 표시
-        const currentAdmin = getCurrentAdmin();
-        if (currentAdmin) {
-            document.getElementById('adminInfo').textContent = `${currentAdmin.name}님 환영합니다`;
+        try {
+            const currentAdmin = typeof getCurrentAdmin === 'function' ? getCurrentAdmin() : getCurrentUser();
+            console.log('🔍 현재 관리자:', currentAdmin);
+            
+            if (currentAdmin) {
+                const adminInfoElement = document.getElementById('adminInfo');
+                if (adminInfoElement) {
+                    adminInfoElement.textContent = `${currentAdmin.name}님 환영합니다`;
+                }
+            }
+        } catch (error) {
+            console.error('❌ 관리자 정보 표시 중 오류:', error);
         }
 
         // 투자 데이터 변수
@@ -124,15 +162,28 @@
             try {
                 console.log('📡 투자 데이터 로드 시작');
                 
+                // fetch 함수 확인
+                if (typeof fetch === 'undefined') {
+                    throw new Error('fetch 함수가 지원되지 않습니다.');
+                }
+                
+                console.log('🔍 API 호출 준비 중...');
+                
                 const response = await fetch('/api/admin/investments', {
                     method: 'GET',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
                 console.log('📡 응답 상태:', response.status);
+                console.log('📡 응답 OK:', response.ok);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('❌ 서버 응답 오류:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                 }
                 
                 const result = await response.json();
@@ -141,38 +192,43 @@
                 if (result.success) {
                     console.log('📊 원본 투자 데이터 개수:', result.investments?.length || 0);
                     
-                    investments = result.investments.map(inv => {
-                        console.log('🔍 투자 데이터 원본:', inv); // 디버그용
-                        
-                        // 모든 가능한 컬럼명 시도
-                        const productName = inv.product_name || inv.product_type || inv.type || inv.product || '알 수 없음';
-                        const amount = parseFloat(
-                            inv.investment_amount || 
-                            inv.amount || 
-                            inv.invest_amount || 
-                            inv.money || 
-                            0
-                        );
-                        
-                        const processedData = {
-                            id: inv.id,
-                            investor: inv.member?.name || '알 수 없음',
-                            investorUsername: inv.member?.username || '',
-                            product: productName,
-                            amount: amount,
-                            applicationDate: inv.created_at?.split('T')[0] || '',
-                            status: inv.status,
-                            email: inv.member?.email || '',
-                            phone: inv.member?.phone || '',
-                            bankName: '',
-                            accountNumber: '',
-                            adminNote: '',
-                            processedAt: inv.updated_at?.split('T')[0] || ''
-                        };
-                        
-                        console.log('✅ 처리된 투자 데이터:', processedData);
-                        return processedData;
-                    });
+                    if (!result.investments || !Array.isArray(result.investments)) {
+                        console.warn('⚠️ 투자 데이터가 배열이 아님:', result.investments);
+                        investments = [];
+                    } else {
+                        investments = result.investments.map(inv => {
+                            console.log('🔍 투자 데이터 원본:', inv); // 디버그용
+                            
+                            // 모든 가능한 컬럼명 시도
+                            const productName = inv.product_name || inv.product_type || inv.type || inv.product || '알 수 없음';
+                            const amount = parseFloat(
+                                inv.investment_amount || 
+                                inv.amount || 
+                                inv.invest_amount || 
+                                inv.money || 
+                                0
+                            );
+                            
+                            const processedData = {
+                                id: inv.id,
+                                investor: inv.member?.name || '알 수 없음',
+                                investorUsername: inv.member?.username || '',
+                                product: productName,
+                                amount: amount,
+                                applicationDate: inv.created_at?.split('T')[0] || '',
+                                status: inv.status,
+                                email: inv.member?.email || '',
+                                phone: inv.member?.phone || '',
+                                bankName: '',
+                                accountNumber: '',
+                                adminNote: '',
+                                processedAt: inv.updated_at?.split('T')[0] || ''
+                            };
+                            
+                            console.log('✅ 처리된 투자 데이터:', processedData);
+                            return processedData;
+                        });
+                    }
                     
                     console.log('📊 처리된 투자 데이터 개수:', investments.length);
                     
@@ -181,11 +237,29 @@
                     renderInvestmentTable();
                 } else {
                     console.error('❌ 투자 데이터 로드 실패:', result.message);
-                    showAlert('error', '투자 데이터를 불러오는데 실패했습니다.');
+                    showAlert('error', result.message || '투자 데이터를 불러오는데 실패했습니다.');
                 }
             } catch (error) {
                 console.error('❌ 투자 데이터 로드 중 오류:', error);
-                showAlert('error', `투자 데이터를 불러오는데 실패했습니다: ${error.message}`);
+                console.error('❌ 오류 스택:', error.stack);
+                
+                // 더 자세한 오류 정보 표시
+                let errorMessage = '투자 데이터를 불러오는데 실패했습니다.';
+                if (error.message.includes('fetch')) {
+                    errorMessage += ' 네트워크 연결을 확인해주세요.';
+                } else if (error.message.includes('403') || error.message.includes('401')) {
+                    errorMessage += ' 관리자 권한이 필요합니다.';
+                } else if (error.message.includes('500')) {
+                    errorMessage += ' 서버 내부 오류가 발생했습니다.';
+                }
+                
+                showAlert('error', `${errorMessage}\n\n오류 상세: ${error.message}`);
+                
+                // 빈 테이블 표시
+                const tbody = document.getElementById('investmentTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #e74c3c; padding: 40px;">데이터 로드 중 오류가 발생했습니다.</td></tr>';
+                }
             }
         }
 
