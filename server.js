@@ -33,13 +33,23 @@ console.log(`🔧 포트: ${PORT}`);
 
 // Supabase 설정
 const supabaseUrl = process.env.SUPABASE_URL || 'https://aqcewkutnssgrioxlqba.supabase.co';
-// 배포 환경에서는 서비스 롤 키를 강제로 사용 (RLS 우회)
-const supabaseKey = process.env.NODE_ENV === 'production' 
-    ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I'
-    : (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I');
+
+// 키 선택 로직 개선
+let supabaseKey;
+if (process.env.NODE_ENV === 'production') {
+    // 프로덕션에서는 환경변수의 서비스 롤 키 우선, 없으면 하드코딩된 키
+    supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
+} else {
+    // 개발환경에서는 서비스 롤 키 우선
+    supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 
+        process.env.SUPABASE_ANON_KEY || 
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
+}
 
 console.log('🔧 Supabase URL:', supabaseUrl);
 console.log('🔧 Supabase Key:', supabaseKey ? '설정됨' : '설정안됨');
+console.log('🔧 키 타입:', supabaseKey.includes('service_role') ? 'service_role' : 'anon');
 
 let supabase;
 try {
@@ -188,30 +198,40 @@ async function ensureBasicAccounts() {
         ];
         
         for (const account of basicAccounts) {
-            // 계정이 이미 존재하는지 확인
-            const { data: existing } = await supabase
-                .from('members')
-                .select('username')
-                .eq('username', account.username)
-                .maybeSingle();
-            
-            if (!existing) {
-                console.log(`📝 ${account.username} 계정 생성 중...`);
-                const { error } = await supabase
-                    .from('members')
-                    .insert([{
-                        ...account,
-                        created_at: new Date().toISOString(),
-                        approved_at: new Date().toISOString()
-                    }]);
+            try {
+                // 각 계정 확인에 타임아웃 적용 (5초)
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('timeout')), 5000)
+                );
                 
-                if (error) {
-                    console.error(`❌ ${account.username} 계정 생성 실패:`, error);
+                const checkPromise = supabase
+                    .from('members')
+                    .select('username')
+                    .eq('username', account.username)
+                    .maybeSingle();
+                
+                const { data: existing } = await Promise.race([checkPromise, timeoutPromise]);
+                
+                if (!existing) {
+                    console.log(`📝 ${account.username} 계정 생성 중...`);
+                    const { error } = await supabase
+                        .from('members')
+                        .insert([{
+                            ...account,
+                            created_at: new Date().toISOString(),
+                            approved_at: new Date().toISOString()
+                        }]);
+                    
+                    if (error) {
+                        console.error(`❌ ${account.username} 계정 생성 실패:`, error);
+                    } else {
+                        console.log(`✅ ${account.username} 계정 생성 성공`);
+                    }
                 } else {
-                    console.log(`✅ ${account.username} 계정 생성 성공`);
+                    console.log(`✅ ${account.username} 계정 이미 존재함`);
                 }
-            } else {
-                console.log(`✅ ${account.username} 계정 이미 존재함`);
+            } catch (err) {
+                console.warn(`⚠️ ${account.username} 계정 처리 중 오류 (계속 진행):`, err.message);
             }
         }
         
@@ -370,8 +390,18 @@ app.get('/health', (req, res) => {
         status: 'healthy', 
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        version: '2.0.0' // 버전 업데이트로 재배포 확인
+        version: '2.1.0' // 버전 업데이트로 재배포 확인
     });
+});
+
+// 빠른 응답용 기본 헬스체크
+app.get('/ping', (req, res) => {
+    res.status(200).send('pong');
+});
+
+// 루트 경로도 빠른 응답
+app.get('/status', (req, res) => {
+    res.status(200).json({ ok: true, time: Date.now() });
 });
 
 // API 목록 확인용 (디버깅)
@@ -3028,21 +3058,30 @@ async function startServer() {
         server.keepAliveTimeout = 65000; // 65초
         server.headersTimeout = 66000; // 66초
 
-        // 백그라운드에서 초기화 작업 수행 (타임아웃 설정)
+        // 백그라운드에서 초기화 작업 수행 (타임아웃 단축)
         const initTimeout = setTimeout(() => {
-            console.warn('⚠️ 초기화 작업이 60초를 초과했습니다. 기본값으로 계속 진행합니다.');
-        }, 60000);
+            console.warn('⚠️ 초기화 작업이 30초를 초과했습니다. 기본값으로 계속 진행합니다.');
+        }, 30000);
 
         Promise.all([
-            loadDataFromSupabase().catch(err => {
+            Promise.race([
+                loadDataFromSupabase(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000))
+            ]).catch(err => {
                 console.warn('⚠️ Supabase 데이터 로드 실패:', err.message);
                 return null;
             }),
-            convertHtmlToEjs().catch(err => {
+            Promise.race([
+                convertHtmlToEjs(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
+            ]).catch(err => {
                 console.warn('⚠️ HTML to EJS 변환 실패:', err.message);
                 return null;
             }),
-            ensureBasicAccounts().catch(err => {
+            Promise.race([
+                ensureBasicAccounts(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000))
+            ]).catch(err => {
                 console.warn('⚠️ 기본 계정 생성 실패:', err.message);
                 return null;
             })
