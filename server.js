@@ -761,18 +761,41 @@ app.get('/mypage', requireLogin, async (req, res) => {
             return res.render('mypage', { 
                 user: req.session.user, 
                 userProfile: null,
-                currentBalance: 0
+                currentBalance: 0,
+                totalInvestment: 0,
+                totalProfit: 0
             });
         }
         
         // 사용자 잔액 조회
         const currentBalance = await getMemberBalance(userProfile.id);
         
+        // 총 출자 금액 조회 (승인된 투자만)
+        const { data: investments, error: investmentError } = await supabase
+            .from('investments')
+            .select('amount')
+            .eq('member_id', userProfile.id)
+            .eq('status', 'approved');
+            
+        let totalInvestment = 0;
+        if (!investmentError && investments) {
+            totalInvestment = investments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+        }
+        
+        // 임대수익 계산 (월 수익률 기준으로 누적 계산)
+        // 현재는 가상의 수익률로 계산 (실제로는 더 복잡한 로직 필요)
+        const monthlyRate = 0.025; // 월 2.5% 가정
+        const totalProfit = totalInvestment * monthlyRate * 12; // 1년 기준 예시
+        
         console.log(`✅ ${req.session.user.username} 사용자 프로필 조회 성공`);
+        console.log(`💰 잔액: ${currentBalance}, 총 출자: ${totalInvestment}, 수익: ${totalProfit}`);
+        
         res.render('mypage', { 
             user: req.session.user, 
             userProfile: userProfile,
-            currentBalance: currentBalance
+            currentBalance: currentBalance,
+            totalInvestment: totalInvestment,
+            totalProfit: totalProfit
         });
         
     } catch (error) {
@@ -780,7 +803,9 @@ app.get('/mypage', requireLogin, async (req, res) => {
         res.render('mypage', { 
             user: req.session.user, 
             userProfile: null,
-            currentBalance: 0
+            currentBalance: 0,
+            totalInvestment: 0,
+            totalProfit: 0
         });
     }
 });
@@ -856,12 +881,12 @@ app.get('/my_investments', requireLogin, async (req, res) => {
     try {
         const memberId = req.session.user.id;
         
-        // 사용자의 투자 데이터 조회
+        // 사용자의 투자 데이터 조회 (모든 상태의 투자 포함)
         const { data: investments, error } = await supabase
             .from('investments')
             .select('*')
             .eq('member_id', memberId)
-            .eq('status', 'active');
+            .order('created_at', { ascending: false });
         
         if (error) {
             console.error('투자 데이터 조회 오류:', error);
@@ -870,9 +895,13 @@ app.get('/my_investments', requireLogin, async (req, res) => {
             });
         }
         
+        // 사용자 잔액 조회
+        const currentBalance = await getMemberBalance(memberId);
+        
         res.render('my_investments', { 
             user: req.session.user,
-            investments: investments || []
+            investments: investments || [],
+            currentBalance: currentBalance
         });
     } catch (error) {
         console.error('투자 현황 페이지 오류:', error);
@@ -1086,8 +1115,63 @@ app.get('/admin/site-settings', requireAdmin, (req, res) => {
     res.render('admin/site-settings', { user: req.session.user, currentPage: 'site-settings' });
 });
 
-app.get('/admin/account-manager', requireAdmin, (req, res) => {
-    res.render('admin/account-manager', { user: req.session.user, currentPage: 'account-manager' });
+app.get('/admin/account-manager', requireAdmin, async (req, res) => {
+    try {
+        // 모든 조합원 정보와 잔액 조회
+        const { data: members, error: membersError } = await supabase
+            .from('members')
+            .select('id, username, name, email, phone, bank_name, account_number, created_at')
+            .order('created_at', { ascending: false });
+        
+        if (membersError) {
+            console.error('조합원 목록 조회 오류:', membersError);
+            return res.render('admin/account-manager', { 
+                user: req.session.user, 
+                currentPage: 'account-manager',
+                members: [],
+                error: '조합원 목록을 불러오는 중 오류가 발생했습니다.'
+            });
+        }
+        
+        // 각 조합원의 잔액과 투자 정보 조회
+        const membersWithBalance = await Promise.all(
+            members.map(async (member) => {
+                const balance = await getMemberBalance(member.id);
+                
+                // 총 투자 금액 조회
+                const { data: investments } = await supabase
+                    .from('investments')
+                    .select('amount')
+                    .eq('member_id', member.id)
+                    .eq('status', 'approved');
+                
+                const totalInvestment = investments 
+                    ? investments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0)
+                    : 0;
+                
+                return {
+                    ...member,
+                    balance: balance,
+                    totalInvestment: totalInvestment
+                };
+            })
+        );
+        
+        res.render('admin/account-manager', { 
+            user: req.session.user, 
+            currentPage: 'account-manager',
+            members: membersWithBalance
+        });
+        
+    } catch (error) {
+        console.error('계좌 관리 페이지 오류:', error);
+        res.render('admin/account-manager', { 
+            user: req.session.user, 
+            currentPage: 'account-manager',
+            members: [],
+            error: '페이지를 불러오는 중 오류가 발생했습니다.'
+        });
+    }
 });
 
 app.get('/admin/notice-manager', requireAdmin, (req, res) => {
@@ -1098,8 +1182,46 @@ app.get('/admin/inquiry-manager', requireAdmin, (req, res) => {
     res.render('admin/inquiry-manager', { user: req.session.user, currentPage: 'inquiry-manager' });
 });
 
-app.get('/admin/transaction-management', requireAdmin, (req, res) => {
-    res.render('admin/transaction-management', { user: req.session.user, currentPage: 'transaction-management' });
+app.get('/admin/transaction-management', requireAdmin, async (req, res) => {
+    try {
+        // 거래 내역 조회
+        const { data: transactions, error: transactionsError } = await supabase
+            .from('transactions')
+            .select(`
+                *,
+                members:member_id (
+                    username,
+                    name
+                )
+            `)
+            .order('created_at', { ascending: false })
+            .limit(100);
+        
+        if (transactionsError) {
+            console.error('거래내역 조회 오류:', transactionsError);
+            return res.render('admin/transaction-management', { 
+                user: req.session.user, 
+                currentPage: 'transaction-management',
+                transactions: [],
+                error: '거래내역을 불러오는 중 오류가 발생했습니다.'
+            });
+        }
+        
+        res.render('admin/transaction-management', { 
+            user: req.session.user, 
+            currentPage: 'transaction-management',
+            transactions: transactions || []
+        });
+        
+    } catch (error) {
+        console.error('거래 관리 페이지 오류:', error);
+        res.render('admin/transaction-management', { 
+            user: req.session.user, 
+            currentPage: 'transaction-management',
+            transactions: [],
+            error: '페이지를 불러오는 중 오류가 발생했습니다.'
+        });
+    }
 });
 
 // API 엔드포인트들
@@ -2695,6 +2817,55 @@ app.put('/api/admin/investment/:id', requireAdmin, async (req, res) => {
         }
         
         const newStatus = action === 'approve' ? 'approved' : 'rejected';
+        
+        // 투자 승인인 경우 잔액에서 투자 금액 차감
+        if (action === 'approve') {
+            // 현재 잔액 조회
+            const currentBalance = await getMemberBalance(investment.member_id);
+            
+            // 잔액 부족 확인
+            if (currentBalance < investment.amount) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: '조합원의 잔액이 부족합니다.' 
+                });
+            }
+            
+            // 잔액에서 투자 금액 차감
+            const newBalance = currentBalance - investment.amount;
+            const { error: balanceError } = await supabase
+                .from('member_balances')
+                .update({ balance: newBalance })
+                .eq('member_id', investment.member_id);
+            
+            if (balanceError) {
+                console.error('잔액 업데이트 오류:', balanceError);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: '잔액 업데이트 중 오류가 발생했습니다.' 
+                });
+            }
+            
+            // 거래내역 기록 (투자 차감)
+            const { error: transactionError } = await supabase
+                .from('transactions')
+                .insert({
+                    member_id: investment.member_id,
+                    type: 'investment',
+                    amount: -investment.amount,
+                    balance_after: newBalance,
+                    description: `${investment.product_name} 투자`,
+                    status: 'completed',
+                    created_at: new Date().toISOString()
+                });
+                
+            if (transactionError) {
+                console.error('거래내역 기록 오류:', transactionError);
+                // 거래내역 기록 실패해도 투자 승인은 진행
+            }
+            
+            console.log(`💰 투자 승인으로 잔액 차감: ${investment.member_id}, 차감액: ${investment.amount}, 잔액: ${newBalance}`);
+        }
         
         // 투자 신청 상태 업데이트
         const { error: updateError } = await supabase

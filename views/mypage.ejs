@@ -572,9 +572,11 @@
                 <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
                 <div class="stat-title">총 출자 금액</div>
                 <div class="stat-value" id="statInvestment">
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.username === 'minj0010') { %>₩70,000,000<% } else if (user.role === 'admin') { %>₩200,000,000<% } else { %>₩0<% } %>
-                    <% } else { %>₩0<% } %>
+                    <% if (typeof totalInvestment !== 'undefined') { %>
+                        ₩<%= totalInvestment.toLocaleString() %>
+                    <% } else { %>
+                        ₩0
+                    <% } %>
                 </div>
             </div>
             
@@ -582,9 +584,11 @@
                 <div class="stat-icon"><i class="fas fa-coins"></i></div>
                 <div class="stat-title">나의 임대수익 금액</div>
                 <div class="stat-value" id="statProfit">
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.username === 'minj0010') { %>₩33,177,000<% } else if (user.role === 'admin') { %>₩85,000,000<% } else { %>₩0<% } %>
-                    <% } else { %>₩0<% } %>
+                    <% if (typeof totalProfit !== 'undefined') { %>
+                        ₩<%= Math.round(totalProfit).toLocaleString() %>
+                    <% } else { %>
+                        ₩0
+                    <% } %>
                 </div>
             </div>
         </div>
