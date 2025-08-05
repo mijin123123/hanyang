@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 
 // Supabase 설정
 const supabaseUrl = 'https://aqcewkutnssgrioxlqba.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyOTAxNDgsImV4cCI6MjA2OTg2NjE0OH0.CdU2UhkIu6Wcyl4GWTg4a0z9eovgkFSSNn9sZfUKSAw';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Multer 설정 (파일 업로드)
@@ -239,21 +239,53 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
     try {
+        console.log('🔍 로그인 시도:', username);
+        
         // 비밀번호 해시화
         const passwordHash = hashPassword(password);
+        console.log('🔐 비밀번호 해시:', passwordHash);
         
-        // 사용자 조회
+        // 먼저 사용자가 존재하는지 확인
+        const { data: existingUser, error: userError } = await supabase
+            .from('members')
+            .select('username, password_hash, status, role')
+            .eq('username', username)
+            .single();
+            
+        if (userError) {
+            console.log('❌ 사용자 조회 오류:', userError);
+            return res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+        }
+        
+        if (!existingUser) {
+            console.log('❌ 사용자 없음:', username);
+            return res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+        }
+        
+        console.log('✅ 사용자 발견:', existingUser.username, '저장된 해시:', existingUser.password_hash);
+        
+        // 비밀번호 확인
+        if (existingUser.password_hash !== passwordHash) {
+            console.log('❌ 비밀번호 불일치');
+            return res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+        }
+        
+        // 승인 상태 확인
+        if (existingUser.status !== 'approved') {
+            console.log('❌ 승인되지 않은 사용자:', existingUser.status);
+            return res.json({ success: false, message: '계정이 승인되지 않았습니다.' });
+        }
+        
+        // 전체 사용자 정보 조회
         const { data: user, error } = await supabase
             .from('members')
             .select('*')
             .eq('username', username)
-            .eq('password_hash', passwordHash)
-            .eq('status', 'approved') // 승인된 사용자만
             .single();
 
         if (error || !user) {
-            console.log('로그인 실패:', username);
-            return res.json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+            console.log('❌ 전체 사용자 정보 조회 실패:', username);
+            return res.json({ success: false, message: '로그인 처리 중 오류가 발생했습니다.' });
         }
 
         // 세션 설정
@@ -1114,6 +1146,206 @@ app.get('/api/test/supabase', async (req, res) => {
     }
 });
 
+// 비밀번호 해시 테스트 API
+app.get('/api/test/hash/:password', (req, res) => {
+    const { password } = req.params;
+    const hash = hashPassword(password);
+    
+    console.log(`🔐 비밀번호 "${password}" 해시:`, hash);
+    
+    res.json({
+        success: true,
+        password: password,
+        hash: hash,
+        message: `비밀번호 "${password}"의 해시값입니다.`
+    });
+});
+
+// members 테이블 조회 테스트 API
+app.get('/api/test/members', async (req, res) => {
+    try {
+        console.log('🧪 Members 테이블 조회 테스트');
+        
+        // 모든 members 조회
+        const { data: allMembers, error: allError } = await supabase
+            .from('members')
+            .select('*');
+        
+        if (allError) {
+            console.log('❌ 모든 멤버 조회 오류:', allError);
+        } else {
+            console.log('✅ 모든 멤버 조회 성공:', allMembers);
+        }
+        
+        // minj0010 사용자만 조회
+        const { data: minj0010, error: minjError } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', 'minj0010');
+        
+        if (minjError) {
+            console.log('❌ minj0010 조회 오류:', minjError);
+        } else {
+            console.log('✅ minj0010 조회 성공:', minj0010);
+        }
+        
+        res.json({
+            success: true,
+            allMembers: allMembers,
+            allMembersError: allError,
+            minj0010: minj0010,
+            minj0010Error: minjError
+        });
+        
+    } catch (error) {
+        console.error('Members 테이블 조회 중 오류:', error);
+        res.json({
+            success: false,
+            message: '서버 오류',
+            error: error.message
+        });
+    }
+});
+
+// 로그인 테스트 API
+app.get('/api/test/login/:username/:password', async (req, res) => {
+    const { username, password } = req.params;
+    
+    try {
+        console.log(`🧪 로그인 테스트: ${username}/${password}`);
+        
+        const passwordHash = hashPassword(password);
+        console.log('🔐 생성된 해시:', passwordHash);
+        
+        // Supabase에서 사용자 조회 (여러 방법으로 시도)
+        console.log('🔍 사용자 조회 시도 1: single() 사용');
+        const { data: user1, error: error1 } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', username)
+            .single();
+        
+        console.log('🔍 사용자 조회 시도 2: 배열로 조회');
+        const { data: user2, error: error2 } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', username);
+        
+        if (error1 && error2) {
+            console.log('❌ 사용자 조회 오류1:', error1);
+            console.log('❌ 사용자 조회 오류2:', error2);
+            return res.json({
+                success: false,
+                message: '사용자 조회 실패',
+                error1: error1.message,
+                error2: error2.message
+            });
+        }
+        
+        const user = user1 || (user2 && user2[0]);
+        
+        if (!user) {
+            return res.json({
+                success: false,
+                message: '사용자를 찾을 수 없습니다.',
+                user1: user1,
+                user2: user2
+            });
+        }
+        
+        console.log('📋 DB에 저장된 사용자 정보:');
+        console.log('  - Username:', user.username);
+        console.log('  - 저장된 해시:', user.password_hash);
+        console.log('  - 입력된 해시:', passwordHash);
+        console.log('  - 해시 일치:', user.password_hash === passwordHash);
+        
+        res.json({
+            success: true,
+            user: {
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                status: user.status
+            },
+            storedHash: user.password_hash,
+            inputHash: passwordHash,
+            hashMatch: user.password_hash === passwordHash
+        });
+        
+    } catch (error) {
+        console.error('로그인 테스트 중 오류:', error);
+        res.json({
+            success: false,
+            message: '서버 오류',
+            error: error.message
+        });
+    }
+});
+
+// 테스트용 API - 계정 생성 (개발용)
+app.post('/api/test/create-accounts', async (req, res) => {
+    try {
+        console.log('🔨 테스트 계정 생성 시작');
+        
+        const accounts = [
+            {
+                username: 'minj0010',
+                password_hash: hashPassword('minj0010'),
+                name: '김민정',
+                email: 'minj0010@hanyang.com',
+                role: 'admin',
+                status: 'approved'
+            },
+            {
+                username: 'test',
+                password_hash: hashPassword('test123'),
+                name: '테스트사용자',
+                email: 'test@hanyang.com',
+                role: 'user',
+                status: 'approved'
+            }
+        ];
+        
+        const results = [];
+        
+        for (const account of accounts) {
+            // 기존 계정 확인
+            const { data: existing } = await supabase
+                .from('members')
+                .select('username')
+                .eq('username', account.username);
+            
+            if (existing && existing.length > 0) {
+                results.push({ username: account.username, status: 'already_exists' });
+                continue;
+            }
+            
+            // RPC를 사용하여 계정 생성 시도
+            const { data, error } = await supabase.rpc('create_member_manual', {
+                p_username: account.username,
+                p_password_hash: account.password_hash,
+                p_name: account.name,
+                p_email: account.email,
+                p_role: account.role,
+                p_status: account.status
+            });
+            
+            if (error) {
+                console.log(`❌ ${account.username} 생성 실패:`, error);
+                results.push({ username: account.username, status: 'failed', error: error.message });
+            } else {
+                console.log(`✅ ${account.username} 생성 성공`);
+                results.push({ username: account.username, status: 'created' });
+            }
+        }
+        
+        res.json({ success: true, results });
+    } catch (error) {
+        console.error('계정 생성 중 오류:', error);
+        res.json({ success: false, error: error.message });
+    }
+});
+
 // 회원 목록 조회 (관리자용)
 app.get('/api/members', requireAdmin, (req, res) => {
     const approvedMembers = users.filter(user => user.status === 'approved');
@@ -1161,70 +1393,43 @@ async function initializeDefaultAccounts() {
     try {
         console.log('🔍 기본 계정 초기화 중...');
         
-        // 관리자 계정 (minj0010/minj0010)
-        const adminData = {
-            username: 'minj0010',
-            password_hash: hashPassword('minj0010'),
-            name: '김민정',
-            email: 'minj0010@hanyang.com',
-            role: 'admin',
-            status: 'approved',
-            created_at: new Date().toISOString(),
-            approved_at: new Date().toISOString()
-        };
-
+        // 먼저 기존 계정이 있는지 확인
         const { data: existingAdmin } = await supabase
             .from('members')
             .select('username')
-            .eq('username', 'minj0010')
-            .single();
+            .eq('username', 'minj0010');
 
-        if (!existingAdmin) {
-            const { error: adminError } = await supabase
-                .from('members')
-                .insert([adminData]);
-
-            if (!adminError) {
-                console.log('✅ 관리자 계정 생성: minj0010/minj0010');
-            } else {
-                console.error('❌ 관리자 계정 생성 실패:', adminError);
-            }
+        if (!existingAdmin || existingAdmin.length === 0) {
+            console.log('⚠️ 관리자 계정이 없습니다. Supabase 대시보드에서 수동으로 생성해주세요.');
+            console.log('📝 생성할 관리자 계정 정보:');
+            console.log('   Username: minj0010');
+            console.log('   Password Hash:', hashPassword('minj0010'));
+            console.log('   Name: 김민정');
+            console.log('   Role: admin');
+            console.log('   Status: approved');
         } else {
             console.log('✅ 관리자 계정 이미 존재');
         }
 
-        // 테스트 사용자 계정 (test/test123)
-        const testData = {
-            username: 'test',
-            password_hash: hashPassword('test123'),
-            name: '테스트사용자',
-            email: 'test@hanyang.com',
-            role: 'user',
-            status: 'approved',
-            created_at: new Date().toISOString(),
-            approved_at: new Date().toISOString()
-        };
-
         const { data: existingTest } = await supabase
             .from('members')
             .select('username')
-            .eq('username', 'test')
-            .single();
+            .eq('username', 'test');
 
-        if (!existingTest) {
-            const { error: testError } = await supabase
-                .from('members')
-                .insert([testData]);
-
-            if (!testError) {
-                console.log('✅ 테스트 사용자 계정 생성: test/test123');
-            }
+        if (!existingTest || existingTest.length === 0) {
+            console.log('⚠️ 테스트 계정이 없습니다. Supabase 대시보드에서 수동으로 생성해주세요.');
+            console.log('📝 생성할 테스트 계정 정보:');
+            console.log('   Username: test');
+            console.log('   Password Hash:', hashPassword('test123'));
+            console.log('   Name: 테스트사용자');
+            console.log('   Role: user');
+            console.log('   Status: approved');
         } else {
-            console.log('✅ 테스트 사용자 계정 이미 존재');
+            console.log('✅ 테스트 계정 이미 존재');
         }
 
     } catch (error) {
-        console.error('기본 계정 초기화 중 오류:', error);
+        console.error('기본 계정 확인 중 오류:', error);
     }
 }
 
