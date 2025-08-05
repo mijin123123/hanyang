@@ -839,6 +839,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('💾 로컬 스토리지에 사용자 정보 저장됨');
                     }
                     
+                    // 세션 상태 확인
+                    try {
+                        const sessionCheck = await fetch('/api/session-check', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                        const sessionData = await sessionCheck.json();
+                        console.log('🔍 세션 확인 결과:', sessionData);
+                    } catch (e) {
+                        console.log('⚠️ 세션 확인 실패:', e);
+                    }
+                    
                     setTimeout(() => {
                         console.log('🔄 메인 페이지로 리다이렉트...');
                         window.location.href = '/';

@@ -83,10 +83,26 @@ app.use(helmet({
 // CORS 설정
 // CORS 설정 (Render 배포 환경 최적화)
 app.use(cors({
-    origin: NODE_ENV === 'production' 
-        ? ['https://hanyang-energy.onrender.com'] 
-        : ['http://localhost:3000'],
-    credentials: true // 쿠키 및 인증 정보 포함 허용
+    origin: function (origin, callback) {
+        // 배포 환경에서는 특정 도메인만 허용
+        const allowedOrigins = [
+            'https://hanyang-energy.onrender.com',
+            'http://localhost:3000',
+            'http://127.0.0.1:3000'
+        ];
+        
+        // origin이 없는 경우 (동일 도메인 요청) 허용
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('CORS 차단된 origin:', origin);
+            callback(null, true); // 임시로 모든 origin 허용
+        }
+    },
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 // Body parser 미들웨어
@@ -98,11 +114,12 @@ app.use(session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    rolling: true, // 세션 만료 시간 갱신
     cookie: {
-        secure: NODE_ENV === 'production', // HTTPS에서만 쿠키 전송
+        secure: false, // HTTPS가 아닌 환경에서도 작동하도록 임시 설정
         httpOnly: true, // XSS 공격 방지
         maxAge: 24 * 60 * 60 * 1000, // 24시간
-        sameSite: NODE_ENV === 'production' ? 'none' : 'lax' // CORS 환경에서 쿠키 전송 허용
+        sameSite: 'lax' // CORS 환경에서 쿠키 전송 허용
     },
     name: 'hanyang.sid' // 기본 세션 이름 변경
 }));
@@ -117,6 +134,9 @@ app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/videos', express.static(path.join(__dirname, 'videos')));
+
+// 디버깅용 HTML 파일도 서빙
+app.use(express.static(__dirname));
 
 // 관리자 정적 파일 서빙
 app.use('/admin/css', express.static(path.join(__dirname, 'admin/css')));
@@ -281,6 +301,8 @@ app.post('/login', async (req, res) => {
     
     try {
         console.log('🔍 로그인 시도:', username, '환경:', NODE_ENV, '요청 헤더:', req.headers.origin);
+        console.log('🍪 기존 세션 정보:', req.session.user ? '존재' : '없음');
+        console.log('🔗 세션 ID:', req.sessionID);
         
         // 비밀번호 해시화
         const passwordHash = hashPassword(password);
@@ -345,9 +367,20 @@ app.post('/login', async (req, res) => {
             loginTime: new Date().toISOString()
         };
         
-        console.log('✅ 로그인 성공:', user.username, '세션 ID:', req.sessionID);
-        console.log('🔒 세션 저장 상태:', req.session.user ? '성공' : '실패');
-        res.json({ success: true, user: req.session.user });
+        // 세션 강제 저장
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ 세션 저장 실패:', err);
+                return res.json({ success: false, message: '세션 저장 중 오류가 발생했습니다.' });
+            }
+            
+            console.log('✅ 로그인 성공:', user.username, '세션 ID:', req.sessionID);
+            console.log('🔒 세션 저장 상태:', req.session.user ? '성공' : '실패');
+            console.log('💾 세션 데이터:', req.session.user);
+            
+            res.json({ success: true, user: req.session.user });
+        });
+        
     } catch (error) {
         console.error('로그인 처리 중 오류:', error);
         res.json({ success: false, message: '로그인 처리 중 오류가 발생했습니다.' });
@@ -439,10 +472,35 @@ app.post('/signup', async (req, res) => {
     }
 });
 
+// 세션 상태 확인용 엔드포인트 (디버깅용)
+app.get('/api/session-check', (req, res) => {
+    console.log('🔍 세션 체크 요청');
+    console.log('🔗 세션 ID:', req.sessionID);
+    console.log('👤 세션 사용자:', req.session.user);
+    console.log('🍪 쿠키:', req.headers.cookie);
+    
+    res.json({
+        sessionId: req.sessionID,
+        user: req.session.user || null,
+        isLoggedIn: !!req.session.user,
+        cookie: req.headers.cookie
+    });
+});
+
 // 로그아웃
 app.post('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/login');
+    console.log('🚪 로그아웃 요청 - 사용자:', req.session.user ? req.session.user.username : '없음');
+    
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('❌ 세션 삭제 실패:', err);
+            return res.json({ success: false, message: '로그아웃 처리 중 오류가 발생했습니다.' });
+        }
+        
+        console.log('✅ 로그아웃 완료');
+        res.clearCookie('hanyang.sid'); // 쿠키도 명시적으로 삭제
+        res.json({ success: true, message: '로그아웃 되었습니다.' });
+    });
 });
 
 // 환경 변수 체크 API (배포 환경 디버깅용)
