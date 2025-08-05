@@ -906,7 +906,15 @@ app.get('/my_investments', requireLogin, async (req, res) => {
             product_name: investment.product_name || 
                          getProductNameFromType(investment.product_type) || 
                          investment.product || 
-                         '알 수 없는 상품'
+                         '알 수 없는 상품',
+            // 투자 날짜 설정 (created_at이나 investment_date 사용)
+            investment_date: investment.investment_date || investment.created_at || new Date().toISOString(),
+            // 상태 정규화 (DB의 실제 상태를 템플릿에서 이해할 수 있는 형태로 변환)
+            displayStatus: investment.status === 'approved' ? 'active' : 
+                          investment.status === 'rejected' ? 'rejected' : 
+                          investment.status === 'completed' ? 'completed' : 'pending',
+            // 원본 상태도 유지
+            originalStatus: investment.status
         }));
         
         // 사용자 잔액 조회

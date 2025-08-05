@@ -999,10 +999,14 @@
                         <td><%= new Date(investment.investment_date).toLocaleDateString('ko-KR') %></td>
                         <td class="profit-rate"><%= profitRate %></td>
                         <td class="profit-amount">₩<%= dailyProfit.toLocaleString() %></td>
-                        <td><span class="status-badge status-<%= investment.status %>"><%= investment.status === 'active' ? '진행중' : investment.status === 'completed' ? '완료' : '대기중' %></span></td>
+                        <td><span class="status-badge status-<%= investment.originalStatus %>"><%= 
+                            investment.originalStatus === 'approved' ? '승인됨' : 
+                            investment.originalStatus === 'rejected' ? '반려됨' : 
+                            investment.originalStatus === 'completed' ? '완료됨' : '대기중' 
+                        %></span></td>
                         <td>
                             <button class="action-btn btn-detail">상세보기</button>
-                            <% if (investment.status === 'active') { %>
+                            <% if (investment.originalStatus === 'approved') { %>
                             <button class="action-btn btn-withdraw">출금신청</button>
                             <% } %>
                         </td>
