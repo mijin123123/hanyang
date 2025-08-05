@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입출금 관리 | 한양에너지 관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
+    <style>
+        .transaction-management {
+            padding: 20px;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filter-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #0056a3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: #004080;
+        }
+
+        .transactions-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .table-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        td {
+            font-size: 0.9rem;
+        }
+
+        .type-deposit {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .type-withdraw {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-approved {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-rejected {
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+        }
+
+        .btn-reject:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .amount {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .member-info {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .account-info {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal h4 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .btn-modal {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-modal.primary {
+            background: #0056a3;
+            color: white;
+        }
+
+        .btn-modal.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 사이드바 -->
+        <%- include('../partials/admin-sidebar') %>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>입출금 관리</h1>
+                <div class="header-actions">
+                    <span id="current-time"></span>
+                </div>
+            </div>
+
+            <div class="transaction-management">
+                <!-- 필터 섹션 -->
+                <div class="filter-section">
+                    <h3>필터</h3>
+                    <div class="filter-form">
+                        <div class="filter-group">
+                            <label>거래 유형</label>
+                            <select id="filter-type">
+                                <option value="">전체</option>
+                                <option value="deposit">입금</option>
+                                <option value="withdraw">출금</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>상태</label>
+                            <select id="filter-status">
+                                <option value="">전체</option>
+                                <option value="pending">승인 대기</option>
+                                <option value="approved">승인 완료</option>
+                                <option value="rejected">승인 거부</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>시작일</label>
+                            <input type="date" id="filter-start-date">
+                        </div>
+                        <div class="filter-group">
+                            <label>종료일</label>
+                            <input type="date" id="filter-end-date">
+                        </div>
+                        <button class="filter-btn" onclick="loadTransactions()">
+                            <i class="fas fa-search"></i> 검색
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 거래 내역 테이블 -->
+                <div class="transactions-table">
+                    <div class="table-header">
+                        <h3>거래 내역</h3>
+                        <div class="table-stats">
+                            <span>총 <span id="total-count">0</span>건</span>
+                            <span>대기 <span id="pending-count">0</span>건</span>
+                        </div>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>신청일시</th>
+                                <th>회원</th>
+                                <th>유형</th>
+                                <th>금액</th>
+                                <th>계좌정보</th>
+                                <th>상태</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                                    데이터를 로드하는 중...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 승인/거부 모달 -->
+    <div id="action-modal" class="modal">
+        <div class="modal-content">
+            <h4 id="modal-title">거래 처리</h4>
+            <div id="modal-transaction-info"></div>
+            <textarea id="modal-note" placeholder="관리자 메모를 입력하세요..."></textarea>
+            <div class="modal-buttons">
+                <button class="btn-modal secondary" onclick="closeModal()">취소</button>
+                <button class="btn-modal primary" id="modal-confirm-btn" onclick="confirmAction()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/js/common-sidebar.js"></script>
+    <script>
+        let currentTransactionId = null;
+        let currentAction = null;
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTransactions();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+        });
+
+        // 현재 시간 업데이트
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('ko-KR');
+        }
+
+        // 거래 내역 로드
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/api/admin/transactions', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('거래 내역을 불러올 수 없습니다.');
+                }
+
+                const result = await response.json();
+                displayTransactions(result.transactions || []);
+                updateStats(result.transactions || []);
+
+            } catch (error) {
+                console.error('거래 내역 로드 오류:', error);
+                showError('거래 내역을 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 거래 내역 표시
+        function displayTransactions(transactions) {
+            const tbody = document.getElementById('transactions-tbody');
+            
+            if (transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                            거래 내역이 없습니다.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = transactions.map(transaction => {
+                const createdAt = new Date(transaction.created_at).toLocaleString('ko-KR');
+                const amount = parseInt(transaction.amount).toLocaleString();
+                const memberName = transaction.member ? transaction.member.name : '알 수 없음';
+                const memberUsername = transaction.member ? transaction.member.username : '';
+                
+                const typeClass = transaction.type === 'deposit' ? 'type-deposit' : 'type-withdraw';
+                const typeName = transaction.type === 'deposit' ? '입금' : '출금';
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (transaction.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = '승인 대기';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-approved';
+                        statusText = '승인 완료';
+                        break;
+                    case 'rejected':
+                        statusClass = 'status-rejected';
+                        statusText = '승인 거부';
+                        break;
+                }
+
+                let accountInfo = '';
+                if (transaction.type === 'deposit') {
+                    accountInfo = transaction.bank_transfer_name || '입금자명 없음';
+                } else {
+                    accountInfo = `
+                        ${transaction.withdraw_bank_name || ''}<br>
+                        ${transaction.withdraw_account_number || ''}<br>
+                        ${transaction.withdraw_account_holder || ''}
+                    `;
+                }
+
+                const canManage = transaction.status === 'pending';
+
+                return `
+                    <tr>
+                        <td>${createdAt}</td>
+                        <td>
+                            <div class="member-info">
+                                <strong>${memberName}</strong><br>
+                                <small>(${memberUsername})</small>
+                            </div>
+                        </td>
+                        <td><span class="${typeClass}">${typeName}</span></td>
+                        <td class="amount">₩${amount}</td>
+                        <td><div class="account-info">${accountInfo}</div></td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            ${canManage ? `
+                                <div class="action-buttons">
+                                    <button class="btn-approve" onclick="showActionModal('${transaction.id}', 'approve')">
+                                        승인
+                                    </button>
+                                    <button class="btn-reject" onclick="showActionModal('${transaction.id}', 'reject')">
+                                        거부
+                                    </button>
+                                </div>
+                            ` : `
+                                <span style="color: #666; font-size: 0.8rem;">처리완료</span>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 통계 업데이트
+        function updateStats(transactions) {
+            const totalCount = transactions.length;
+            const pendingCount = transactions.filter(t => t.status === 'pending').length;
+            
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('pending-count').textContent = pendingCount;
+        }
+
+        // 액션 모달 표시
+        function showActionModal(transactionId, action) {
+            currentTransactionId = transactionId;
+            currentAction = action;
+            
+            const actionText = action === 'approve' ? '승인' : '거부';
+            document.getElementById('modal-title').textContent = `거래 ${actionText}`;
+            document.getElementById('modal-confirm-btn').textContent = actionText;
+            document.getElementById('modal-confirm-btn').className = `btn-modal ${action === 'approve' ? 'primary' : 'reject'}`;
+            document.getElementById('modal-note').value = '';
+            
+            document.getElementById('action-modal').style.display = 'block';
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('action-modal').style.display = 'none';
+            currentTransactionId = null;
+            currentAction = null;
+        }
+
+        // 액션 확인
+        async function confirmAction() {
+            if (!currentTransactionId || !currentAction) {
+                return;
+            }
+
+            const note = document.getElementById('modal-note').value;
+            
+            try {
+                const response = await fetch(`/api/admin/transaction/${currentTransactionId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        action: currentAction,
+                        note: note
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess(result.message);
+                    closeModal();
+                    loadTransactions(); // 목록 새로고침
+                } else {
+                    showError(result.message || '처리 중 오류가 발생했습니다.');
+                }
+
+            } catch (error) {
+                console.error('거래 처리 오류:', error);
+                showError('서버 오류가 발생했습니다.');
+            }
+        }
+
+        // 성공 메시지 표시
+        function showSuccess(message) {
+            alert(message); // 실제로는 toast 알림으로 대체
+        }
+
+        // 에러 메시지 표시
+        function showError(message) {
+            alert('오류: ' + message); // 실제로는 toast 알림으로 대체
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('action-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

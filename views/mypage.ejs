@@ -549,7 +549,7 @@
                 <div class="stat-title">가입된 조합 상품</div>
                 <div class="stat-value" id="statProducts">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.username === 'minj0010') { %>2건<% } else if (user.role === 'admin') { %>5건<% } else { %>1건<% } %>
+                        <% if (user.username === 'minj0010') { %>2건<% } else if (user.role === 'admin') { %>5건<% } else { %>0건<% } %>
                     <% } else { %>0건<% } %>
                 </div>
             </div>
@@ -559,7 +559,15 @@
                 <div class="stat-title">계좌 잔액</div>
                 <div class="stat-value" id="statBalance">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.username === 'minj0010') { %>₩4,623,000<% } else if (user.role === 'admin') { %>₩15,000,000<% } else { %>₩1,500,000<% } %>
+                        <% if (typeof currentBalance !== 'undefined') { %>
+                            ₩<%= currentBalance.toLocaleString() %>
+                        <% } else if (user.username === 'minj0010') { %>
+                            ₩4,623,000
+                        <% } else if (user.role === 'admin') { %>
+                            ₩15,000,000
+                        <% } else { %>
+                            ₩0
+                        <% } %>
                     <% } else { %>₩0<% } %>
                 </div>
             </div>
@@ -569,7 +577,7 @@
                 <div class="stat-title">총 출자 금액</div>
                 <div class="stat-value" id="statInvestment">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.username === 'minj0010') { %>₩70,000,000<% } else if (user.role === 'admin') { %>₩200,000,000<% } else { %>₩25,000,000<% } %>
+                        <% if (user.username === 'minj0010') { %>₩70,000,000<% } else if (user.role === 'admin') { %>₩200,000,000<% } else { %>₩0<% } %>
                     <% } else { %>₩0<% } %>
                 </div>
             </div>
@@ -579,7 +587,7 @@
                 <div class="stat-title">나의 임대수익 금액</div>
                 <div class="stat-value" id="statProfit">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.username === 'minj0010') { %>₩33,177,000<% } else if (user.role === 'admin') { %>₩85,000,000<% } else { %>₩3,200,000<% } %>
+                        <% if (user.username === 'minj0010') { %>₩33,177,000<% } else if (user.role === 'admin') { %>₩85,000,000<% } else { %>₩0<% } %>
                     <% } else { %>₩0<% } %>
                 </div>
             </div>

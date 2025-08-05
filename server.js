@@ -425,18 +425,30 @@ app.get('/mypage', requireLogin, async (req, res) => {
         if (error) {
             console.error('사용자 프로필 조회 오류:', error);
             // 오류 시 세션 정보만 사용
-            return res.render('mypage', { user: req.session.user, userProfile: null });
+            return res.render('mypage', { 
+                user: req.session.user, 
+                userProfile: null,
+                currentBalance: 0
+            });
         }
+        
+        // 사용자 잔액 조회
+        const currentBalance = await getMemberBalance(userProfile.id);
         
         console.log(`✅ ${req.session.user.username} 사용자 프로필 조회 성공`);
         res.render('mypage', { 
             user: req.session.user, 
-            userProfile: userProfile 
+            userProfile: userProfile,
+            currentBalance: currentBalance
         });
         
     } catch (error) {
         console.error('마이페이지 로드 중 오류:', error);
-        res.render('mypage', { user: req.session.user, userProfile: null });
+        res.render('mypage', { 
+            user: req.session.user, 
+            userProfile: null,
+            currentBalance: 0
+        });
     }
 });
 
@@ -453,8 +465,37 @@ app.get('/my_investments', requireLogin, (req, res) => {
     res.render('my_investments', { user: req.session.user });
 });
 
-app.get('/withdraw_request', requireLogin, (req, res) => {
-    res.render('withdraw_request', { user: req.session.user });
+app.get('/withdraw_request', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        
+        // 사용자 잔액 조회
+        const currentBalance = await getMemberBalance(memberId);
+        
+        // 사용자 프로필 정보 조회
+        const { data: userProfile, error: profileError } = await supabase
+            .from('members')
+            .select('*')
+            .eq('id', memberId)
+            .single();
+        
+        if (profileError) {
+            console.error('사용자 프로필 조회 오류:', profileError);
+        }
+        
+        res.render('withdraw_request', { 
+            user: req.session.user,
+            userProfile: userProfile || {},
+            currentBalance: currentBalance
+        });
+    } catch (error) {
+        console.error('입출금 페이지 로드 오류:', error);
+        res.render('withdraw_request', { 
+            user: req.session.user,
+            userProfile: {},
+            currentBalance: 0
+        });
+    }
 });
 
 app.get('/investment_detail', requireLogin, (req, res) => {
@@ -554,6 +595,10 @@ app.get('/admin/notice-manager', requireAdmin, (req, res) => {
 
 app.get('/admin/inquiry-manager', requireAdmin, (req, res) => {
     res.render('admin/inquiry-manager', { user: req.session.user, currentPage: 'inquiry-manager' });
+});
+
+app.get('/admin/transaction-management', requireAdmin, (req, res) => {
+    res.render('admin/transaction-management', { user: req.session.user, currentPage: 'transaction-management' });
 });
 
 // API 엔드포인트들
@@ -1597,6 +1642,351 @@ async function initializeDefaultAccounts() {
         console.error('기본 계정 확인 중 오류:', error);
     }
 }
+
+// 회원 잔액 조회
+async function getMemberBalance(memberId) {
+    try {
+        const { data, error } = await supabase
+            .from('member_balances')
+            .select('balance')
+            .eq('member_id', memberId)
+            .single();
+        
+        if (error) {
+            // 잔액 레코드가 없으면 생성
+            if (error.code === 'PGRST116') {
+                const { error: insertError } = await supabase
+                    .from('member_balances')
+                    .insert({ member_id: memberId, balance: 0 });
+                
+                if (insertError) {
+                    console.error('잔액 생성 오류:', insertError);
+                    return 0;
+                }
+                return 0;
+            }
+            console.error('잔액 조회 오류:', error);
+            return 0;
+        }
+        
+        return parseFloat(data.balance) || 0;
+    } catch (error) {
+        console.error('잔액 조회 중 오류:', error);
+        return 0;
+    }
+}
+
+// 회원 잔액 업데이트
+async function updateMemberBalance(memberId, newBalance) {
+    try {
+        const { error } = await supabase
+            .from('member_balances')
+            .upsert({ 
+                member_id: memberId, 
+                balance: newBalance,
+                updated_at: new Date().toISOString()
+            });
+        
+        if (error) {
+            console.error('잔액 업데이트 오류:', error);
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('잔액 업데이트 중 오류:', error);
+        return false;
+    }
+}
+
+// 입출금 신청 처리 API
+app.post('/api/transaction', requireLogin, async (req, res) => {
+    try {
+        const { type, amount, bankTransferName, withdrawBankName, withdrawAccountNumber, withdrawAccountHolder } = req.body;
+        const memberId = req.session.user.id;
+        
+        // 입력 검증
+        if (!type || !amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '올바른 금액을 입력해주세요.' 
+            });
+        }
+        
+        const transactionAmount = parseFloat(amount);
+        
+        // 출금의 경우 잔액 확인
+        if (type === 'withdraw') {
+            const currentBalance = await getMemberBalance(memberId);
+            if (transactionAmount > currentBalance) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: '잔액이 부족합니다.' 
+                });
+            }
+            
+            // 최소 출금액 확인
+            if (transactionAmount < 10000) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: '최소 출금 금액은 10,000원입니다.' 
+                });
+            }
+            
+            // 출금 계좌 정보 확인
+            if (!withdrawBankName || !withdrawAccountNumber || !withdrawAccountHolder) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: '출금 계좌 정보를 입력해주세요.' 
+                });
+            }
+        }
+        
+        // 입금의 경우 최소 금액 확인
+        if (type === 'deposit' && transactionAmount < 50000) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '최소 입금 금액은 50,000원입니다.' 
+            });
+        }
+        
+        // 트랜잭션 생성
+        const transactionData = {
+            member_id: memberId,
+            type: type,
+            amount: transactionAmount,
+            status: 'pending'
+        };
+        
+        if (type === 'deposit') {
+            transactionData.bank_transfer_name = bankTransferName || req.session.user.name;
+        } else if (type === 'withdraw') {
+            transactionData.withdraw_bank_name = withdrawBankName;
+            transactionData.withdraw_account_number = withdrawAccountNumber;
+            transactionData.withdraw_account_holder = withdrawAccountHolder;
+        }
+        
+        const { data: transaction, error } = await supabase
+            .from('transactions')
+            .insert(transactionData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('트랜잭션 생성 오류:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '신청 처리 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        // 트랜잭션 로그 생성
+        await supabase
+            .from('transaction_logs')
+            .insert({
+                transaction_id: transaction.id,
+                previous_status: null,
+                new_status: 'pending',
+                note: `${type === 'deposit' ? '입금' : '출금'} 신청 생성`
+            });
+        
+        res.json({ 
+            success: true, 
+            message: `${type === 'deposit' ? '입금' : '출금'} 신청이 완료되었습니다. 관리자 승인 후 처리됩니다.`,
+            transactionId: transaction.id
+        });
+        
+    } catch (error) {
+        console.error('트랜잭션 처리 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 트랜잭션 목록 조회 API
+app.get('/api/transactions', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        const { data: transactions, error } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('member_id', memberId)
+            .order('created_at', { ascending: false })
+            .limit(20);
+        
+        if (error) {
+            console.error('트랜잭션 조회 오류:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '거래 내역 조회 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        res.json({ 
+            success: true, 
+            transactions: transactions || [] 
+        });
+        
+    } catch (error) {
+        console.error('트랜잭션 조회 중 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 관리자: 모든 트랜잭션 조회 API
+app.get('/api/admin/transactions', requireAdmin, async (req, res) => {
+    try {
+        const { data: transactions, error } = await supabase
+            .from('transactions')
+            .select(`
+                *,
+                member:members(name, username)
+            `)
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('관리자 트랜잭션 조회 오류:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '거래 내역 조회 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        res.json({ 
+            success: true, 
+            transactions: transactions || [] 
+        });
+        
+    } catch (error) {
+        console.error('관리자 트랜잭션 조회 중 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 관리자: 트랜잭션 승인/거부 API
+app.put('/api/admin/transaction/:id', requireAdmin, async (req, res) => {
+    try {
+        const transactionId = req.params.id;
+        const { action, note } = req.body; // action: 'approve' 또는 'reject'
+        const adminId = req.session.user.id;
+        
+        if (!['approve', 'reject'].includes(action)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '올바른 액션을 선택해주세요.' 
+            });
+        }
+        
+        // 트랜잭션 조회
+        const { data: transaction, error: fetchError } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('id', transactionId)
+            .single();
+        
+        if (fetchError || !transaction) {
+            return res.status(404).json({ 
+                success: false, 
+                message: '거래 내역을 찾을 수 없습니다.' 
+            });
+        }
+        
+        if (transaction.status !== 'pending') {
+            return res.status(400).json({ 
+                success: false, 
+                message: '이미 처리된 거래입니다.' 
+            });
+        }
+        
+        const newStatus = action === 'approve' ? 'approved' : 'rejected';
+        
+        // 승인인 경우 잔액 업데이트
+        if (action === 'approve') {
+            const currentBalance = await getMemberBalance(transaction.member_id);
+            
+            if (transaction.type === 'deposit') {
+                // 입금 승인: 잔액 증가
+                const newBalance = currentBalance + parseFloat(transaction.amount);
+                const updateSuccess = await updateMemberBalance(transaction.member_id, newBalance);
+                
+                if (!updateSuccess) {
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: '잔액 업데이트 중 오류가 발생했습니다.' 
+                    });
+                }
+            } else if (transaction.type === 'withdraw') {
+                // 출금 승인: 잔액 감소
+                if (currentBalance < parseFloat(transaction.amount)) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: '잔액이 부족하여 출금을 승인할 수 없습니다.' 
+                    });
+                }
+                
+                const newBalance = currentBalance - parseFloat(transaction.amount);
+                const updateSuccess = await updateMemberBalance(transaction.member_id, newBalance);
+                
+                if (!updateSuccess) {
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: '잔액 업데이트 중 오류가 발생했습니다.' 
+                    });
+                }
+            }
+        }
+        
+        // 트랜잭션 상태 업데이트
+        const { error: updateError } = await supabase
+            .from('transactions')
+            .update({ 
+                status: newStatus,
+                admin_note: note,
+                processed_by: adminId,
+                processed_at: new Date().toISOString()
+            })
+            .eq('id', transactionId);
+        
+        if (updateError) {
+            console.error('트랜잭션 업데이트 오류:', updateError);
+            return res.status(500).json({ 
+                success: false, 
+                message: '거래 처리 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        // 트랜잭션 로그 생성
+        await supabase
+            .from('transaction_logs')
+            .insert({
+                transaction_id: transactionId,
+                previous_status: 'pending',
+                new_status: newStatus,
+                admin_id: adminId,
+                note: note || `관리자에 의해 ${action === 'approve' ? '승인' : '거부'}됨`
+            });
+        
+        res.json({ 
+            success: true, 
+            message: `거래가 ${action === 'approve' ? '승인' : '거부'}되었습니다.` 
+        });
+        
+    } catch (error) {
+        console.error('트랜잭션 처리 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
 
 // 서버 시작
 async function startServer() {

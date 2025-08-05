@@ -425,6 +425,54 @@
             to { opacity: 1; }
         }
 
+        .form-note {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .deposit-notice,
+        .withdraw-notice {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .deposit-notice h4,
+        .withdraw-notice h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .deposit-notice ul,
+        .withdraw-notice ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .deposit-notice li,
+        .withdraw-notice li {
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .submit-button:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+        }
+
         /* 반응형 디자인 */
         @media (max-width: 768px) {
             .container {
@@ -697,7 +745,7 @@
                     <i class="fas fa-wallet"></i>
                     보유 잔액
                 </div>
-                <div class="card-value">₩4,623,000</div>
+                <div class="card-value">₩<%= typeof currentBalance !== 'undefined' ? currentBalance.toLocaleString() : '0' %></div>
                 <div class="card-note">출금 가능 금액</div>
             </div>
             
@@ -718,11 +766,16 @@
                 <button class="tab-button" data-tab="withdraw">출금 신청</button>
             </div>
             
-            <form id="deposit-form" class="form-section active" method="POST">
-                <input type="hidden" name="action" value="deposit">
+            <form id="deposit-form" class="form-section active">
                 <div class="form-group">
                     <label class="form-label" for="deposit-amount">입금 금액</label>
                     <input type="text" id="deposit-amount" name="amount" class="form-control" placeholder="최소 50,000원 이상 입력" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="bank-transfer-name">입금자명</label>
+                    <input type="text" id="bank-transfer-name" name="bankTransferName" class="form-control" placeholder="입금자명 입력" value="<%= typeof user !== 'undefined' && user ? user.name : '' %>" required>
+                    <div class="form-note">입금 시 위 이름으로 입금해 주세요</div>
                 </div>
                 
                 <div class="amount-buttons">
@@ -733,11 +786,20 @@
                     <button type="button" class="amount-button" data-amount="5000000">5,000,000원</button>
                 </div>
                 
+                <div class="deposit-notice">
+                    <h4>입금 안내</h4>
+                    <ul>
+                        <li>입금 후 관리자 확인을 거쳐 잔액에 반영됩니다</li>
+                        <li>입금자명과 회원명이 일치해야 합니다</li>
+                        <li>최소 입금 금액은 50,000원입니다</li>
+                        <li>입금 확인은 영업일 기준 1~2일 소요됩니다</li>
+                    </ul>
+                </div>
+                
                 <button type="submit" class="submit-button">입금 신청하기</button>
             </form>
             
-            <form id="withdraw-form" class="form-section" method="POST">
-                <input type="hidden" name="action" value="withdraw">
+            <form id="withdraw-form" class="form-section">
                 <div class="form-group">
                     <label class="form-label" for="withdraw-amount">출금 금액</label>
                     <input type="text" id="withdraw-amount" name="amount" class="form-control" placeholder="최소 10,000원 이상 입력" required>
@@ -752,12 +814,29 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">출금 계좌 정보</label>
-                    <div class="account-info">
-                        <div class="account-info-title">KB국민은행</div>
-                        <div class="account-info-detail">94401139100103</div>
-                        <div class="account-info-detail">예금주: 김민정</div>
-                    </div>
+                    <label class="form-label" for="withdraw-bank-name">출금 은행명</label>
+                    <input type="text" id="withdraw-bank-name" name="withdrawBankName" class="form-control" placeholder="은행명 입력" value="<%= typeof userProfile !== 'undefined' && userProfile.bank_name ? userProfile.bank_name : '' %>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="withdraw-account-number">출금 계좌번호</label>
+                    <input type="text" id="withdraw-account-number" name="withdrawAccountNumber" class="form-control" placeholder="계좌번호 입력 (- 없이)" value="<%= typeof userProfile !== 'undefined' && userProfile.account_number ? userProfile.account_number : '' %>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="withdraw-account-holder">예금주명</label>
+                    <input type="text" id="withdraw-account-holder" name="withdrawAccountHolder" class="form-control" placeholder="예금주명 입력" value="<%= typeof user !== 'undefined' && user ? user.name : '' %>" required>
+                </div>
+                
+                <div class="withdraw-notice">
+                    <h4>출금 안내</h4>
+                    <ul>
+                        <li>출금 신청 후 관리자 승인을 거쳐 처리됩니다</li>
+                        <li>예금주명과 회원명이 일치해야 합니다</li>
+                        <li>최소 출금 금액은 10,000원입니다</li>
+                        <li>출금 처리는 영업일 기준 1~3일 소요됩니다</li>
+                        <li>출금 수수료는 없습니다</li>
+                    </ul>
                 </div>
                 
                 <button type="submit" class="submit-button">출금 신청하기</button>
@@ -774,91 +853,13 @@
                         <th>금액</th>
                         <th>신청일시</th>
                         <th>상태</th>
+                        <th>관리자 메모</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="transaction-history">
                     <tr>
-                        <td class="type-cell type-withdraw">
-                            출금
-                        </td>
-                        <td class="amount-cell">₩3,900,000</td>
-                        <td>2025-05-28 18:37:59</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                출금 완료
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="type-cell type-withdraw">
-                            출금
-                        </td>
-                        <td class="amount-cell">₩3,900,000</td>
-                        <td>2025-04-30 10:11:45</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                출금 완료
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="type-cell type-withdraw">
-                            출금
-                        </td>
-                        <td class="amount-cell">₩3,900,000</td>
-                        <td>2025-03-29 15:20:41</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                출금 완료
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="type-cell type-withdraw">
-                            출금
-                        </td>
-                        <td class="amount-cell">₩3,900,000</td>
-                        <td>2025-02-28 13:31:38</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                출금 완료
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="type-cell type-withdraw">
-                            출금
-                        </td>
-                        <td class="amount-cell">₩3,900,000</td>
-                        <td>2025-01-23 23:32:02</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                출금 완료
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="type-cell type-withdraw">
-                            출금
-                        </td>
-                        <td class="amount-cell">₩3,900,000</td>
-                        <td>2024-12-28 11:28:30</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                출금 완료
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="type-cell type-deposit">
-                            입금
-                        </td>
-                        <td class="amount-cell">₩65,000,000</td>
-                        <td>2024-11-22 13:31:25</td>
-                        <td>
-                            <span class="status-cell status-completed">
-                                승인 완료
-                            </span>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                            거래 내역이 없습니다.
                         </td>
                     </tr>
                 </tbody>
@@ -902,7 +903,229 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateHeaderUserInfo();
             loadSiteSettings(); // 사이트 설정 로드
+            loadTransactionHistory(); // 거래 내역 로드
+            
+            // 입금 폼 이벤트
+            document.getElementById('deposit-form').addEventListener('submit', handleDepositSubmit);
+            
+            // 출금 폼 이벤트
+            document.getElementById('withdraw-form').addEventListener('submit', handleWithdrawSubmit);
+            
+            // 금액 버튼 이벤트
+            document.querySelectorAll('.amount-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const amount = this.getAttribute('data-amount');
+                    const activeTab = document.querySelector('.tab-button.active').getAttribute('data-tab');
+                    const targetInput = activeTab === 'deposit' ? 
+                        document.getElementById('deposit-amount') : 
+                        document.getElementById('withdraw-amount');
+                    
+                    targetInput.value = parseInt(amount).toLocaleString();
+                });
+            });
         });
+
+        // 거래 내역 로드
+        async function loadTransactionHistory() {
+            try {
+                const response = await fetch('/api/transactions', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('거래 내역을 불러올 수 없습니다.');
+                }
+                
+                const result = await response.json();
+                displayTransactionHistory(result.transactions || []);
+                
+            } catch (error) {
+                console.error('거래 내역 로드 오류:', error);
+            }
+        }
+
+        // 거래 내역 표시
+        function displayTransactionHistory(transactions) {
+            const tbody = document.getElementById('transaction-history');
+            
+            if (transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                            거래 내역이 없습니다.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = transactions.map(transaction => {
+                const typeClass = transaction.type === 'deposit' ? 'type-deposit' : 'type-withdraw';
+                const typeName = transaction.type === 'deposit' ? '입금' : '출금';
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (transaction.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = '승인 대기';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-approved';
+                        statusText = '승인 완료';
+                        break;
+                    case 'rejected':
+                        statusClass = 'status-rejected';
+                        statusText = '승인 거부';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = '처리 완료';
+                        break;
+                }
+                
+                const createdAt = new Date(transaction.created_at).toLocaleString('ko-KR');
+                const amount = parseInt(transaction.amount).toLocaleString();
+                const adminNote = transaction.admin_note || '-';
+                
+                return `
+                    <tr>
+                        <td class="type-cell ${typeClass}">${typeName}</td>
+                        <td class="amount-cell">₩${amount}</td>
+                        <td>${createdAt}</td>
+                        <td><span class="status-cell ${statusClass}">${statusText}</span></td>
+                        <td style="max-width: 200px; word-break: break-word;">${adminNote}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 입금 신청 처리
+        async function handleDepositSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const submitButton = form.querySelector('.submit-button');
+            const amount = document.getElementById('deposit-amount').value.replace(/,/g, '');
+            const bankTransferName = document.getElementById('bank-transfer-name').value;
+            
+            if (!amount || !bankTransferName) {
+                showPopup('모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            if (parseInt(amount) < 50000) {
+                showPopup('최소 입금 금액은 50,000원입니다.');
+                return;
+            }
+            
+            submitButton.disabled = true;
+            submitButton.textContent = '처리 중...';
+            
+            try {
+                const response = await fetch('/api/transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        type: 'deposit',
+                        amount: parseInt(amount),
+                        bankTransferName: bankTransferName
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showPopup(result.message);
+                    form.reset();
+                    loadTransactionHistory(); // 거래 내역 새로고침
+                } else {
+                    showPopup(result.message || '입금 신청 중 오류가 발생했습니다.');
+                }
+                
+            } catch (error) {
+                console.error('입금 신청 오류:', error);
+                showPopup('서버 오류가 발생했습니다. 다시 시도해주세요.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = '입금 신청하기';
+            }
+        }
+
+        // 출금 신청 처리
+        async function handleWithdrawSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const submitButton = form.querySelector('.submit-button');
+            const amount = document.getElementById('withdraw-amount').value.replace(/,/g, '');
+            const withdrawBankName = document.getElementById('withdraw-bank-name').value;
+            const withdrawAccountNumber = document.getElementById('withdraw-account-number').value;
+            const withdrawAccountHolder = document.getElementById('withdraw-account-holder').value;
+            
+            if (!amount || !withdrawBankName || !withdrawAccountNumber || !withdrawAccountHolder) {
+                showPopup('모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            if (parseInt(amount) < 10000) {
+                showPopup('최소 출금 금액은 10,000원입니다.');
+                return;
+            }
+            
+            submitButton.disabled = true;
+            submitButton.textContent = '처리 중...';
+            
+            try {
+                const response = await fetch('/api/transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        type: 'withdraw',
+                        amount: parseInt(amount),
+                        withdrawBankName: withdrawBankName,
+                        withdrawAccountNumber: withdrawAccountNumber,
+                        withdrawAccountHolder: withdrawAccountHolder
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showPopup(result.message);
+                    form.reset();
+                    loadTransactionHistory(); // 거래 내역 새로고침
+                } else {
+                    showPopup(result.message || '출금 신청 중 오류가 발생했습니다.');
+                }
+                
+            } catch (error) {
+                console.error('출금 신청 오류:', error);
+                showPopup('서버 오류가 발생했습니다. 다시 시도해주세요.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = '출금 신청하기';
+            }
+        }
+
+        // 팝업 표시
+        function showPopup(message) {
+            document.getElementById('popup-message').textContent = message;
+            document.getElementById('popup-overlay').classList.add('active');
+        }
+
+        // 팝업 닫기
+        function closePopup() {
+            document.getElementById('popup-overlay').classList.remove('active');
+        }
     </script>
     
     <%- include('partials/footer') %>
