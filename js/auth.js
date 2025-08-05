@@ -537,12 +537,70 @@ document.addEventListener('DOMContentLoaded', function() {
 // 전역 함수로 만들어서 다른 스크립트에서 접근 가능하도록 설정
 window.isLoggedIn = isLoggedIn;
 window.getCurrentUser = getCurrentUser;
+// 헤더 사용자 정보 업데이트
+function updateHeaderUserInfo() {
+    try {
+        const authArea = document.querySelector('.hy-auth-area');
+        const mobileAuthArea = document.querySelector('.hy-mobile-auth');
+        
+        if (!authArea) return;
+        
+        const currentUser = getCurrentUser();
+        
+        if (currentUser && currentUser.status === 'approved') {
+            // 데스크탑 헤더
+            authArea.innerHTML = `
+                <div class="hy-user-info">
+                    <span class="hy-welcome">안녕하세요, ${currentUser.name}님</span>
+                    <div class="hy-user-menu">
+                        <a href="/mypage" class="hy-user-menu-item">마이페이지</a>
+                        <button onclick="logout()" class="hy-logout-btn">로그아웃</button>
+                    </div>
+                </div>
+            `;
+            
+            // 모바일 헤더
+            if (mobileAuthArea) {
+                mobileAuthArea.innerHTML = `
+                    <div class="hy-mobile-user-info">
+                        <p class="hy-mobile-welcome">${currentUser.name}님 안녕하세요</p>
+                        <div class="hy-mobile-user-actions">
+                            <a href="/mypage" class="hy-mobile-btn">마이페이지</a>
+                            <button onclick="logout()" class="hy-mobile-btn hy-mobile-logout">로그아웃</button>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            // 로그인하지 않은 상태
+            authArea.innerHTML = `
+                <div class="hy-auth-buttons">
+                    <a href="/login" class="hy-login-btn">로그인</a>
+                    <a href="/signup" class="hy-signup-btn">회원가입</a>
+                </div>
+            `;
+            
+            if (mobileAuthArea) {
+                mobileAuthArea.innerHTML = `
+                    <div class="hy-mobile-auth-buttons">
+                        <a href="/login" class="hy-mobile-btn">로그인</a>
+                        <a href="/signup" class="hy-mobile-btn">회원가입</a>
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error('헤더 사용자 정보 업데이트 오류:', error);
+    }
+}
+
 window.login = login;
 window.logout = logout;
 window.handleLoginSuccess = handleLoginSuccess;
 window.handleLoginRedirect = handleLoginRedirect;
 window.checkAdminAccess = checkAdminAccess;
 window.isAdmin = isAdmin;
+window.updateHeaderUserInfo = updateHeaderUserInfo;
 
 console.log('전역 함수들이 설정되었습니다:', {
     isLoggedIn: typeof window.isLoggedIn,

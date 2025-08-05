@@ -879,8 +879,18 @@
         // 거래 내역 로드
         async function loadTransactionHistory() {
             try {
+                const currentUser = getCurrentUser();
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (currentUser) {
+                    headers['x-current-user'] = JSON.stringify(currentUser);
+                }
+                
                 const response = await fetch('/api/transactions', {
                     method: 'GET',
+                    headers: headers,
                     credentials: 'include'
                 });
                 
@@ -976,11 +986,18 @@
             submitButton.textContent = '처리 중...';
             
             try {
+                const currentUser = getCurrentUser();
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (currentUser) {
+                    headers['x-current-user'] = JSON.stringify(currentUser);
+                }
+                
                 const response = await fetch('/api/transaction', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     credentials: 'include',
                     body: JSON.stringify({
                         type: 'deposit',
@@ -1033,11 +1050,18 @@
             submitButton.textContent = '처리 중...';
             
             try {
+                const currentUser = getCurrentUser();
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (currentUser) {
+                    headers['x-current-user'] = JSON.stringify(currentUser);
+                }
+                
                 const response = await fetch('/api/transaction', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     credentials: 'include',
                     body: JSON.stringify({
                         type: 'withdraw',

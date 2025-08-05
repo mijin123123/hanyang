@@ -186,6 +186,14 @@ function requireLogin(req, res, next) {
         }
     }
     
+    // API 요청인 경우 JSON 응답
+    if (req.path.startsWith('/api/')) {
+        return res.status(401).json({ 
+            success: false, 
+            message: '로그인이 필요합니다.' 
+        });
+    }
+    
     // 로그인이 필요한 경우
     res.redirect('/login');
 }
