@@ -1532,15 +1532,21 @@ app.post('/api/test/create-accounts', async (req, res) => {
                 continue;
             }
             
-            // RPC를 사용하여 계정 생성 시도
-            const { data, error } = await supabase.rpc('create_member_manual', {
-                p_username: account.username,
-                p_password_hash: account.password_hash,
-                p_name: account.name,
-                p_email: account.email,
-                p_role: account.role,
-                p_status: account.status
-            });
+            // 직접 INSERT 사용
+            const { data, error } = await supabase
+                .from('members')
+                .insert({
+                    username: account.username,
+                    password_hash: account.password_hash,
+                    name: account.name,
+                    email: account.email,
+                    role: account.role,
+                    status: account.status,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .select()
+                .single();
             
             if (error) {
                 console.log(`❌ ${account.username} 생성 실패:`, error);
