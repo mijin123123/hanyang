@@ -782,18 +782,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // 로그인 폼 처리 (서버 기반)
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        console.log('로그인 폼을 찾았습니다.');
+        console.log('🔍 로그인 폼을 찾았습니다.');
+        console.log('🔍 현재 환경:', window.location.origin);
+        console.log('🔍 auth.js 로드 확인:', typeof login === 'function' ? '성공' : '실패');
+        
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            console.log('로그인 폼이 제출되었습니다.');
+            console.log('📝 로그인 폼이 제출되었습니다.');
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            console.log('입력값:', { username: username, password: password ? '***' : '' });
+            console.log('📋 입력값:', { username: username, password: password ? '***' : '' });
             
             // 간단한 유효성 검사
             if (!username || !password) {
-                console.log('유효성 검사 실패: 아이디 또는 비밀번호가 비어있음');
+                console.log('❌ 유효성 검사 실패: 아이디 또는 비밀번호가 비어있음');
                 showError('아이디와 비밀번호를 모두 입력해주세요.');
                 return;
             }
@@ -805,23 +808,43 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.disabled = true;
             
             try {
-                // 서버로 로그인 요청
-                console.log('서버로 로그인 요청 전송');
-                const result = await login(username, password);
-                console.log('로그인 결과:', result);
+                console.log('🌐 로그인 요청 시작...');
+                
+                // 직접 fetch 요청 사용 (더 안정적)
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // 쿠키 포함
+                    body: JSON.stringify({ username, password })
+                });
+                
+                console.log('� 응답 상태:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('📋 로그인 결과:', result);
                 
                 if (result && result.success) {
+                    console.log('✅ 로그인 성공!');
                     showPopup(`환영합니다, ${result.user.name}님! 로그인 완료!`);
+                    
+                    // 세션 저장 (브라우저 호환성)
+                    if (typeof(Storage) !== "undefined") {
+                        localStorage.setItem('currentUser', JSON.stringify(result.user));
+                        console.log('💾 로컬 스토리지에 사용자 정보 저장됨');
+                    }
+                    
                     setTimeout(() => {
-                        // auth.js의 리다이렉트 처리 함수 사용
-                        if (typeof handleLoginSuccess === 'function') {
-                            handleLoginSuccess();
-                        } else {
-                            // 백업 리다이렉트
-                            window.location.href = '/';
-                        }
+                        console.log('🔄 메인 페이지로 리다이렉트...');
+                        window.location.href = '/';
                     }, 1000);
                 } else {
+                    console.log('❌ 로그인 실패:', result.message);
                     // 승인 대기 상태인 경우 특별한 스타일로 표시
                     if (result && result.message && result.message.includes('승인 대기')) {
                         showPendingMessage(result.message);
@@ -830,14 +853,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch (error) {
-                console.error('로그인 요청 중 오류:', error);
-                showError('로그인 요청 중 오류가 발생했습니다. 다시 시도해주세요.');
+                console.error('❌ 로그인 요청 중 오류:', error);
+                showError(`로그인 요청 중 오류가 발생했습니다: ${error.message}`);
             } finally {
                 // 로딩 상태 해제
                 submitButton.textContent = originalText;
                 submitButton.disabled = false;
             }
         });
+    } else {
+        console.error('❌ 로그인 폼을 찾을 수 없습니다.');
     }
 });
 

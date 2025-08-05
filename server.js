@@ -81,21 +81,30 @@ app.use(helmet({
 }));
 
 // CORS 설정
-app.use(cors());
+// CORS 설정 (Render 배포 환경 최적화)
+app.use(cors({
+    origin: NODE_ENV === 'production' 
+        ? ['https://hanyang-energy.onrender.com'] 
+        : ['http://localhost:3000'],
+    credentials: true // 쿠키 및 인증 정보 포함 허용
+}));
 
 // Body parser 미들웨어
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// 세션 설정
+// 세션 설정 (Render 배포 환경 최적화)
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: NODE_ENV === 'production', // 프로덕션에서는 HTTPS 필요
-        maxAge: 24 * 60 * 60 * 1000 // 24시간
-    }
+        secure: NODE_ENV === 'production', // HTTPS에서만 쿠키 전송
+        httpOnly: true, // XSS 공격 방지
+        maxAge: 24 * 60 * 60 * 1000, // 24시간
+        sameSite: NODE_ENV === 'production' ? 'none' : 'lax' // CORS 환경에서 쿠키 전송 허용
+    },
+    name: 'hanyang.sid' // 기본 세션 이름 변경
 }));
 
 // EJS 템플릿 엔진 설정
@@ -266,12 +275,12 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
-// 로그인 처리 (Supabase 연동)
+// 로그인 처리 (Supabase 연동) - Render 배포 환경 최적화
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
     try {
-        console.log('🔍 로그인 시도:', username);
+        console.log('🔍 로그인 시도:', username, '환경:', NODE_ENV, '요청 헤더:', req.headers.origin);
         
         // 비밀번호 해시화
         const passwordHash = hashPassword(password);
@@ -336,7 +345,8 @@ app.post('/login', async (req, res) => {
             loginTime: new Date().toISOString()
         };
         
-        console.log('✅ 로그인 성공:', user.username);
+        console.log('✅ 로그인 성공:', user.username, '세션 ID:', req.sessionID);
+        console.log('🔒 세션 저장 상태:', req.session.user ? '성공' : '실패');
         res.json({ success: true, user: req.session.user });
     } catch (error) {
         console.error('로그인 처리 중 오류:', error);
@@ -435,8 +445,23 @@ app.post('/logout', (req, res) => {
     res.redirect('/login');
 });
 
-// 세션 상태 확인 API
+// 환경 변수 체크 API (배포 환경 디버깅용)
+app.get('/api/debug/env', (req, res) => {
+    res.json({
+        NODE_ENV: NODE_ENV,
+        PORT: PORT,
+        SUPABASE_URL: SUPABASE_URL ? 'SET' : 'NOT SET',
+        SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? 'SET' : 'NOT SET',
+        SESSION_SECRET: SESSION_SECRET ? 'SET' : 'NOT SET',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// 세션 상태 확인 API - Render 배포 환경 디버깅
 app.get('/api/check-session', (req, res) => {
+    console.log('🔍 세션 확인 요청 - 세션 ID:', req.sessionID);
+    console.log('🔍 세션 사용자:', req.session.user ? req.session.user.username : '없음');
+    
     if (req.session.user) {
         res.json({ user: req.session.user });
     } else {
