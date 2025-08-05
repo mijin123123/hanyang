@@ -314,7 +314,18 @@ app.get('/signup', (req, res) => {
 
 // 회원가입 처리 (Supabase 연동)
 app.post('/signup', async (req, res) => {
-    const { username, password, name, email, phone, address } = req.body;
+    const { 
+        username, 
+        password, 
+        name, 
+        email, 
+        phone, 
+        address, 
+        detailAddress, 
+        bank_name, 
+        account_number, 
+        referral_code 
+    } = req.body;
     
     try {
         // 중복 확인
@@ -345,6 +356,10 @@ app.post('/signup', async (req, res) => {
                 email,
                 phone: phone || '',
                 address: address || '',
+                detail_address: detailAddress || '',
+                bank_name: bank_name || '',
+                account_number: account_number || '',
+                referral_code: referral_code || '',
                 role: 'user',
                 status: 'approved', // 즉시 승인
                 approved_at: new Date().toISOString()
