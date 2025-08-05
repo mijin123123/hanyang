@@ -33,7 +33,10 @@ console.log(`🔧 포트: ${PORT}`);
 
 // Supabase 설정
 const supabaseUrl = process.env.SUPABASE_URL || 'https://aqcewkutnssgrioxlqba.supabase.co';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
+// 배포 환경에서는 서비스 롤 키를 강제로 사용 (RLS 우회)
+const supabaseKey = process.env.NODE_ENV === 'production' 
+    ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I'
+    : (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I');
 
 console.log('🔧 Supabase URL:', supabaseUrl);
 console.log('🔧 Supabase Key:', supabaseKey ? '설정됨' : '설정안됨');
@@ -143,7 +146,73 @@ app.use('/admin/css', express.static(path.join(__dirname, 'admin/css')));
 app.use('/admin/js', express.static(path.join(__dirname, 'admin/js')));
 app.use('/admin/uploads', express.static(path.join(__dirname, 'adm/uploads')));
 
-// 기존 HTML 파일들을 EJS로 복사하는 함수
+// 기본 계정 생성 함수 (배포 환경용)
+async function ensureBasicAccounts() {
+    if (NODE_ENV !== 'production') return;
+    
+    try {
+        console.log('🔍 배포 환경 기본 계정 확인 중...');
+        
+        // 기본 계정들
+        const basicAccounts = [
+            {
+                username: 'minj0010',
+                password_hash: hashPassword('minj0010'),
+                name: '김민정',
+                email: 'minj0010@hanyang.com',
+                role: 'admin',
+                status: 'approved'
+            },
+            {
+                username: 'admin',
+                password_hash: hashPassword('admin123'),
+                name: '시스템관리자',
+                email: 'admin@hanyang.com',
+                role: 'admin',
+                status: 'approved'
+            },
+            {
+                username: 'test',
+                password_hash: hashPassword('test123'),
+                name: '테스트사용자',
+                email: 'test@hanyang.com',
+                role: 'user',
+                status: 'approved'
+            }
+        ];
+        
+        for (const account of basicAccounts) {
+            // 계정이 이미 존재하는지 확인
+            const { data: existing } = await supabase
+                .from('members')
+                .select('username')
+                .eq('username', account.username)
+                .maybeSingle();
+            
+            if (!existing) {
+                console.log(`📝 ${account.username} 계정 생성 중...`);
+                const { error } = await supabase
+                    .from('members')
+                    .insert([{
+                        ...account,
+                        created_at: new Date().toISOString(),
+                        approved_at: new Date().toISOString()
+                    }]);
+                
+                if (error) {
+                    console.error(`❌ ${account.username} 계정 생성 실패:`, error);
+                } else {
+                    console.log(`✅ ${account.username} 계정 생성 성공`);
+                }
+            } else {
+                console.log(`✅ ${account.username} 계정 이미 존재함`);
+            }
+        }
+        
+    } catch (error) {
+        console.error('기본 계정 생성 중 오류:', error);
+    }
+}
 async function convertHtmlToEjs() {
     const viewsDir = path.join(__dirname, 'views');
     await fs.ensureDir(viewsDir);
@@ -2384,8 +2453,8 @@ async function startServer() {
                 console.warn('⚠️ HTML to EJS 변환 실패:', err.message);
                 return null;
             }),
-            initializeDefaultAccounts().catch(err => {
-                console.warn('⚠️ 기본 계정 초기화 실패:', err.message);
+            ensureBasicAccounts().catch(err => {
+                console.warn('⚠️ 기본 계정 생성 실패:', err.message);
                 return null;
             })
         ]).then(() => {
