@@ -48,6 +48,17 @@
     </div>
 
     <div class="section">
+        <h3>🔐 비밀번호 해시 테스트</h3>
+        <input type="text" id="hashTestUsername" placeholder="사용자명 (minj0010)" value="minj0010">
+        <button onclick="checkUserHash()">사용자 해시 확인</button>
+        <br><br>
+        <input type="text" id="fixUsername" placeholder="수정할 사용자명" value="minj0010">
+        <input type="password" id="fixPassword" placeholder="새 비밀번호" value="minj0010">
+        <button onclick="fixPassword()">비밀번호 해시 수정</button>
+        <div id="hashTestResult" class="result"></div>
+    </div>
+
+    <div class="section">
         <h3>🧪 단계별 디버깅</h3>
         <button onclick="fullDiagnostic()">전체 진단 실행</button>
         <div id="diagnosticResult" class="result"></div>
@@ -221,6 +232,77 @@ ${allCookies.map(c => `  - ${c}`).join('\n') || '  없음'}</pre>
                 document.getElementById('loginResult').innerHTML = `
                     <div class="error">
                         <h4>로그인 테스트 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function checkUserHash() {
+            const username = document.getElementById('hashTestUsername').value;
+            
+            if (!username) {
+                alert('사용자명을 입력하세요');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseURL}/api/test/check-hash/${username}`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                document.getElementById('hashTestResult').innerHTML = `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <h4>사용자 해시 확인 결과:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('hashTestResult').innerHTML = `
+                    <div class="error">
+                        <h4>해시 확인 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function fixPassword() {
+            const username = document.getElementById('fixUsername').value;
+            const password = document.getElementById('fixPassword').value;
+            
+            if (!username || !password) {
+                alert('사용자명과 비밀번호를 모두 입력하세요');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseURL}/api/test/fix-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                
+                document.getElementById('hashTestResult').innerHTML += `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <h4>비밀번호 수정 결과:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                
+                // 성공시 해시 재확인
+                if (data.success) {
+                    setTimeout(() => checkUserHash(), 1000);
+                }
+            } catch (error) {
+                document.getElementById('hashTestResult').innerHTML += `
+                    <div class="error">
+                        <h4>비밀번호 수정 실패:</h4>
                         <pre>${error.message}</pre>
                     </div>
                 `;

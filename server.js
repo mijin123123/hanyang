@@ -1464,6 +1464,107 @@ app.get('/api/test/hash/:password', (req, res) => {
     });
 });
 
+// DB 해시 확인 API
+app.get('/api/test/check-hash/:username', async (req, res) => {
+    const { username } = req.params;
+    
+    try {
+        const { data: user, error } = await supabase
+            .from('members')
+            .select('username, password_hash, name, status')
+            .eq('username', username)
+            .single();
+        
+        if (error || !user) {
+            return res.json({
+                success: false,
+                message: '사용자를 찾을 수 없습니다.',
+                error: error?.message
+            });
+        }
+        
+        // 여러 비밀번호 조합 테스트
+        const testPasswords = [username, 'minj0010', 'admin123', 'test123', '1234'];
+        const hashTests = testPasswords.map(pwd => ({
+            password: pwd,
+            hash: hashPassword(pwd),
+            match: hashPassword(pwd) === user.password_hash
+        }));
+        
+        res.json({
+            success: true,
+            user: {
+                username: user.username,
+                name: user.name,
+                status: user.status
+            },
+            storedHash: user.password_hash,
+            hashTests: hashTests
+        });
+        
+    } catch (error) {
+        res.json({
+            success: false,
+            message: '서버 오류',
+            error: error.message
+        });
+    }
+});
+
+// 비밀번호 해시 수정 API (개발용)
+app.post('/api/test/fix-password', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.json({
+            success: false,
+            message: '사용자명과 비밀번호를 모두 입력해주세요.'
+        });
+    }
+    
+    try {
+        const newHash = hashPassword(password);
+        console.log(`🔧 ${username} 계정 비밀번호 해시 업데이트:`, newHash);
+        
+        const { data, error } = await supabase
+            .from('members')
+            .update({ 
+                password_hash: newHash,
+                updated_at: new Date().toISOString()
+            })
+            .eq('username', username)
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('비밀번호 업데이트 오류:', error);
+            return res.json({
+                success: false,
+                message: '비밀번호 업데이트 실패',
+                error: error.message
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: `${username} 계정의 비밀번호가 성공적으로 업데이트되었습니다.`,
+            user: {
+                username: data.username,
+                name: data.name,
+                newHash: newHash
+            }
+        });
+        
+    } catch (error) {
+        console.error('비밀번호 수정 중 오류:', error);
+        res.json({
+            success: false,
+            message: '서버 오류',
+            error: error.message
+        });
+    }
+});
+
 // members 테이블 조회 테스트 API
 app.get('/api/test/members', async (req, res) => {
     try {
