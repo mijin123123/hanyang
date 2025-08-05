@@ -273,7 +273,28 @@ app.get('/health', (req, res) => {
     res.status(200).json({ 
         status: 'healthy', 
         timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        version: '2.0.0' // 버전 업데이트로 재배포 확인
+    });
+});
+
+// API 목록 확인용 (디버깅)
+app.get('/api/debug/routes', (req, res) => {
+    const routes = [];
+    app._router.stack.forEach(function(r) {
+        if (r.route && r.route.path) {
+            routes.push({
+                method: Object.keys(r.route.methods).join(',').toUpperCase(),
+                path: r.route.path
+            });
+        }
+    });
+    
+    res.json({
+        success: true,
+        routes: routes,
+        totalRoutes: routes.length,
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -302,9 +323,21 @@ app.post('/login', async (req, res) => {
         console.log('🔒 쿠키 헤더:', req.headers.cookie);
         console.log('📡 요청 IP:', req.ip || req.connection.remoteAddress);
         
+        // 입력값 검증
+        if (!username || !password) {
+            console.log('❌ 입력값 검증 실패');
+            return res.json({ success: false, message: '아이디와 비밀번호를 모두 입력해주세요.' });
+        }
+        
         // 비밀번호 해시화
         const passwordHash = hashPassword(password);
         console.log('🔐 비밀번호 해시:', passwordHash);
+        
+        // Supabase 연결 확인
+        if (!supabase) {
+            console.log('❌ Supabase 클라이언트 없음');
+            return res.json({ success: false, message: 'DB 연결 오류가 발생했습니다.' });
+        }
         
         // 먼저 사용자가 존재하는지 확인
         const { data: existingUser, error: userError } = await supabase
