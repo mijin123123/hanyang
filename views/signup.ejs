@@ -1033,23 +1033,24 @@ async function processSignup() {
             return;
         }
     }
-    
-    // signup 함수가 정의되어 있는지 확인
-    if (typeof signup === 'undefined') {
-        console.error('signup 함수가 정의되지 않았습니다!');
-        showPopup('회원가입 시스템에 오류가 있습니다. 페이지를 새로고침하고 다시 시도해주세요.');
-        return;
-    }
-    
+
     try {
-        console.log('signup 함수 호출 중...'); // 디버깅용
-        // auth.js의 signup 함수 호출 (await 추가)
-        const result = await signup(formData);
+        console.log('서버 회원가입 API 호출 중...'); // 디버깅용
         
+        // 서버 API 직접 호출
+        const response = await fetch('/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
         console.log('회원가입 결과:', result); // 디버깅용
         
         if (result && result.success) {
-            showPopup(result.message || '회원가입이 완료되었습니다.', function() {
+            showPopup(result.message || '회원가입이 완료되었습니다. 바로 로그인하실 수 있습니다.', function() {
                 // 성공 시 로그인 페이지로 이동
                 window.location.href = "/login";
             });
