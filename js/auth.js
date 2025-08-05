@@ -114,6 +114,8 @@ async function login(username, password) {
 // 로그아웃 함수 (서버 기반)
 async function logout() {
     try {
+        console.log('로그아웃 요청 시작...');
+        
         // 서버로 로그아웃 요청
         const response = await fetch('/logout', {
             method: 'POST',
@@ -122,14 +124,20 @@ async function logout() {
             }
         });
         
+        const result = await response.json();
+        console.log('로그아웃 응답:', result);
+        
         // 로컬 스토리지 정리
         localStorage.removeItem('currentUser');
         localStorage.removeItem('sessionExpiry');
         
-        // 로그인 페이지로 리다이렉트
+        // 성공 여부와 관계없이 로그인 페이지로 리다이렉트
+        console.log('로그인 페이지로 리다이렉트...');
         window.location.href = '/login';
+        
     } catch (error) {
         console.error('로그아웃 요청 중 오류:', error);
+        
         // 오류가 발생해도 로컬 정리 후 리다이렉트
         localStorage.removeItem('currentUser');
         localStorage.removeItem('sessionExpiry');
