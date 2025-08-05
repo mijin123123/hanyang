@@ -393,8 +393,31 @@ app.get('/api/check-session', (req, res) => {
 });
 
 // 마이페이지
-app.get('/mypage', requireLogin, (req, res) => {
-    res.render('mypage', { user: req.session.user });
+app.get('/mypage', requireLogin, async (req, res) => {
+    try {
+        // 현재 로그인한 사용자의 상세 정보 조회
+        const { data: userProfile, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', req.session.user.username)
+            .single();
+            
+        if (error) {
+            console.error('사용자 프로필 조회 오류:', error);
+            // 오류 시 세션 정보만 사용
+            return res.render('mypage', { user: req.session.user, userProfile: null });
+        }
+        
+        console.log(`✅ ${req.session.user.username} 사용자 프로필 조회 성공`);
+        res.render('mypage', { 
+            user: req.session.user, 
+            userProfile: userProfile 
+        });
+        
+    } catch (error) {
+        console.error('마이페이지 로드 중 오류:', error);
+        res.render('mypage', { user: req.session.user, userProfile: null });
+    }
 });
 
 // 조합상품 관련 페이지들
@@ -1378,20 +1401,44 @@ app.get('/api/user', (req, res) => {
     }
 });
 
-// 사용자 통계 정보 (샘플 데이터)
-app.get('/api/user/stats/:username', requireLogin, (req, res) => {
+// 사용자 통계 정보 (실제 데이터)
+app.get('/api/user/stats/:username', requireLogin, async (req, res) => {
     const { username } = req.params;
     
-    const sampleStats = {
-        'minj0010': { products: 2, balance: 4623000, investment: 70000000, profit: 33177000 },
-        'admin': { products: 5, balance: 15000000, investment: 200000000, profit: 85000000 },
-        'user1': { products: 1, balance: 1500000, investment: 30000000, profit: 5200000 },
-        'user2': { products: 3, balance: 3200000, investment: 50000000, profit: 12000000 },
-        'test': { products: 1, balance: 800000, investment: 20000000, profit: 2500000 }
-    };
-    
-    const stats = sampleStats[username] || { products: 0, balance: 0, investment: 0, profit: 0 };
-    res.json({ success: true, data: stats });
+    try {
+        // 로그인한 사용자가 자신의 정보만 조회할 수 있도록 보안 체크
+        if (req.session.user.username !== username && req.session.user.role !== 'admin') {
+            return res.json({ success: false, message: '권한이 없습니다.' });
+        }
+        
+        // 사용자 정보 조회
+        const { data: user, error: userError } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', username)
+            .single();
+            
+        if (userError || !user) {
+            console.error('사용자 조회 오류:', userError);
+            return res.json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        }
+        
+        // 투자 관련 데이터는 아직 테이블이 없으므로 기본값 사용
+        // 추후 investments 테이블이 생성되면 실제 데이터로 교체
+        const stats = {
+            products: 0,           // 보유 상품 수
+            balance: 0,            // 보유 금액 (원)
+            investment: 0,         // 총 투자 금액 (원)
+            profit: 0              // 누적 수익 (원)
+        };
+        
+        console.log(`✅ ${username} 사용자 통계 조회 성공`);
+        res.json({ success: true, data: stats });
+        
+    } catch (error) {
+        console.error('사용자 통계 조회 중 오류:', error);
+        res.json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
 });
 
 // 에러 핸들링

@@ -592,12 +592,17 @@
                 <form id="profileForm">
                     <div class="form-group">
                         <label for="name">이름</label>
-                        <input type="text" id="name" class="form-control" readonly value="<%= typeof user !== 'undefined' && user ? user.name : '' %>">
+                        <input type="text" id="name" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile ? userProfile.name : (typeof user !== 'undefined' && user ? user.name : '') %>">
                     </div>
                     
                     <div class="form-group">
                         <label for="username">아이디</label>
-                        <input type="text" id="username" class="form-control" readonly value="<%= typeof user !== 'undefined' && user ? user.username : '' %>">
+                        <input type="text" id="username" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile ? userProfile.username : (typeof user !== 'undefined' && user ? user.username : '') %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile ? userProfile.email : '' %>">
                     </div>
                     
                     <div class="form-group">
@@ -613,7 +618,7 @@
                     
                     <div class="form-group">
                         <label for="phone">전화번호</label>
-                        <input type="text" id="phone" name="phone" class="form-control" placeholder="전화번호 입력" value="<% if (typeof user !== 'undefined' && user) { %><% if (user.username === 'minj0010') { %>010-3234-1123<% } else if (user.role === 'admin') { %>010-1234-5678<% } else { %>010-5678-9012<% } %><% } %>">
+                        <input type="text" id="phone" name="phone" class="form-control" placeholder="전화번호 입력" value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.phone ? userProfile.phone : '' %>">
                     </div>
                     
                     <button type="submit" class="btn btn-block">정보 업데이트</button>
@@ -624,24 +629,24 @@
                 <h2 class="section-title">계좌 정보</h2>
                 <div class="form-group">
                     <label>은행명</label>
-                    <input type="text" id="bankName" class="form-control" readonly value="<% if (typeof user !== 'undefined' && user) { %><% if (user.username === 'minj0010') { %>KB국민은행<% } else if (user.role === 'admin') { %>신한은행<% } else { %>우리은행<% } %><% } %>">
+                    <input type="text" id="bankName" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.bank_name ? userProfile.bank_name : '' %>">
                 </div>
                 
                 <div class="form-group">
                     <label>계좌번호</label>
-                    <input type="text" id="accountNumber" class="form-control" readonly value="<% if (typeof user !== 'undefined' && user) { %><% if (user.username === 'minj0010') { %>94401139100103<% } else if (user.role === 'admin') { %>110123456789<% } else { %>1005123456789<% } %><% } %>">
+                    <input type="text" id="accountNumber" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.account_number ? userProfile.account_number : '' %>">
                     <span class="form-note warning">변경 희망 시 고객센터 문의</span>
                 </div>
                 
                 <h2 class="section-title" style="margin-top: 30px;">주소 정보</h2>
                 <div class="form-group">
                     <label>주소</label>
-                    <input type="text" id="address" class="form-control" readonly value="<% if (typeof user !== 'undefined' && user) { %><% if (user.username === 'minj0010') { %>서울 강남구 도산대로 104 (논현동)<% } else if (user.role === 'admin') { %>서울 종로구 청와대로 1<% } else { %>서울 마포구 월드컵북로 21<% } %><% } %>">
+                    <input type="text" id="address" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.address ? userProfile.address : '' %>">
                 </div>
                 
                 <div class="form-group">
                     <label>상세주소</label>
-                    <input type="text" id="detailAddress" class="form-control" readonly value="<% if (typeof user !== 'undefined' && user) { %><% if (user.username === 'minj0010') { %>원경빌301<% } else if (user.role === 'admin') { %>관리동 101호<% } else { %>한양빌딩 205호<% } %><% } %>">
+                    <input type="text" id="detailAddress" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.detail_address ? userProfile.detail_address : '' %>">
                 </div>
                 
                 <a href="#" class="btn btn-secondary btn-block" onclick="openChat()">
