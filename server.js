@@ -20,10 +20,25 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 환경 설정 및 기본값
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'hanyang-energy-secret-key-2025';
+
+console.log(`🔧 환경: ${NODE_ENV}`);
+console.log(`🔧 포트: ${PORT}`);
+
 // Supabase 설정
-const supabaseUrl = 'https://aqcewkutnssgrioxlqba.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = process.env.SUPABASE_URL || 'https://aqcewkutnssgrioxlqba.supabase.co';
+const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
+
+let supabase;
+try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('✅ Supabase 클라이언트 초기화 완료');
+} catch (error) {
+    console.error('❌ Supabase 클라이언트 초기화 실패:', error);
+    // 앱은 계속 실행되지만 데이터베이스 기능은 제한됨
+}
 
 // Multer 설정 (파일 업로드)
 const storage = multer.diskStorage({
@@ -74,11 +89,11 @@ app.use(bodyParser.json());
 
 // 세션 설정
 app.use(session({
-    secret: 'hanyang-energy-secret-key',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // HTTPS에서는 true로 설정
+        secure: NODE_ENV === 'production', // 프로덕션에서는 HTTPS 필요
         maxAge: 24 * 60 * 60 * 1000 // 24시간
     }
 }));
@@ -228,6 +243,15 @@ function requireAdmin(req, res, next) {
 }
 
 // 라우트 설정
+
+// 건강 체크 엔드포인트 (Render 등 배포 플랫폼용)
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
 
 // 메인 페이지
 app.get('/', (req, res) => {
@@ -2083,21 +2107,66 @@ app.put('/api/admin/transaction/:id', requireAdmin, async (req, res) => {
 // 서버 시작
 async function startServer() {
     try {
-        // Supabase에서 데이터 로드
-        await loadDataFromSupabase();
+        console.log('🚀 한양에너지 서버를 시작합니다...');
         
-        // HTML 파일을 EJS로 변환
-        await convertHtmlToEjs();
-        
-        // 기본 계정 초기화
-        await initializeDefaultAccounts();
-        
-        app.listen(PORT, () => {
-            console.log(`한양에너지 서버가 포트 ${PORT}에서 실행 중입니다.`);
-            console.log(`http://localhost:${PORT} 에서 접속하세요.`);
+        // 서버를 먼저 시작하여 빠른 응답 제공
+        const server = app.listen(PORT, () => {
+            console.log(`✅ 한양에너지 서버가 포트 ${PORT}에서 실행 중입니다.`);
+            console.log(`🌐 접속 URL: ${NODE_ENV === 'production' ? 'https://hanyang-energy.onrender.com' : `http://localhost:${PORT}`}`);
         });
+
+        // 서버 타임아웃 설정 (Render 배포 환경에서 중요)
+        server.timeout = 30000; // 30초
+        server.keepAliveTimeout = 65000; // 65초
+        server.headersTimeout = 66000; // 66초
+
+        // 백그라운드에서 초기화 작업 수행 (타임아웃 설정)
+        const initTimeout = setTimeout(() => {
+            console.warn('⚠️ 초기화 작업이 60초를 초과했습니다. 기본값으로 계속 진행합니다.');
+        }, 60000);
+
+        Promise.all([
+            loadDataFromSupabase().catch(err => {
+                console.warn('⚠️ Supabase 데이터 로드 실패:', err.message);
+                return null;
+            }),
+            convertHtmlToEjs().catch(err => {
+                console.warn('⚠️ HTML to EJS 변환 실패:', err.message);
+                return null;
+            }),
+            initializeDefaultAccounts().catch(err => {
+                console.warn('⚠️ 기본 계정 초기화 실패:', err.message);
+                return null;
+            })
+        ]).then(() => {
+            clearTimeout(initTimeout);
+            console.log('✅ 서버 초기화 완료');
+        }).catch(err => {
+            clearTimeout(initTimeout);
+            console.error('❌ 서버 초기화 중 일부 오류 발생:', err);
+        });
+
+        // 서버 종료 시 정리
+        process.on('SIGTERM', () => {
+            console.log('🔄 서버를 정상적으로 종료합니다...');
+            server.close(() => {
+                console.log('✅ 서버가 정상적으로 종료되었습니다.');
+                process.exit(0);
+            });
+        });
+
+        process.on('SIGINT', () => {
+            console.log('🔄 인터럽트 신호를 받았습니다. 서버를 종료합니다...');
+            server.close(() => {
+                console.log('✅ 서버가 정상적으로 종료되었습니다.');
+                process.exit(0);
+            });
+        });
+
+        return server;
     } catch (error) {
-        console.error('서버 시작 중 오류:', error);
+        console.error('❌ 서버 시작 중 오류:', error);
+        process.exit(1);
     }
 }
 
