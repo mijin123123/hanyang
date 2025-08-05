@@ -1045,43 +1045,141 @@ function showPurchaseModal() {
     
     modal.style.display = 'flex';
     
-    confirmBtn.onclick = function() {
+    confirmBtn.onclick = async function() {
         modal.style.display = 'none';
         
-        // 성공 메시지 모달 표시
-        const successModal = document.createElement('div');
-        successModal.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7); z-index: 1001;
-            display: flex; justify-content: center; align-items: center;
-        `;
-        
-        successModal.innerHTML = `
-            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; animation: modalFadeIn 0.3s ease;">
-                <div style="color: var(--success-color); font-size: 48px; margin-bottom: 15px;">
-                    <i class="fas fa-check-circle"></i>
+        try {
+            // 로딩 모달 표시
+            const loadingModal = document.createElement('div');
+            loadingModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background-color: rgba(0,0,0,0.7); z-index: 1001;
+                display: flex; justify-content: center; align-items: center;
+            `;
+            
+            loadingModal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 12px; text-align: center;">
+                    <div style="color: var(--primary-color); font-size: 24px; margin-bottom: 15px;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>투자 신청을 처리 중입니다...</p>
                 </div>
-                <h3 style="color: var(--success-color); margin-bottom: 15px; font-size: 20px;">투자 신청 완료!</h3>
-                <p style="margin-bottom: 20px; line-height: 1.6; color: #495057;">
-                    투자 신청이 성공적으로 접수되었습니다.<br>
-                    담당자가 검토 후 빠른 시일 내에 연락드리겠습니다.
-                </p>
-                <button onclick="this.closest('div').remove()" style="
-                    background: var(--success-color); color: white; border: none;
-                    padding: 12px 24px; border-radius: 8px; font-weight: 600;
-                    cursor: pointer; transition: all 0.3s ease;
-                ">확인</button>
-            </div>
-        `;
-        
-        document.body.appendChild(successModal);
-        
-        // 3초 후 자동 제거
-        setTimeout(() => {
-            if (successModal.parentNode) {
-                successModal.remove();
+            `;
+            
+            document.body.appendChild(loadingModal);
+            
+            // 투자 신청 API 호출
+            const response = await fetch('/api/investment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    productType: '300kw',
+                    amount: 5000000,
+                    bankName: '',
+                    accountNumber: ''
+                })
+            });
+            
+            const result = await response.json();
+            loadingModal.remove();
+            
+            if (result.success) {
+                // 성공 메시지 모달 표시
+                const successModal = document.createElement('div');
+                successModal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background-color: rgba(0,0,0,0.7); z-index: 1001;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                successModal.innerHTML = `
+                    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; animation: modalFadeIn 0.3s ease;">
+                        <div style="color: var(--success-color); font-size: 48px; margin-bottom: 15px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 style="color: var(--success-color); margin-bottom: 15px; font-size: 20px;">투자 신청 완료!</h3>
+                        <p style="margin-bottom: 20px; line-height: 1.6; color: #495057;">
+                            투자 신청이 성공적으로 접수되었습니다.<br>
+                            관리자 승인 후 처리됩니다.
+                        </p>
+                        <button onclick="this.closest('div').remove()" style="
+                            background: var(--success-color); color: white; border: none;
+                            padding: 12px 24px; border-radius: 8px; font-weight: 600;
+                            cursor: pointer; transition: all 0.3s ease;
+                        ">확인</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(successModal);
+                
+                // 3초 후 자동 제거
+                setTimeout(() => {
+                    if (successModal.parentNode) {
+                        successModal.remove();
+                    }
+                }, 3000);
+            } else {
+                // 오류 메시지 모달 표시
+                const errorModal = document.createElement('div');
+                errorModal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background-color: rgba(0,0,0,0.7); z-index: 1001;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                errorModal.innerHTML = `
+                    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center;">
+                        <div style="color: #e74c3c; font-size: 48px; margin-bottom: 15px;">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h3 style="color: #e74c3c; margin-bottom: 15px; font-size: 20px;">투자 신청 실패</h3>
+                        <p style="margin-bottom: 20px; line-height: 1.6; color: #495057;">
+                            ${result.message || '투자 신청 중 오류가 발생했습니다.'}
+                        </p>
+                        <button onclick="this.closest('div').remove()" style="
+                            background: #e74c3c; color: white; border: none;
+                            padding: 12px 24px; border-radius: 8px; font-weight: 600;
+                            cursor: pointer; transition: all 0.3s ease;
+                        ">확인</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(errorModal);
             }
-        }, 3000);
+        } catch (error) {
+            console.error('투자 신청 중 오류:', error);
+            
+            // 네트워크 오류 모달 표시
+            const errorModal = document.createElement('div');
+            errorModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background-color: rgba(0,0,0,0.7); z-index: 1001;
+                display: flex; justify-content: center; align-items: center;
+            `;
+            
+            errorModal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center;">
+                    <div style="color: #e74c3c; font-size: 48px; margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 style="color: #e74c3c; margin-bottom: 15px; font-size: 20px;">네트워크 오류</h3>
+                    <p style="margin-bottom: 20px; line-height: 1.6; color: #495057;">
+                        서버와의 연결에 문제가 발생했습니다.<br>
+                        잠시 후 다시 시도해주세요.
+                    </p>
+                    <button onclick="this.closest('div').remove()" style="
+                        background: #e74c3c; color: white; border: none;
+                        padding: 12px 24px; border-radius: 8px; font-weight: 600;
+                        cursor: pointer; transition: all 0.3s ease;
+                    ">확인</button>
+                </div>
+            `;
+            
+            document.body.appendChild(errorModal);
+        }
     };
     
     cancelBtn.onclick = function() {

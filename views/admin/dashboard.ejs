@@ -197,26 +197,35 @@
             }
         ];
 
-        // 통계 업데이트
-        function updateDashboardStats() {
-            // 총 회원수
-            document.querySelector('.stat-card:nth-child(1) .stat-number').textContent = members.length;
-            
-            // 총 투자금액
-            const totalInvestment = investments.reduce((sum, inv) => sum + inv.amount, 0);
-            document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = totalInvestment.toLocaleString() + '원';
-            
-            // 미처리 문의
-            const pendingInquiries = inquiries.filter(inq => inq.status === 'pending').length;
-            document.querySelector('.stat-card:nth-child(3) .stat-number').textContent = pendingInquiries;
-            
-            // 활성 공지
-            const activeNotices = notices.filter(notice => notice.status === 'active').length;
-            document.querySelector('.stat-card:nth-child(4) .stat-number').textContent = activeNotices;
-            
-            // 등록된 계좌
-            const activeAccounts = accounts.filter(acc => acc.status === 'active').length;
-            document.querySelector('.stat-card:nth-child(5) .stat-number').textContent = activeAccounts;
+        // 대시보드 통계 로드
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/admin/dashboard-stats', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const stats = result.stats;
+                    
+                    // 총 회원수
+                    document.querySelector('.stat-card:nth-child(1) .stat-number').textContent = stats.totalMembers;
+                    
+                    // 총 투자금액
+                    document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = stats.totalInvestments.toLocaleString() + '원';
+                    
+                    // 미처리 문의 (현재는 미처리 트랜잭션으로 대체)
+                    document.querySelector('.stat-card:nth-child(3) .stat-number').textContent = stats.pendingTransactions;
+                    
+                    console.log('✅ 대시보드 통계 로드 성공:', stats);
+                } else {
+                    console.error('대시보드 통계 로드 실패:', result.message);
+                }
+            } catch (error) {
+                console.error('대시보드 통계 로드 중 오류:', error);
+            }
         }
 
         // 최근 활동 업데이트
@@ -262,7 +271,7 @@
 
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            updateDashboardStats();
+            loadDashboardStats(); // 실제 데이터 로드
             updateRecentActivities();
         });
     </script>

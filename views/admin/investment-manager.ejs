@@ -115,35 +115,76 @@
             document.getElementById('adminInfo').textContent = `${currentAdmin.name}님 환영합니다`;
         }
 
-        // 투자 데이터 (실제 데이터 - 김민정 2개 상품: 500만원, 6500만원)
-        let investments = [
-            {
-                id: 1,
-                investor: "김민정",
-                product: "[300KW] 다함께 동행 뉴베이직",
-                amount: 5000000,
-                applicationDate: "2025-01-15",
-                status: "approved",
-                email: "minj0010@example.com",
-                phone: "010-1234-5678",
-                bankName: "국민은행",
-                accountNumber: "123-456-789"
-            },
-            {
-                id: 2,
-                investor: "김민정",
-                product: "[1MW] 다함께 동행 메가",
-                amount: 65000000,
-                applicationDate: "2025-01-20",
-                status: "approved",
-                email: "minj0010@example.com",
-                phone: "010-1234-5678",
-                bankName: "국민은행",
-                accountNumber: "123-456-789"
-            }
-        ];
+        // 투자 데이터 변수
+        let investments = [];
+        let filteredInvestments = [];
 
-        let filteredInvestments = [...investments];
+        // 투자 데이터 로드
+        async function loadInvestments() {
+            try {
+                const response = await fetch('/api/admin/investments', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    investments = result.investments.map(inv => {
+                        console.log('🔍 투자 데이터 원본:', inv); // 디버그용
+                        
+                        // 모든 가능한 컬럼명 시도
+                        const productName = inv.product_name || inv.product_type || inv.type || inv.product || '알 수 없음';
+                        const amount = parseFloat(
+                            inv.investment_amount || 
+                            inv.amount || 
+                            inv.invest_amount || 
+                            inv.money || 
+                            0
+                        );
+                        
+                        return {
+                            id: inv.id,
+                            investor: inv.member?.name || '알 수 없음',
+                            investorUsername: inv.member?.username || '',
+                            product: productName,
+                            amount: amount,
+                            applicationDate: inv.created_at?.split('T')[0] || '',
+                            status: inv.status,
+                            email: inv.member?.email || '',
+                            phone: inv.member?.phone || '',
+                            bankName: '',
+                            accountNumber: '',
+                            adminNote: '',
+                            processedAt: inv.updated_at?.split('T')[0] || ''
+                        };
+                    });
+                    
+                    filteredInvestments = [...investments];
+                    updateInvestmentStats();
+                    renderInvestmentTable();
+                } else {
+                    console.error('투자 데이터 로드 실패:', result.message);
+                    showAlert('error', '투자 데이터를 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('투자 데이터 로드 중 오류:', error);
+                showAlert('error', '투자 데이터를 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 상품 타입을 이름으로 변환
+        function getProductName(productType) {
+            const productNames = {
+                '300kw': '[300KW] 다함께 동행 뉴베이직',
+                '500kw': '[500KW] 다함께 동행',
+                '1mw': '[1MW] 다함께 동행 메가',
+                'green_starter': '그린 스타터 패키지',
+                'laon': '라온 에너지 패키지',
+                'simple_eco': '심플 에코 패키지'
+            };
+            return productNames[productType] || productType;
+        }
 
         // 통계 업데이트
         function updateInvestmentStats() {
@@ -234,27 +275,65 @@
         }
 
         // 투자 승인
-        function approveInvestment(id) {
-            confirmAction('이 투자를 승인하시겠습니까?', () => {
-                const investmentIndex = investments.findIndex(i => i.id === id);
-                if (investmentIndex !== -1) {
-                    investments[investmentIndex].status = 'approved';
-                    filterInvestments();
-                    showAlert('success', '투자가 성공적으로 승인되었습니다.');
+        async function approveInvestment(id) {
+            if (confirm('이 투자를 승인하시겠습니까?')) {
+                try {
+                    const response = await fetch(`/api/admin/investment/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            action: 'approve',
+                            note: '관리자에 의해 승인됨'
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showAlert('success', '투자가 성공적으로 승인되었습니다.');
+                        await loadInvestments(); // 데이터 새로고침
+                    } else {
+                        showAlert('error', result.message || '투자 승인에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('투자 승인 중 오류:', error);
+                    showAlert('error', '투자 승인 중 오류가 발생했습니다.');
                 }
-            });
+            }
         }
 
         // 투자 반려
-        function rejectInvestment(id) {
-            confirmAction('이 투자를 반려하시겠습니까?', () => {
-                const investmentIndex = investments.findIndex(i => i.id === id);
-                if (investmentIndex !== -1) {
-                    investments[investmentIndex].status = 'rejected';
-                    filterInvestments();
-                    showAlert('success', '투자가 반려되었습니다.');
+        async function rejectInvestment(id) {
+            if (confirm('이 투자를 반려하시겠습니까?')) {
+                try {
+                    const response = await fetch(`/api/admin/investment/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            action: 'reject',
+                            note: '관리자에 의해 거부됨'
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showAlert('success', '투자가 반려되었습니다.');
+                        await loadInvestments(); // 데이터 새로고침
+                    } else {
+                        showAlert('error', result.message || '투자 반려에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('투자 반려 중 오류:', error);
+                    showAlert('error', '투자 반려 중 오류가 발생했습니다.');
                 }
-            });
+            }
         }
 
         // 투자 필터링
@@ -315,10 +394,21 @@
             }
         }
 
+        // 알림 표시
+        function showAlert(type, message) {
+            // 간단한 알림 - 실제로는 더 나은 UI 라이브러리 사용 권장
+            if (type === 'success') {
+                alert('✅ ' + message);
+            } else if (type === 'error') {
+                alert('❌ ' + message);
+            } else {
+                alert(message);
+            }
+        }
+
         // 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            updateInvestmentStats();
-            renderInvestmentTable();
+            loadInvestments(); // 실제 데이터 로드
         });
     </script>
 

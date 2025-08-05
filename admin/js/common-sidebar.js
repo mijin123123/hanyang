@@ -179,3 +179,31 @@ window.addEventListener('resize', function() {
         sidebar.classList.remove('collapsed');
     }
 });
+
+// 로그아웃 함수
+function logout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        // 서버의 로그아웃 API 호출
+        fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // 세션 쿠키 포함
+        })
+        .then(response => {
+            // 성공 여부와 상관없이 로그인 페이지로 이동
+            window.location.href = "/admin/login";
+        })
+        .catch(error => {
+            console.error('로그아웃 중 오류:', error);
+            // 오류가 발생해도 로그인 페이지로 이동
+            window.location.href = "/admin/login";
+        });
+        
+        // 로컬스토리지 정리 (혹시 남아있을 수 있는 데이터)
+        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('adminLoginTime');
+        localStorage.removeItem('currentAdminId');
+    }
+}

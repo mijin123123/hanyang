@@ -141,6 +141,12 @@ app.use('/videos', express.static(path.join(__dirname, 'videos')));
 // 디버깅용 HTML 파일도 서빙
 app.use(express.static(__dirname));
 
+// 모든 요청 로깅 미들웨어
+app.use((req, res, next) => {
+    console.log(`📡 ${req.method} ${req.url} - ${new Date().toISOString()}`);
+    next();
+});
+
 // 관리자 정적 파일 서빙
 app.use('/admin/css', express.static(path.join(__dirname, 'admin/css')));
 app.use('/admin/js', express.static(path.join(__dirname, 'admin/js')));
@@ -279,25 +285,41 @@ let users = [
 
 // 미들웨어: 로그인 확인
 function requireLogin(req, res, next) {
+    console.log('🔐 requireLogin 미들웨어 실행됨');
+    console.log('🔐 요청 경로:', req.path);
+    console.log('🔐 세션 사용자:', req.session?.user?.username || '없음');
+    
     // 세션 기반 인증 먼저 확인
     if (req.session.user) {
+        console.log('✅ 세션 기반 인증 성공');
         return next();
     }
     
     // 헤더에서 사용자 정보 확인 (클라이언트 측 auth.js와 연동)
     const userHeader = req.headers['x-current-user'];
+    console.log('🔐 사용자 헤더:', userHeader ? '있음' : '없음');
+    
     if (userHeader) {
         try {
-            const user = JSON.parse(userHeader);
+            // URL 디코딩 후 JSON 파싱
+            const decodedHeader = decodeURIComponent(userHeader);
+            const user = JSON.parse(decodedHeader);
+            console.log('🔐 헤더에서 파싱된 사용자:', user?.username || '없음');
+            
             if (user && user.status === 'approved') {
+                console.log('✅ 헤더 기반 인증 성공');
                 // 세션에도 저장
                 req.session.user = user;
                 return next();
+            } else {
+                console.log('❌ 사용자 상태가 승인되지 않음:', user?.status);
             }
         } catch (e) {
-            console.log('사용자 헤더 파싱 오류:', e);
+            console.log('❌ 사용자 헤더 파싱 오류:', e);
         }
     }
+    
+    console.log('❌ 인증 실패 - 로그인 필요');
     
     // API 요청인 경우 JSON 응답
     if (req.path.startsWith('/api/')) {
@@ -626,7 +648,24 @@ app.post('/logout', (req, res) => {
         
         console.log('✅ 로그아웃 완료');
         res.clearCookie('hanyang.sid'); // 쿠키도 명시적으로 삭제
-        res.json({ success: true, message: '로그아웃 되었습니다.' });
+        
+        // JSON 응답 대신 홈페이지로 리다이렉트
+        res.redirect('/');
+    });
+});
+
+// GET 로그아웃 라우트도 추가 (URL 직접 접근 대응)
+app.get('/logout', (req, res) => {
+    console.log('🚪 GET 로그아웃 요청 - 사용자:', req.session.user ? req.session.user.username : '없음');
+    
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('❌ 세션 삭제 실패:', err);
+        }
+        
+        console.log('✅ 로그아웃 완료 (GET)');
+        res.clearCookie('hanyang.sid');
+        res.redirect('/');
     });
 });
 
@@ -696,6 +735,64 @@ app.get('/mypage', requireLogin, async (req, res) => {
     }
 });
 
+// 계좌/주소 정보 업데이트 API
+app.post('/api/update-account-info', requireLogin, async (req, res) => {
+    try {
+        const { bankName, accountNumber, address, detailAddress } = req.body;
+        const userId = req.session.user.id;
+
+        // 입력값 검증
+        if (!bankName || !accountNumber) {
+            return res.json({
+                success: false,
+                message: '은행명과 계좌번호는 필수 입력 항목입니다.'
+            });
+        }
+
+        // 계좌번호 형식 검증
+        const accountRegex = /^[0-9-]+$/;
+        if (!accountRegex.test(accountNumber)) {
+            return res.json({
+                success: false,
+                message: '계좌번호는 숫자와 하이픈(-)만 입력 가능합니다.'
+            });
+        }
+
+        // 데이터베이스 업데이트
+        const { data, error } = await supabase
+            .from('members')
+            .update({
+                bank_name: bankName,
+                account_number: accountNumber,
+                address: address || null,
+                detail_address: detailAddress || null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId);
+
+        if (error) {
+            console.error('계좌 정보 업데이트 오류:', error);
+            return res.json({
+                success: false,
+                message: '정보 저장 중 오류가 발생했습니다.'
+            });
+        }
+
+        console.log(`✅ ${req.session.user.username} 계좌/주소 정보 업데이트 성공`);
+        res.json({
+            success: true,
+            message: '계좌/주소 정보가 성공적으로 저장되었습니다.'
+        });
+
+    } catch (error) {
+        console.error('계좌 정보 업데이트 중 오류:', error);
+        res.json({
+            success: false,
+            message: '서버 오류가 발생했습니다.'
+        });
+    }
+});
+
 // 조합상품 관련 페이지들
 app.get('/introduce_product', requireLogin, (req, res) => {
     res.render('introduce_product', { user: req.session.user });
@@ -705,8 +802,34 @@ app.get('/product_list', requireLogin, (req, res) => {
     res.render('product_list', { user: req.session.user });
 });
 
-app.get('/my_investments', requireLogin, (req, res) => {
-    res.render('my_investments', { user: req.session.user });
+app.get('/my_investments', requireLogin, async (req, res) => {
+    try {
+        const memberId = req.session.user.id;
+        
+        // 사용자의 투자 데이터 조회
+        const { data: investments, error } = await supabase
+            .from('investments')
+            .select('*')
+            .eq('member_id', memberId)
+            .eq('status', 'active');
+        
+        if (error) {
+            console.error('투자 데이터 조회 오류:', error);
+            return res.status(500).render('error', { 
+                message: '투자 데이터를 불러오는 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        res.render('my_investments', { 
+            user: req.session.user,
+            investments: investments || []
+        });
+    } catch (error) {
+        console.error('투자 현황 페이지 오류:', error);
+        res.status(500).render('error', { 
+            message: '페이지를 불러오는 중 오류가 발생했습니다.' 
+        });
+    }
 });
 
 app.get('/withdraw_request', requireLogin, async (req, res) => {
@@ -2022,17 +2145,6 @@ app.get('/api/user/stats/:username', requireLogin, async (req, res) => {
     }
 });
 
-// 에러 핸들링
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('서버 오류가 발생했습니다.');
-});
-
-// 404 핸들링
-app.use((req, res) => {
-    res.status(404).send('페이지를 찾을 수 없습니다.');
-});
-
 // 기본 계정 초기화 함수
 async function initializeDefaultAccounts() {
     try {
@@ -2134,11 +2246,485 @@ async function updateMemberBalance(memberId, newBalance) {
     }
 }
 
-// 입출금 신청 처리 API
-app.post('/api/transaction', requireLogin, async (req, res) => {
+// 테스트용 API - investments 테이블 구조 확인 및 생성
+app.get('/api/test/investments-table', async (req, res) => {
     try {
-        const { type, amount, bankTransferName, withdrawBankName, withdrawAccountNumber, withdrawAccountHolder } = req.body;
+        console.log('🔍 investments 테이블 구조 확인');
+        
+        // 1단계: PostgreSQL 시스템 테이블에서 컬럼 정보 조회
+        const { data: columnInfo, error: columnError } = await supabase
+            .rpc('get_table_columns', { table_name: 'investments' })
+            .then(result => {
+                console.log('RPC 호출 결과:', result);
+                return result;
+            })
+            .catch(err => {
+                console.log('RPC 호출 실패, 대안 방법 시도');
+                return { data: null, error: err };
+            });
+        
+        // 2단계: 직접 테이블 조회 시도
+        const { data, error } = await supabase
+            .from('investments')
+            .select('*')
+            .limit(1);
+        
+        if (error) {
+            console.log('❌ investments 테이블 조회 오류:', error);
+            
+            if (error.code === 'PGRST116') {
+                // 테이블이 존재하지 않음
+                const createTableSQL = `
+                    CREATE TABLE IF NOT EXISTS investments (
+                        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                        member_id UUID REFERENCES members(id) ON DELETE CASCADE,
+                        product_type VARCHAR(50) NOT NULL,
+                        amount DECIMAL(15,2) NOT NULL,
+                        status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'completed', 'cancelled')),
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                `;
+                
+                return res.json({
+                    success: false,
+                    error: error,
+                    message: 'investments 테이블이 존재하지 않습니다.',
+                    createTableSQL: createTableSQL,
+                    suggestion: 'Supabase 대시보드 SQL Editor에서 위 SQL을 실행해주세요.'
+                });
+            }
+            
+            return res.json({
+                success: false,
+                error: error,
+                message: 'investments 테이블 조회 실패'
+            });
+        }
+        
+        // 3단계: 실제 데이터 조회해서 컬럼 확인
+        const { data: sampleData, error: sampleError } = await supabase
+            .from('investments')
+            .select('*')
+            .limit(5);
+        
+        console.log('✅ investments 테이블 샘플 데이터:', sampleData);
+        
+        // 4단계: 데이터가 있다면 컬럼 이름들 추출
+        let columnNames = [];
+        if (sampleData && sampleData.length > 0) {
+            columnNames = Object.keys(sampleData[0]);
+        }
+        
+        res.json({
+            success: true,
+            sampleData: sampleData,
+            sampleError: sampleError,
+            columnNames: columnNames,
+            columnInfo: columnInfo,
+            message: 'investments 테이블 구조 확인 완료',
+            tableExists: true
+        });
+        
+    } catch (error) {
+        console.error('investments 테이블 구조 확인 중 오류:', error);
+        res.json({
+            success: false,
+            error: error.message,
+            message: '테이블 구조 확인 중 예외 오류 발생'
+        });
+    }
+});
+
+// 상품 타입을 이름으로 변환하는 함수
+function getProductNameFromType(productType) {
+    const productNames = {
+        '300kw': '[300KW] 다함께 동행 뉴베이직',
+        '500kw': '[500KW] 다함께 동행',
+        '1mw': '[1MW] 다함께 동행 메가',
+        'green_starter': '그린 스타터 패키지',
+        'laon': '라온 에너지 패키지',
+        'simple_eco': '심플 에코 패키지'
+    };
+    return productNames[productType] || productType;
+}
+
+// 투자 신청 처리 API
+app.post('/api/investment', requireLogin, async (req, res) => {
+    try {
+        console.log('💰 투자 신청 API 요청 받음');
+        console.log('💰 요청 본문:', req.body);
+        console.log('💰 세션 사용자:', req.session.user);
+        
+        const { productType, amount, bankName, accountNumber } = req.body;
         const memberId = req.session.user.id;
+        
+        // 입력 검증
+        if (!productType || !amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            console.log('❌ 입력 검증 실패:', { productType, amount });
+            return res.status(400).json({ 
+                success: false, 
+                message: '올바른 투자 정보를 입력해주세요.' 
+            });
+        }
+        
+        const investmentAmount = parseFloat(amount);
+        
+        // 최소 투자 금액 확인 (50만원)
+        if (investmentAmount < 500000) {
+            console.log('❌ 최소 투자 금액 미달:', investmentAmount);
+            return res.status(400).json({ 
+                success: false, 
+                message: '최소 투자 금액은 500,000원입니다.' 
+            });
+        }
+        
+        // 투자 신청 생성 - 모든 가능한 컬럼명 시도
+        console.log('🔍 투자 테이블 구조 확인 중...');
+        
+        // 1단계: 테이블 구조 확인
+        const { data: tableCheck, error: tableError } = await supabase
+            .from('investments')
+            .select('*')
+            .limit(1);
+            
+        console.log('📋 테이블 확인 결과:', { tableCheck, tableError });
+        
+        // 2단계: 다양한 컬럼명과 구조로 시도
+        const attempts = [
+            {
+                name: '기본 구조 시도 (product_type, amount)',
+                data: {
+                    member_id: memberId,
+                    product_type: productType,
+                    amount: investmentAmount,
+                    status: 'pending'
+                }
+            },
+            {
+                name: '대안 구조 1 (type, amount)',
+                data: {
+                    member_id: memberId,
+                    type: productType,
+                    amount: investmentAmount,
+                    status: 'pending'
+                }
+            },
+            {
+                name: '대안 구조 2 (product, investment_amount)',
+                data: {
+                    member_id: memberId,
+                    product: getProductNameFromType(productType),
+                    investment_amount: investmentAmount,
+                    status: 'pending'
+                }
+            },
+            {
+                name: '대안 구조 3 (product_name, amount)',
+                data: {
+                    member_id: memberId,
+                    product_name: getProductNameFromType(productType),
+                    amount: investmentAmount,
+                    status: 'pending'
+                }
+            },
+            {
+                name: '간단한 구조 (amount만)',
+                data: {
+                    member_id: memberId,
+                    amount: investmentAmount,
+                    status: 'pending'
+                }
+            }
+        ];
+        
+        let investment = null;
+        let finalError = null;
+        
+        for (const attempt of attempts) {
+            console.log(`💰 ${attempt.name}:`, attempt.data);
+            
+            const { data: result, error } = await supabase
+                .from('investments')
+                .insert(attempt.data)
+                .select()
+                .single();
+                
+            if (!error && result) {
+                investment = result;
+                console.log(`✅ ${attempt.name} 성공!`);
+                break;
+            } else {
+                console.log(`❌ ${attempt.name} 실패:`, error);
+                finalError = error;
+            }
+        }
+        
+        
+        if (!investment) {
+            console.error('❌ 모든 시도 실패 - 투자 신청 생성 오류:', finalError);
+            console.error('❌ 오류 세부사항:', JSON.stringify(finalError, null, 2));
+            
+            // 테이블이 존재하지 않는 경우 생성 안내
+            if (finalError?.code === 'PGRST116' || finalError?.message?.includes('does not exist')) {
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'investments 테이블이 존재하지 않습니다. 관리자에게 문의해주세요.',
+                    error: 'TABLE_NOT_EXISTS',
+                    createTableSQL: `
+                        CREATE TABLE IF NOT EXISTS investments (
+                            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                            member_id UUID REFERENCES members(id) ON DELETE CASCADE,
+                            product_type VARCHAR(50) NOT NULL,
+                            amount DECIMAL(15,2) NOT NULL,
+                            status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+                            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                        );
+                    `
+                });
+            }
+            
+            return res.status(500).json({ 
+                success: false, 
+                message: '투자 신청 처리 중 오류가 발생했습니다. 데이터베이스 구조를 확인해주세요.',
+                error: finalError?.message || '알 수 없는 오류',
+                suggestion: 'http://localhost:3000/api/test/investments-table 페이지에서 테이블 구조를 확인해주세요.'
+            });
+        }
+        
+        console.log('✅ 투자 신청 생성 성공:', investment.id);
+        res.json({ 
+            success: true, 
+            message: '투자 신청이 완료되었습니다. 관리자 승인 후 처리됩니다.',
+            investmentId: investment.id
+        });
+        
+    } catch (error) {
+        console.error('💥 투자 신청 처리 예외 오류:', error);
+        console.error('💥 오류 스택:', error.stack);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.',
+            error: error.message
+        });
+    }
+});
+
+// 관리자: 모든 투자 신청 조회 API
+app.get('/api/admin/investments', requireAdmin, async (req, res) => {
+    try {
+        console.log('🔍 관리자 투자 조회 API 호출됨');
+        
+        const { data: investments, error } = await supabase
+            .from('investments')
+            .select(`
+                *,
+                member:members!investments_member_id_fkey(name, username, email, phone)
+            `)
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('관리자 투자 조회 오류:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '투자 내역 조회 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        console.log('✅ 관리자 투자 조회 성공:', investments?.length || 0, '건');
+        res.json({ 
+            success: true, 
+            investments: investments || [] 
+        });
+        
+    } catch (error) {
+        console.error('관리자 투자 조회 중 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 관리자: 대시보드 통계 조회 API
+app.get('/api/admin/dashboard-stats', requireAdmin, async (req, res) => {
+    try {
+        console.log('📊 관리자 대시보드 통계 조회 API 호출됨');
+        
+        // 회원 수 조회
+        const { data: members, error: membersError } = await supabase
+            .from('members')
+            .select('id')
+            .neq('role', 'admin');
+        
+        // 투자 데이터 조회
+        const { data: investments, error: investmentsError } = await supabase
+            .from('investments')
+            .select('*');
+        
+        // 트랜잭션 데이터 조회
+        const { data: transactions, error: transactionsError } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('status', 'pending');
+        
+        if (membersError || investmentsError || transactionsError) {
+            console.error('대시보드 통계 조회 오류:', { membersError, investmentsError, transactionsError });
+            return res.status(500).json({ 
+                success: false, 
+                message: '통계 데이터 조회 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        // 통계 계산 (모든 가능한 컬럼명 시도)
+        const stats = {
+            totalMembers: members?.length || 0,
+            totalInvestments: investments?.reduce((sum, inv) => {
+                const amount = parseFloat(
+                    inv.investment_amount || 
+                    inv.amount || 
+                    inv.invest_amount || 
+                    inv.money || 
+                    0
+                );
+                return sum + amount;
+            }, 0) || 0,
+            pendingTransactions: transactions?.length || 0,
+            pendingInvestments: investments?.filter(inv => inv.status === 'active' || inv.status === 'pending').length || 0
+        };
+        
+        console.log('✅ 관리자 대시보드 통계 조회 성공:', stats);
+        res.json({ 
+            success: true, 
+            stats: stats
+        });
+        
+    } catch (error) {
+        console.error('관리자 대시보드 통계 조회 중 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 관리자: 투자 승인/거부 API
+app.put('/api/admin/investment/:id', requireAdmin, async (req, res) => {
+    try {
+        const investmentId = req.params.id;
+        const { action, note } = req.body; // action: 'approve' 또는 'reject'
+        const adminId = req.session.user.id;
+        
+        if (!['approve', 'reject'].includes(action)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '올바른 액션을 선택해주세요.' 
+            });
+        }
+        
+        // 투자 신청 조회
+        const { data: investment, error: fetchError } = await supabase
+            .from('investments')
+            .select('*')
+            .eq('id', investmentId)
+            .single();
+        
+        if (fetchError || !investment) {
+            return res.status(404).json({ 
+                success: false, 
+                message: '투자 신청을 찾을 수 없습니다.' 
+            });
+        }
+        
+        if (investment.status !== 'pending') {
+            return res.status(400).json({ 
+                success: false, 
+                message: '이미 처리된 투자 신청입니다.' 
+            });
+        }
+        
+        const newStatus = action === 'approve' ? 'approved' : 'rejected';
+        
+        // 투자 신청 상태 업데이트
+        const { error: updateError } = await supabase
+            .from('investments')
+            .update({ 
+                status: newStatus,
+                admin_note: note,
+                processed_by: adminId,
+                processed_at: new Date().toISOString()
+            })
+            .eq('id', investmentId);
+        
+        if (updateError) {
+            console.error('투자 신청 업데이트 오류:', updateError);
+            return res.status(500).json({ 
+                success: false, 
+                message: '투자 신청 처리 중 오류가 발생했습니다.' 
+            });
+        }
+        
+        console.log(`✅ 투자 신청 ${action === 'approve' ? '승인' : '거부'} 성공:`, investmentId);
+        res.json({ 
+            success: true, 
+            message: `투자 신청이 ${action === 'approve' ? '승인' : '거부'}되었습니다.` 
+        });
+        
+    } catch (error) {
+        console.error('투자 신청 처리 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 테스트용 간단한 API 라우트
+app.post('/api/test-route', (req, res) => {
+    console.log('🧪 테스트 라우트 실행됨!');
+    res.json({ success: true, message: '테스트 라우트 작동' });
+});
+
+// 입출금 신청 처리 API
+app.post('/api/transaction', async (req, res) => {
+    console.log('💳💳💳 트랜잭션 API 라우트 핸들러 진입!!! (미들웨어 제거됨)');
+    console.log('💳 트랜잭션 API 요청 받음');
+    console.log('💳 요청 본문:', req.body);
+    console.log('💳 세션 사용자:', req.session.user);
+    
+    try {
+        // 사용자 인증 확인
+        let currentUser = req.session.user;
+        
+        if (!currentUser) {
+            // 헤더에서 사용자 정보 확인
+            const userHeader = req.headers['x-current-user'];
+            if (userHeader) {
+                try {
+                    const decodedHeader = decodeURIComponent(userHeader);
+                    currentUser = JSON.parse(decodedHeader);
+                    console.log('💳 헤더에서 사용자 정보 추출:', currentUser?.username);
+                } catch (e) {
+                    console.log('💳 헤더 파싱 오류:', e);
+                }
+            }
+        }
+        
+        if (!currentUser) {
+            console.log('💳 사용자 인증 실패 - 로그인 필요');
+            return res.status(401).json({ 
+                success: false, 
+                message: '로그인이 필요합니다.' 
+            });
+        }
+        
+        console.log('💳 인증된 사용자:', currentUser.username);
+        
+        const { type, amount, bankTransferName, withdrawBankName, withdrawAccountNumber, withdrawAccountHolder } = req.body;
+        const memberId = currentUser.id;
+        
+        console.log('💳 파싱된 데이터:', { type, amount, bankTransferName, withdrawBankName, withdrawAccountNumber, withdrawAccountHolder, memberId });
         
         // 입력 검증
         if (!type || !amount || isNaN(amount) || parseFloat(amount) <= 0) {
@@ -2276,11 +2862,13 @@ app.get('/api/transactions', requireLogin, async (req, res) => {
 // 관리자: 모든 트랜잭션 조회 API
 app.get('/api/admin/transactions', requireAdmin, async (req, res) => {
     try {
+        console.log('🔍 관리자 트랜잭션 조회 API 호출됨');
+        
         const { data: transactions, error } = await supabase
             .from('transactions')
             .select(`
                 *,
-                member:members(name, username)
+                member:members!transactions_member_id_fkey(name, username)
             `)
             .order('created_at', { ascending: false });
         
@@ -2292,6 +2880,7 @@ app.get('/api/admin/transactions', requireAdmin, async (req, res) => {
             });
         }
         
+        console.log('✅ 관리자 트랜잭션 조회 성공:', transactions?.length || 0, '건');
         res.json({ 
             success: true, 
             transactions: transactions || [] 
@@ -2488,6 +3077,18 @@ async function startServer() {
         process.exit(1);
     }
 }
+
+// 에러 핸들링 (모든 라우트 정의 후에 위치)
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('서버 오류가 발생했습니다.');
+});
+
+// 404 핸들링 (모든 라우트 정의 후에 위치)
+app.use((req, res) => {
+    console.log('🚫 404 - 페이지를 찾을 수 없음:', req.method, req.url);
+    res.status(404).send('페이지를 찾을 수 없습니다.');
+});
 
 startServer();
 

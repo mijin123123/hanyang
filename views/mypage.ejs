@@ -9,13 +9,8 @@
     <link rel="icon" href="img/favi.ico" type="image/jpeg">
     
     <!-- 폰트 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-wallet"></i></div>
-                <div class="stat-title">계좌 잔액</div>
-                <div class="stat-value" id="statBalance">
-                    ₩<%= typeof currentBalance !== 'undefined' ? currentBalance.toLocaleString() : '0' %>
-                </div>
-            </div>link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- CSS 파일 -->
     <link rel="stylesheet" href="css/global.css?v=1754220183">
@@ -637,26 +632,30 @@
             <div>
                 <h2 class="section-title">계좌 정보</h2>
                 <div class="form-group">
-                    <label>은행명</label>
-                    <input type="text" id="bankName" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.bank_name ? userProfile.bank_name : '' %>">
+                    <label for="bankName">은행명</label>
+                    <input type="text" id="bankName" name="bankName" class="form-control" placeholder="은행명을 입력하세요" value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.bank_name ? userProfile.bank_name : '' %>">
                 </div>
                 
                 <div class="form-group">
-                    <label>계좌번호</label>
-                    <input type="text" id="accountNumber" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.account_number ? userProfile.account_number : '' %>">
-                    <span class="form-note warning">변경 희망 시 고객센터 문의</span>
+                    <label for="accountNumber">계좌번호</label>
+                    <input type="text" id="accountNumber" name="accountNumber" class="form-control" placeholder="계좌번호를 입력하세요" value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.account_number ? userProfile.account_number : '' %>">
+                    <span class="form-note">출금 시 사용될 계좌번호입니다</span>
                 </div>
                 
                 <h2 class="section-title" style="margin-top: 30px;">주소 정보</h2>
                 <div class="form-group">
-                    <label>주소</label>
-                    <input type="text" id="address" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.address ? userProfile.address : '' %>">
+                    <label for="address">주소</label>
+                    <input type="text" id="address" name="address" class="form-control" placeholder="주소를 입력하세요" value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.address ? userProfile.address : '' %>">
                 </div>
                 
                 <div class="form-group">
-                    <label>상세주소</label>
-                    <input type="text" id="detailAddress" class="form-control" readonly value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.detail_address ? userProfile.detail_address : '' %>">
+                    <label for="detailAddress">상세주소</label>
+                    <input type="text" id="detailAddress" name="detailAddress" class="form-control" placeholder="상세주소를 입력하세요" value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.detail_address ? userProfile.detail_address : '' %>">
                 </div>
+                
+                <button type="button" class="btn btn-block" onclick="updateAccountInfo()">
+                    <i class="fas fa-save"></i> 계좌/주소 정보 저장
+                </button>
                 
                 <a href="#" class="btn btn-secondary btn-block" onclick="openChat()">
                     <i class="fas fa-headset"></i> 고객센터 문의
@@ -777,6 +776,58 @@
             if (!detailAddressInput.value && user.username === 'minj0010') {
                 detailAddressInput.value = '원경빌301';
             }
+        }
+
+        // 계좌/주소 정보 업데이트
+        function updateAccountInfo() {
+            const bankName = document.getElementById('bankName').value.trim();
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const detailAddress = document.getElementById('detailAddress').value.trim();
+
+            if (!bankName) {
+                showPopup('은행명을 입력해주세요.');
+                return;
+            }
+
+            if (!accountNumber) {
+                showPopup('계좌번호를 입력해주세요.');
+                return;
+            }
+
+            // 계좌번호 형식 검증 (숫자와 하이픈만 허용)
+            const accountRegex = /^[0-9-]+$/;
+            if (!accountRegex.test(accountNumber)) {
+                showPopup('계좌번호는 숫자와 하이픈(-)만 입력 가능합니다.');
+                return;
+            }
+
+            // 서버로 정보 전송
+            fetch('/api/update-account-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    bankName: bankName,
+                    accountNumber: accountNumber,
+                    address: address,
+                    detailAddress: detailAddress
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showPopup('계좌/주소 정보가 성공적으로 저장되었습니다.');
+                } else {
+                    showPopup(data.message || '정보 저장 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showPopup('정보 저장 중 오류가 발생했습니다.');
+            });
         }
 
         // 프로필 업데이트
