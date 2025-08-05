@@ -847,22 +847,22 @@
             <div class="summary-card">
                 <div class="summary-icon"><i class="fas fa-wallet"></i></div>
                 <div class="summary-label">총 출자 금액</div>
-                <div class="summary-value">₩<%= investments && investments.length > 0 ? investments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount), 0).toLocaleString() : '0' %></div>
+                <div class="summary-value">₩<%= totalInvestmentAmount ? totalInvestmentAmount.toLocaleString() : '0' %></div>
             </div>
             <div class="summary-card">
                 <div class="summary-icon"><i class="fas fa-chart-line"></i></div>
                 <div class="summary-label">평균 수익률</div>
-                <div class="summary-value"><%= investments && investments.length > 0 ? '0.13%' : '0%' %></div>
+                <div class="summary-value"><%= averageReturn ? averageReturn + '%' : '0%' %></div>
             </div>
             <div class="summary-card">
                 <div class="summary-icon"><i class="fas fa-coins"></i></div>
                 <div class="summary-label">예상 월 수익</div>
-                <div class="summary-value">₩<%= investments && investments.length > 0 ? Math.round(investments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount), 0) * 0.0013 * 30).toLocaleString() : '0' %></div>
+                <div class="summary-value">₩<%= totalInvestmentAmount ? Math.round(totalInvestmentAmount * (parseFloat(averageReturn) || 0) / 100 / 12).toLocaleString() : '0' %></div>
             </div>
             <div class="summary-card danger">
                 <div class="summary-icon"><i class="fas fa-clock"></i></div>
                 <div class="summary-label">진행 중 투자</div>
-                <div class="summary-value"><%= investments ? investments.length : 0 %>건</div>
+                <div class="summary-value"><%= activeInvestmentCount || 0 %>건</div>
             </div>
         </div>
 
@@ -912,44 +912,51 @@
         <div class="chart-section">
             <div class="chart-card">
                 <div class="chart-title">월별 수익 현황</div>
-                <div class="progress-label">
-                    <span>1월</span>
-                    <span>₩<%= Math.round(investments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount), 0) * 0.0013 * 30 * 0.6).toLocaleString() %></span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 60%"></div>
-                </div>
-                <div class="progress-label">
-                    <span>2월</span>
-                    <span>₩<%= Math.round(investments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount), 0) * 0.0013 * 30 * 0.49).toLocaleString() %></span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 49%"></div>
-                </div>
-                <div class="progress-label">
-                    <span>3월</span>
-                    <span>₩<%= Math.round(investments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount), 0) * 0.0013 * 30 * 0.72).toLocaleString() %></span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 72%"></div>
-                </div>
+                <% if (monthlyRevenue && monthlyRevenue.length > 0) { %>
+                    <% const maxRevenue = Math.max(...monthlyRevenue.map(m => m.revenue)); %>
+                    <% monthlyRevenue.slice(-3).forEach(month => { 
+                        const widthPercent = maxRevenue > 0 ? Math.max((month.revenue / maxRevenue) * 100, 5) : 0;
+                    %>
+                        <div class="progress-label">
+                            <span><%= month.month %></span>
+                            <span>₩<%= month.revenue.toLocaleString() %></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: <%- widthPercent %>%"></div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="progress-label">
+                        <span>데이터 없음</span>
+                        <span>₩0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                <% } %>
             </div>
             
             <div class="chart-card">
                 <div class="chart-title">포트폴리오 분석</div>
-                <% 
-                const totalAmount = investments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount), 0);
-                investments.forEach(inv => {
-                    const percentage = ((parseFloat(inv.investment_amount) / totalAmount) * 100).toFixed(1);
-                %>
-                <div class="progress-label">
-                    <span><%= inv.product_name %></span>
-                    <span><%= percentage %>%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: <%= percentage + '%' %>"></div>
-                </div>
-                <% }); %>
+                <% if (portfolioAnalysis && portfolioAnalysis.length > 0) { %>
+                    <% portfolioAnalysis.forEach(item => { %>
+                        <div class="progress-label">
+                            <span><%= item.productName %></span>
+                            <span><%= item.percentage %>%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: <%- item.percentage %>%"></div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="progress-label">
+                        <span>투자 상품 없음</span>
+                        <span>0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                <% } %>
             </div>
         </div>
         <% } %>

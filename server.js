@@ -868,6 +868,104 @@ app.post('/api/update-account-info', requireLogin, async (req, res) => {
     }
 });
 
+// 투자 통계 계산 함수들
+function calculateMonthlyRevenue(approvedInvestments) {
+    const monthlyData = [];
+    const currentDate = new Date();
+    
+    // 최근 12개월 데이터 생성
+    for (let i = 11; i >= 0; i--) {
+        const month = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        const monthName = month.toLocaleDateString('ko-KR', { month: 'long' });
+        
+        // 해당 월에 활성화된 투자들의 수익 계산
+        let monthlyRevenue = 0;
+        approvedInvestments.forEach(investment => {
+            const investmentDate = new Date(investment.investment_date);
+            if (investmentDate <= month) {
+                // 상품별 월 수익률 적용 (실제로는 DB에서 가져와야 함)
+                const monthlyRate = getMonthlyRateByProduct(investment.product_name);
+                monthlyRevenue += parseFloat(investment.investment_amount || 0) * monthlyRate;
+            }
+        });
+        
+        monthlyData.push({
+            month: monthName,
+            revenue: Math.round(monthlyRevenue)
+        });
+    }
+    
+    return monthlyData;
+}
+
+function calculatePortfolioAnalysis(approvedInvestments) {
+    const totalAmount = approvedInvestments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount || 0), 0);
+    if (totalAmount === 0) return [];
+    
+    const productMap = {};
+    
+    approvedInvestments.forEach(investment => {
+        const productName = investment.product_name;
+        const amount = parseFloat(investment.investment_amount || 0);
+        
+        if (productMap[productName]) {
+            productMap[productName] += amount;
+        } else {
+            productMap[productName] = amount;
+        }
+    });
+    
+    return Object.entries(productMap).map(([productName, amount]) => ({
+        productName,
+        amount,
+        percentage: ((amount / totalAmount) * 100).toFixed(1)
+    }));
+}
+
+function calculateAverageReturn(approvedInvestments) {
+    if (approvedInvestments.length === 0) return 0;
+    
+    const totalAmount = approvedInvestments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount || 0), 0);
+    if (totalAmount === 0) return 0;
+    
+    let weightedReturn = 0;
+    approvedInvestments.forEach(investment => {
+        const amount = parseFloat(investment.investment_amount || 0);
+        const productRate = getAnnualRateByProduct(investment.product_name);
+        weightedReturn += (amount / totalAmount) * productRate;
+    });
+    
+    return (weightedReturn * 100).toFixed(2); // 백분율로 반환
+}
+
+function getMonthlyRateByProduct(productName) {
+    // 실제로는 DB에서 상품별 수익률을 가져와야 함
+    const rateMap = {
+        '[300KW] 다함께 동행 뉴베이직': 0.0025, // 월 0.25%
+        '[500KW] 다함께 동행 메가': 0.003,     // 월 0.3%
+        '[1MW] 다함께 동행 기가': 0.0035,       // 월 0.35%
+        '그린 스타터 패키지': 0.002,             // 월 0.2%
+        '라온 패키지': 0.0028,                   // 월 0.28%
+        '심플 에코 패키지': 0.0022              // 월 0.22%
+    };
+    
+    return rateMap[productName] || 0.0025; // 기본 0.25%
+}
+
+function getAnnualRateByProduct(productName) {
+    // 실제로는 DB에서 상품별 연간 수익률을 가져와야 함
+    const rateMap = {
+        '[300KW] 다함께 동행 뉴베이직': 0.03,   // 연 3%
+        '[500KW] 다함께 동행 메가': 0.036,      // 연 3.6%
+        '[1MW] 다함께 동행 기가': 0.042,        // 연 4.2%
+        '그린 스타터 패키지': 0.024,            // 연 2.4%
+        '라온 패키지': 0.0336,                  // 연 3.36%
+        '심플 에코 패키지': 0.0264             // 연 2.64%
+    };
+    
+    return rateMap[productName] || 0.03; // 기본 3%
+}
+
 // 조합상품 관련 페이지들
 app.get('/introduce_product', requireLogin, (req, res) => {
     res.render('introduce_product', { user: req.session.user });
@@ -917,15 +1015,47 @@ app.get('/my_investments', requireLogin, async (req, res) => {
             originalStatus: investment.status
         }));
         
+        // 실제 데이터 기반 통계 계산
+        const approvedInvestments = formattedInvestments.filter(inv => inv.originalStatus === 'approved');
+        const rejectedInvestments = formattedInvestments.filter(inv => inv.originalStatus === 'rejected');
+        const pendingInvestments = formattedInvestments.filter(inv => inv.originalStatus === 'pending');
+        const completedInvestments = formattedInvestments.filter(inv => inv.originalStatus === 'completed');
+        
+        // 총 출자 금액 (승인된 투자만)
+        const totalInvestmentAmount = approvedInvestments.reduce((sum, inv) => sum + parseFloat(inv.investment_amount || 0), 0);
+        
+        // 진행중인 투자 개수 (승인된 투자)
+        const activeInvestmentCount = approvedInvestments.length;
+        
+        // 월별 수익 계산 (실제 투자 시작일 기준)
+        const monthlyRevenue = calculateMonthlyRevenue(approvedInvestments);
+        
+        // 포트폴리오 분석 (상품별 비중)
+        const portfolioAnalysis = calculatePortfolioAnalysis(approvedInvestments);
+        
+        // 평균 수익률 계산 (상품별 수익률의 가중평균)
+        const averageReturn = calculateAverageReturn(approvedInvestments);
+        
         // 사용자 잔액 조회
         const currentBalance = await getMemberBalance(memberId);
         
-        console.log(`✅ ${req.session.user.username} 투자 현황 조회 성공: ${formattedInvestments.length}건`);
+        console.log(`✅ ${req.session.user.username} 투자 현황 조회 성공: ${formattedInvestments.length}건 (승인: ${activeInvestmentCount}건)`);
         
         res.render('my_investments', { 
             user: req.session.user,
             investments: formattedInvestments,
-            currentBalance: currentBalance
+            currentBalance: currentBalance,
+            // 실시간 통계 데이터
+            totalInvestmentAmount: totalInvestmentAmount,
+            activeInvestmentCount: activeInvestmentCount,
+            monthlyRevenue: monthlyRevenue,
+            portfolioAnalysis: portfolioAnalysis,
+            averageReturn: averageReturn,
+            // 상태별 개수
+            approvedCount: approvedInvestments.length,
+            rejectedCount: rejectedInvestments.length,
+            pendingCount: pendingInvestments.length,
+            completedCount: completedInvestments.length
         });
     } catch (error) {
         console.error('투자 현황 페이지 오류:', error);
