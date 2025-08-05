@@ -321,9 +321,18 @@ function requireLogin(req, res, next) {
     
     if (userHeader) {
         try {
-            // URL 디코딩 후 JSON 파싱
-            const decodedHeader = decodeURIComponent(userHeader);
-            const user = JSON.parse(decodedHeader);
+            let user;
+            // Base64로 인코딩된 헤더인지 확인 후 디코딩
+            try {
+                const decodedBase64 = Buffer.from(userHeader, 'base64').toString('utf-8');
+                const decodedURI = decodeURIComponent(decodedBase64);
+                user = JSON.parse(decodedURI);
+            } catch (base64Error) {
+                // Base64 디코딩 실패시 기존 방식으로 시도
+                const decodedHeader = decodeURIComponent(userHeader);
+                user = JSON.parse(decodedHeader);
+            }
+            
             console.log('🔐 헤더에서 파싱된 사용자:', user?.username || '없음');
             
             if (user && user.status === 'approved') {
@@ -364,7 +373,18 @@ function requireAdmin(req, res, next) {
     const userHeader = req.headers['x-current-user'];
     if (userHeader) {
         try {
-            const user = JSON.parse(userHeader);
+            let user;
+            // Base64로 인코딩된 헤더인지 확인 후 디코딩
+            try {
+                const decodedBase64 = Buffer.from(userHeader, 'base64').toString('utf-8');
+                const decodedURI = decodeURIComponent(decodedBase64);
+                user = JSON.parse(decodedURI);
+            } catch (base64Error) {
+                // Base64 디코딩 실패시 기존 방식으로 시도
+                const decodedHeader = decodeURIComponent(userHeader);
+                user = JSON.parse(decodedHeader);
+            }
+            
             if (user && user.role === 'admin' && user.status === 'approved') {
                 return next();
             }
@@ -2732,8 +2752,18 @@ app.post('/api/transaction', async (req, res) => {
             const userHeader = req.headers['x-current-user'];
             if (userHeader) {
                 try {
-                    const decodedHeader = decodeURIComponent(userHeader);
-                    currentUser = JSON.parse(decodedHeader);
+                    let user;
+                    // Base64로 인코딩된 헤더인지 확인 후 디코딩
+                    try {
+                        const decodedBase64 = Buffer.from(userHeader, 'base64').toString('utf-8');
+                        const decodedURI = decodeURIComponent(decodedBase64);
+                        user = JSON.parse(decodedURI);
+                    } catch (base64Error) {
+                        // Base64 디코딩 실패시 기존 방식으로 시도
+                        const decodedHeader = decodeURIComponent(userHeader);
+                        user = JSON.parse(decodedHeader);
+                    }
+                    currentUser = user;
                     console.log('💳 헤더에서 사용자 정보 추출:', currentUser?.username);
                 } catch (e) {
                     console.log('💳 헤더 파싱 오류:', e);

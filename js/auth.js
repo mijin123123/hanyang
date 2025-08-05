@@ -528,7 +528,14 @@ function checkAdminAccess() {
                 if (!options.headers) {
                     options.headers = {};
                 }
-                options.headers['X-Current-User'] = JSON.stringify(user);
+                // Base64 인코딩을 사용하여 한글 문자 문제 해결
+                try {
+                    const userStr = JSON.stringify(user);
+                    const encodedUser = btoa(encodeURIComponent(userStr));
+                    options.headers['X-Current-User'] = encodedUser;
+                } catch (e) {
+                    console.warn('사용자 정보 인코딩 실패:', e);
+                }
                 return originalFetch(url, options);
             };
         }
