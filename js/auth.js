@@ -610,9 +610,15 @@ window.checkAdminAccess = checkAdminAccess;
 window.isAdmin = isAdmin;
 window.updateHeaderUserInfo = updateHeaderUserInfo;
 
+// 투자 관리 페이지에서 사용하는 함수들 추가
+window.checkAdminAuth = checkAdminAccess; // checkAdminAccess와 동일한 기능
+window.getCurrentAdmin = getCurrentUser; // getCurrentUser와 동일한 기능
+
 console.log('전역 함수들이 설정되었습니다:', {
     isLoggedIn: typeof window.isLoggedIn,
     getCurrentUser: typeof window.getCurrentUser,
+    getCurrentAdmin: typeof window.getCurrentAdmin,
+    checkAdminAuth: typeof window.checkAdminAuth,
     login: typeof window.login,
     logout: typeof window.logout,
     handleLoginSuccess: typeof window.handleLoginSuccess,

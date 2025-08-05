@@ -122,14 +122,25 @@
         // 투자 데이터 로드
         async function loadInvestments() {
             try {
+                console.log('📡 투자 데이터 로드 시작');
+                
                 const response = await fetch('/api/admin/investments', {
                     method: 'GET',
                     credentials: 'include'
                 });
                 
+                console.log('📡 응답 상태:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
+                console.log('📡 API 응답:', result);
                 
                 if (result.success) {
+                    console.log('📊 원본 투자 데이터 개수:', result.investments?.length || 0);
+                    
                     investments = result.investments.map(inv => {
                         console.log('🔍 투자 데이터 원본:', inv); // 디버그용
                         
@@ -143,7 +154,7 @@
                             0
                         );
                         
-                        return {
+                        const processedData = {
                             id: inv.id,
                             investor: inv.member?.name || '알 수 없음',
                             investorUsername: inv.member?.username || '',
@@ -158,18 +169,23 @@
                             adminNote: '',
                             processedAt: inv.updated_at?.split('T')[0] || ''
                         };
+                        
+                        console.log('✅ 처리된 투자 데이터:', processedData);
+                        return processedData;
                     });
+                    
+                    console.log('📊 처리된 투자 데이터 개수:', investments.length);
                     
                     filteredInvestments = [...investments];
                     updateInvestmentStats();
                     renderInvestmentTable();
                 } else {
-                    console.error('투자 데이터 로드 실패:', result.message);
+                    console.error('❌ 투자 데이터 로드 실패:', result.message);
                     showAlert('error', '투자 데이터를 불러오는데 실패했습니다.');
                 }
             } catch (error) {
-                console.error('투자 데이터 로드 중 오류:', error);
-                showAlert('error', '투자 데이터를 불러오는데 실패했습니다.');
+                console.error('❌ 투자 데이터 로드 중 오류:', error);
+                showAlert('error', `투자 데이터를 불러오는데 실패했습니다: ${error.message}`);
             }
         }
 
@@ -249,14 +265,14 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewInvestment(${investment.id})">
+                        <button class="btn btn-primary btn-sm" onclick="viewInvestment('${investment.id}')">
                             <i class="fas fa-eye"></i> 상세보기
                         </button>
                         ${investment.status === 'pending' ? `
-                            <button class="btn btn-success btn-sm" onclick="approveInvestment(${investment.id})">
+                            <button class="btn btn-success btn-sm" onclick="approveInvestment('${investment.id}')">
                                 <i class="fas fa-check"></i> 승인
                             </button>
-                            <button class="btn btn-danger btn-sm" onclick="rejectInvestment(${investment.id})">
+                            <button class="btn btn-danger btn-sm" onclick="rejectInvestment('${investment.id}')">
                                 <i class="fas fa-times"></i> 반려
                             </button>
                         ` : ''}
@@ -268,16 +284,24 @@
 
         // 투자 상세보기
         function viewInvestment(id) {
+            console.log('🔍 투자 상세보기 요청:', id);
             const investment = investments.find(i => i.id === id);
             if (investment) {
                 alert(`투자 상세 정보:\n\n투자자: ${investment.investor}\n이메일: ${investment.email || 'N/A'}\n연락처: ${investment.phone || 'N/A'}\n상품명: ${investment.product}\n투자금액: ${investment.amount.toLocaleString()}원\n은행: ${investment.bankName || 'N/A'}\n계좌번호: ${investment.accountNumber || 'N/A'}\n신청일: ${investment.applicationDate}\n상태: ${getStatusText(investment.status)}`);
+            } else {
+                console.error('❌ 투자 정보를 찾을 수 없음:', id);
+                alert('투자 정보를 찾을 수 없습니다.');
             }
         }
 
         // 투자 승인
         async function approveInvestment(id) {
+            console.log('🔄 투자 승인 요청:', id);
+            
             if (confirm('이 투자를 승인하시겠습니까?')) {
                 try {
+                    console.log('📡 승인 API 호출 시작');
+                    
                     const response = await fetch(`/api/admin/investment/${id}`, {
                         method: 'PUT',
                         headers: {
@@ -290,7 +314,14 @@
                         })
                     });
 
+                    console.log('📡 응답 상태:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const result = await response.json();
+                    console.log('📡 응답 결과:', result);
 
                     if (result.success) {
                         showAlert('success', '투자가 성공적으로 승인되었습니다.');
@@ -299,16 +330,20 @@
                         showAlert('error', result.message || '투자 승인에 실패했습니다.');
                     }
                 } catch (error) {
-                    console.error('투자 승인 중 오류:', error);
-                    showAlert('error', '투자 승인 중 오류가 발생했습니다.');
+                    console.error('❌ 투자 승인 중 오류:', error);
+                    showAlert('error', `투자 승인 중 오류가 발생했습니다: ${error.message}`);
                 }
             }
         }
 
         // 투자 반려
         async function rejectInvestment(id) {
+            console.log('🔄 투자 반려 요청:', id);
+            
             if (confirm('이 투자를 반려하시겠습니까?')) {
                 try {
+                    console.log('📡 반려 API 호출 시작');
+                    
                     const response = await fetch(`/api/admin/investment/${id}`, {
                         method: 'PUT',
                         headers: {
@@ -321,7 +356,14 @@
                         })
                     });
 
+                    console.log('📡 응답 상태:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const result = await response.json();
+                    console.log('📡 응답 결과:', result);
 
                     if (result.success) {
                         showAlert('success', '투자가 반려되었습니다.');
@@ -330,8 +372,8 @@
                         showAlert('error', result.message || '투자 반려에 실패했습니다.');
                     }
                 } catch (error) {
-                    console.error('투자 반려 중 오류:', error);
-                    showAlert('error', '투자 반려 중 오류가 발생했습니다.');
+                    console.error('❌ 투자 반려 중 오류:', error);
+                    showAlert('error', `투자 반려 중 오류가 발생했습니다: ${error.message}`);
                 }
             }
         }
