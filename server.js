@@ -21,6 +21,9 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy 설정 (Render 등 프록시 환경에서 필요)
+app.set('trust proxy', 1);
+
 // 환경 설정 및 기본값
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'hanyang-energy-secret-key-2025';
@@ -31,6 +34,9 @@ console.log(`🔧 포트: ${PORT}`);
 // Supabase 설정
 const supabaseUrl = process.env.SUPABASE_URL || 'https://aqcewkutnssgrioxlqba.supabase.co';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY2V3a3V0bnNzZ3Jpb3hscWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI5MDE0OCwiZXhwIjoyMDY5ODY2MTQ4fQ.Kz0ARhQd3lRDjF0qRDv9j5dqjzeQpw726QkbwghKX6I';
+
+console.log('🔧 Supabase URL:', supabaseUrl);
+console.log('🔧 Supabase Key:', supabaseKey ? '설정됨' : '설정안됨');
 
 let supabase;
 try {
@@ -84,33 +90,11 @@ app.use(helmet({
 // CORS 설정
 // CORS 설정 (Render 배포 환경 최적화)
 app.use(cors({
-    origin: function (origin, callback) {
-        // 배포 환경에서는 특정 도메인만 허용
-        const allowedOrigins = [
-            'https://hanyang-energy.onrender.com',
-            'http://localhost:3000',
-            'http://127.0.0.1:3000'
-        ];
-        
-        // origin이 없는 경우 (동일 도메인 요청) 허용
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            console.log('CORS 차단된 origin:', origin);
-            // 배포환경에서는 엄격하게 체크, 로컬에서는 허용
-            if (NODE_ENV === 'production') {
-                callback(new Error('CORS policy violation'));
-            } else {
-                callback(null, true);
-            }
-        }
-    },
+    origin: true, // 모든 origin 허용 (임시)
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-current-user']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-current-user', 'Cookie']
 }));
 
 // Body parser 미들웨어
@@ -124,13 +108,13 @@ app.use(session({
         checkPeriod: 86400000 // 하루마다 만료된 세션 정리
     }),
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // 배포 환경에서는 true로 설정
     rolling: true, // 세션 만료 시간 갱신
     cookie: {
-        secure: NODE_ENV === 'production' ? true : false, // 배포환경에서는 HTTPS 필요
+        secure: false, // 임시로 false (배포환경에서도)
         httpOnly: true, // XSS 공격 방지
         maxAge: 24 * 60 * 60 * 1000, // 24시간
-        sameSite: NODE_ENV === 'production' ? 'none' : 'lax' // 배포환경에서는 none 필요
+        sameSite: 'lax' // 호환성을 위해 lax
     },
     name: 'hanyang.sid' // 기본 세션 이름 변경
 }));
@@ -530,10 +514,12 @@ app.get('/api/debug/env', (req, res) => {
     res.json({
         NODE_ENV: NODE_ENV,
         PORT: PORT,
-        SUPABASE_URL: SUPABASE_URL ? 'SET' : 'NOT SET',
-        SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? 'SET' : 'NOT SET',
+        SUPABASE_URL: supabaseUrl,
+        SUPABASE_ANON_KEY: supabaseKey ? 'SET' : 'NOT SET',
         SESSION_SECRET: SESSION_SECRET ? 'SET' : 'NOT SET',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        supabaseUrlFull: supabaseUrl,
+        supabaseKeyLength: supabaseKey ? supabaseKey.length : 0
     });
 });
 
@@ -1554,8 +1540,8 @@ app.get('/api/test/login/:username/:password', async (req, res) => {
             return res.json({
                 success: false,
                 message: '사용자 조회 실패',
-                error1: error1.message,
-                error2: error2.message
+                error1: error1?.message,
+                error2: error2?.message
             });
         }
         

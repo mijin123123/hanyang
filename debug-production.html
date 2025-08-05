@@ -179,6 +179,20 @@ ${allCookies.map(c => `  - ${c}`).join('\n') || '  없음'}</pre>
             try {
                 console.log('🌐 로그인 테스트 시작...');
                 
+                // 먼저 비밀번호 해시 테스트
+                const hashResponse = await fetch(`${baseURL}/api/test/login/${username}/${password}`, {
+                    credentials: 'include'
+                });
+                const hashResult = await hashResponse.json();
+                
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="${hashResult.success ? 'success' : 'error'}">
+                        <h4>비밀번호 해시 테스트:</h4>
+                        <pre>${JSON.stringify(hashResult, null, 2)}</pre>
+                    </div>
+                `;
+                
+                // 실제 로그인 테스트
                 const response = await fetch(`${baseURL}/login`, {
                     method: 'POST',
                     headers: {
@@ -190,9 +204,9 @@ ${allCookies.map(c => `  - ${c}`).join('\n') || '  없음'}</pre>
                 
                 const result = await response.json();
                 
-                document.getElementById('loginResult').innerHTML = `
+                document.getElementById('loginResult').innerHTML += `
                     <div class="${result.success ? 'success' : 'error'}">
-                        <h4>로그인 테스트 결과:</h4>
+                        <h4>실제 로그인 테스트 결과:</h4>
                         <pre>응답 상태: ${response.status}
 결과: ${JSON.stringify(result, null, 2)}</pre>
                     </div>
