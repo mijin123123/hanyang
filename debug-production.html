@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배포 환경 로그인 디버깅</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { border: 1px solid #ddd; margin: 10px 0; padding: 15px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00ff00; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 배포 환경 로그인 디버깅</h1>
+    
+    <div class="section">
+        <h3>📊 환경 정보 확인</h3>
+        <button onclick="checkEnvironment()">환경 변수 확인</button>
+        <div id="envResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>🍪 세션 & 쿠키 확인</h3>
+        <button onclick="checkSession()">세션 상태 확인</button>
+        <button onclick="checkCookies()">쿠키 확인</button>
+        <div id="sessionResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>🌐 네트워크 테스트</h3>
+        <button onclick="testCORS()">CORS 테스트</button>
+        <button onclick="testSupabase()">Supabase 연결 확인</button>
+        <div id="networkResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>🔐 로그인 테스트</h3>
+        <input type="text" id="testUsername" placeholder="사용자명 (minj0010)" value="minj0010">
+        <input type="password" id="testPassword" placeholder="비밀번호" value="minj0010">
+        <button onclick="testLogin()">로그인 테스트</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>🧪 단계별 디버깅</h3>
+        <button onclick="fullDiagnostic()">전체 진단 실행</button>
+        <div id="diagnosticResult" class="result"></div>
+    </div>
+
+    <script>
+        const baseURL = window.location.origin;
+
+        async function checkEnvironment() {
+            try {
+                const response = await fetch(`${baseURL}/api/debug/env`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                document.getElementById('envResult').innerHTML = `
+                    <div class="success">
+                        <h4>환경 변수 정보:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('envResult').innerHTML = `
+                    <div class="error">
+                        <h4>환경 변수 확인 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function checkSession() {
+            try {
+                const response = await fetch(`${baseURL}/api/session-check`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                document.getElementById('sessionResult').innerHTML = `
+                    <div class="${data.isLoggedIn ? 'success' : 'error'}">
+                        <h4>세션 상태:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('sessionResult').innerHTML = `
+                    <div class="error">
+                        <h4>세션 확인 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        function checkCookies() {
+            const cookies = document.cookie;
+            const allCookies = cookies.split(';').map(c => c.trim());
+            
+            document.getElementById('sessionResult').innerHTML += `
+                <div class="result">
+                    <h4>브라우저 쿠키:</h4>
+                    <pre>전체 쿠키: ${cookies || '없음'}
+                    
+개별 쿠키:
+${allCookies.map(c => `  - ${c}`).join('\n') || '  없음'}</pre>
+                </div>
+            `;
+        }
+
+        async function testCORS() {
+            try {
+                const response = await fetch(`${baseURL}/api/session-check`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                document.getElementById('networkResult').innerHTML = `
+                    <div class="success">
+                        <h4>CORS 테스트 성공:</h4>
+                        <pre>상태 코드: ${response.status}
+헤더: ${JSON.stringify([...response.headers.entries()], null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('networkResult').innerHTML = `
+                    <div class="error">
+                        <h4>CORS 테스트 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testSupabase() {
+            try {
+                const response = await fetch(`${baseURL}/api/test/supabase`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                document.getElementById('networkResult').innerHTML += `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <h4>Supabase 연결 테스트:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('networkResult').innerHTML += `
+                    <div class="error">
+                        <h4>Supabase 테스트 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('testUsername').value;
+            const password = document.getElementById('testPassword').value;
+            
+            if (!username || !password) {
+                alert('사용자명과 비밀번호를 입력하세요');
+                return;
+            }
+
+            try {
+                console.log('🌐 로그인 테스트 시작...');
+                
+                const response = await fetch(`${baseURL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="${result.success ? 'success' : 'error'}">
+                        <h4>로그인 테스트 결과:</h4>
+                        <pre>응답 상태: ${response.status}
+결과: ${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+
+                // 로그인 성공 시 세션 재확인
+                if (result.success) {
+                    setTimeout(checkSession, 1000);
+                }
+                
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="error">
+                        <h4>로그인 테스트 실패:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function fullDiagnostic() {
+            document.getElementById('diagnosticResult').innerHTML = '<p>🔍 전체 진단 실행 중...</p>';
+            
+            await checkEnvironment();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await checkSession();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            checkCookies();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testCORS();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testSupabase();
+            
+            document.getElementById('diagnosticResult').innerHTML = '<div class="success">✅ 전체 진단 완료! 위의 결과들을 확인하세요.</div>';
+        }
+
+        // 페이지 로드 시 자동으로 기본 정보 확인
+        window.onload = function() {
+            checkEnvironment();
+            checkSession();
+            checkCookies();
+        };
+    </script>
+</body>
+</html>

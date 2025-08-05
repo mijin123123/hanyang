@@ -11,6 +11,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
 const helmet = require('helmet');
 const cors = require('cors');
 const fs = require('fs-extra');
@@ -98,11 +99,18 @@ app.use(cors({
             callback(null, true);
         } else {
             console.log('CORS 차단된 origin:', origin);
-            callback(null, true); // 임시로 모든 origin 허용
+            // 배포환경에서는 엄격하게 체크, 로컬에서는 허용
+            if (NODE_ENV === 'production') {
+                callback(new Error('CORS policy violation'));
+            } else {
+                callback(null, true);
+            }
         }
     },
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-current-user']
 }));
 
 // Body parser 미들웨어
@@ -112,14 +120,17 @@ app.use(bodyParser.json());
 // 세션 설정 (Render 배포 환경 최적화)
 app.use(session({
     secret: SESSION_SECRET,
+    store: new MemoryStore({
+        checkPeriod: 86400000 // 하루마다 만료된 세션 정리
+    }),
     resave: false,
     saveUninitialized: false,
     rolling: true, // 세션 만료 시간 갱신
     cookie: {
-        secure: false, // HTTPS가 아닌 환경에서도 작동하도록 임시 설정
+        secure: NODE_ENV === 'production' ? true : false, // 배포환경에서는 HTTPS 필요
         httpOnly: true, // XSS 공격 방지
         maxAge: 24 * 60 * 60 * 1000, // 24시간
-        sameSite: 'lax' // CORS 환경에서 쿠키 전송 허용
+        sameSite: NODE_ENV === 'production' ? 'none' : 'lax' // 배포환경에서는 none 필요
     },
     name: 'hanyang.sid' // 기본 세션 이름 변경
 }));
@@ -303,6 +314,9 @@ app.post('/login', async (req, res) => {
         console.log('🔍 로그인 시도:', username, '환경:', NODE_ENV, '요청 헤더:', req.headers.origin);
         console.log('🍪 기존 세션 정보:', req.session.user ? '존재' : '없음');
         console.log('🔗 세션 ID:', req.sessionID);
+        console.log('🌐 User-Agent:', req.headers['user-agent']);
+        console.log('🔒 쿠키 헤더:', req.headers.cookie);
+        console.log('📡 요청 IP:', req.ip || req.connection.remoteAddress);
         
         // 비밀번호 해시화
         const passwordHash = hashPassword(password);
@@ -478,12 +492,20 @@ app.get('/api/session-check', (req, res) => {
     console.log('🔗 세션 ID:', req.sessionID);
     console.log('👤 세션 사용자:', req.session.user);
     console.log('🍪 쿠키:', req.headers.cookie);
+    console.log('🌐 Origin:', req.headers.origin);
+    console.log('📡 User-Agent:', req.headers['user-agent']);
+    console.log('🔒 Secure Context:', req.secure);
+    console.log('💻 환경:', NODE_ENV);
     
     res.json({
         sessionId: req.sessionID,
         user: req.session.user || null,
         isLoggedIn: !!req.session.user,
-        cookie: req.headers.cookie
+        cookie: req.headers.cookie,
+        origin: req.headers.origin,
+        secure: req.secure,
+        environment: NODE_ENV,
+        timestamp: new Date().toISOString()
     });
 });
 
