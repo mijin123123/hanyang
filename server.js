@@ -1347,9 +1347,26 @@ app.post('/api/test/create-accounts', async (req, res) => {
 });
 
 // 회원 목록 조회 (관리자용)
-app.get('/api/members', requireAdmin, (req, res) => {
-    const approvedMembers = users.filter(user => user.status === 'approved');
-    res.json({ success: true, data: approvedMembers });
+app.get('/api/members', requireAdmin, async (req, res) => {
+    try {
+        console.log('🔍 회원 목록 조회 API 호출됨');
+        
+        const { data: members, error } = await supabase
+            .from('members')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('회원 목록 조회 오류:', error);
+            return res.json({ success: false, message: '회원 목록을 불러오는데 실패했습니다.' });
+        }
+
+        console.log('✅ 회원 목록 조회 성공:', members.length, '명');
+        res.json({ success: true, data: members });
+    } catch (error) {
+        console.error('회원 목록 조회 중 오류:', error);
+        res.json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
 });
 
 // 사용자 세션 정보 조회
