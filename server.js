@@ -763,39 +763,82 @@ app.get('/mypage', requireLogin, async (req, res) => {
                 userProfile: null,
                 currentBalance: 0,
                 totalInvestment: 0,
-                totalProfit: 0
+                totalProfit: 0,
+                productCount: 0,
+                dailyProfit: 0
             });
         }
         
-        // 사용자 잔액 조회
-        const currentBalance = await getMemberBalance(userProfile.id);
-        
-        // 총 출자 금액 조회 (승인된 투자만)
+        // 사용자의 모든 투자 데이터 조회 (승인된 투자만)
         const { data: investments, error: investmentError } = await supabase
             .from('investments')
-            .select('amount')
+            .select(`
+                *,
+                created_at,
+                amount,
+                product_name,
+                product_type,
+                status
+            `)
             .eq('member_id', userProfile.id)
             .eq('status', 'approved');
-            
+        
         let totalInvestment = 0;
-        if (!investmentError && investments) {
-            totalInvestment = investments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+        let productCount = 0;
+        let accumulatedInterest = 0;
+        
+        if (!investmentError && investments && investments.length > 0) {
+            productCount = investments.length; // 조합상품 개수
+            
+            // 각 투자별 누적 이자 계산
+            investments.forEach(investment => {
+                const investmentAmount = parseFloat(investment.amount || 0);
+                totalInvestment += investmentAmount;
+                
+                // 투자 시작일로부터 경과 일수 계산
+                const investmentDate = new Date(investment.created_at);
+                const currentDate = new Date();
+                const daysDiff = Math.floor((currentDate - investmentDate) / (1000 * 60 * 60 * 24));
+                
+                // 상품별 일일 수익률 적용
+                const dailyRate = getDailyRateByProduct(investment.product_name || investment.product_type);
+                
+                // 누적 이자 계산 (복리 아닌 단리로 계산)
+                const productInterest = investmentAmount * dailyRate * daysDiff;
+                accumulatedInterest += productInterest;
+            });
         }
         
-        // 임대수익 계산 (월 수익률 기준으로 누적 계산)
-        // 현재는 가상의 수익률로 계산 (실제로는 더 복잡한 로직 필요)
-        const monthlyRate = 0.025; // 월 2.5% 가정
-        const totalProfit = totalInvestment * monthlyRate * 12; // 1년 기준 예시
+        // 사용자 현재 잔액 조회
+        let currentBalance = await getMemberBalance(userProfile.id);
         
-        console.log(`✅ ${req.session.user.username} 사용자 프로필 조회 성공`);
-        console.log(`💰 잔액: ${currentBalance}, 총 출자: ${totalInvestment}, 수익: ${totalProfit}`);
+        // 잔액에 누적 이자 추가 (실제로는 별도 테이블에서 관리해야 함)
+        currentBalance += accumulatedInterest;
+        
+        // 일일 수익 계산 (모든 투자의 일일 수익 합계)
+        let dailyProfit = 0;
+        if (investments && investments.length > 0) {
+            dailyProfit = investments.reduce((sum, investment) => {
+                const investmentAmount = parseFloat(investment.amount || 0);
+                const dailyRate = getDailyRateByProduct(investment.product_name || investment.product_type);
+                return sum + (investmentAmount * dailyRate);
+            }, 0);
+        }
+        
+        console.log(`✅ ${req.session.user.username} 마이페이지 데이터 조회 성공`);
+        console.log(`� 통계: 조합상품 ${productCount}개, 총 출자 ${totalInvestment.toLocaleString()}원`);
+        console.log(`💰 잔액: ${currentBalance.toLocaleString()}원, 일일 수익: ${dailyProfit.toLocaleString()}원`);
+        console.log(`🎯 누적 이자: ${accumulatedInterest.toLocaleString()}원`);
         
         res.render('mypage', { 
             user: req.session.user, 
             userProfile: userProfile,
-            currentBalance: currentBalance,
+            currentBalance: Math.round(currentBalance),
             totalInvestment: totalInvestment,
-            totalProfit: totalProfit
+            totalProfit: Math.round(accumulatedInterest),
+            productCount: productCount,
+            dailyProfit: Math.round(dailyProfit),
+            investments: investments || []
         });
         
     } catch (error) {
@@ -805,7 +848,10 @@ app.get('/mypage', requireLogin, async (req, res) => {
             userProfile: null,
             currentBalance: 0,
             totalInvestment: 0,
-            totalProfit: 0
+            totalProfit: 0,
+            productCount: 0,
+            dailyProfit: 0,
+            investments: []
         });
     }
 });
@@ -2517,6 +2563,39 @@ async function initializeDefaultAccounts() {
     } catch (error) {
         console.error('기본 계정 확인 중 오류:', error);
     }
+}
+
+// 상품별 일일 수익률 반환 함수
+function getDailyRateByProduct(productName) {
+    // 상품별 연간 수익률을 일일 수익률로 환산
+    const annualRates = {
+        'HANYANG GREEN STARTER': 0.05,    // 연 5%
+        'HANYANG LAON': 0.08,             // 연 8%
+        'SIMPLE ECO': 0.06,               // 연 6%
+        '300KW 발전소': 0.07,             // 연 7%
+        '500KW 발전소': 0.09,             // 연 9%
+        '1MW 발전소': 0.10,               // 연 10%
+        '2MW 발전소': 0.12                // 연 12%
+    };
+    
+    // 기본값 설정 (알 수 없는 상품의 경우)
+    const defaultRate = 0.06; // 연 6%
+    
+    // 상품명으로 수익률 찾기
+    let annualRate = annualRates[productName] || defaultRate;
+    
+    // 상품명에 키워드가 포함된 경우 처리
+    if (!annualRates[productName]) {
+        for (const [key, value] of Object.entries(annualRates)) {
+            if (productName && productName.includes(key.split(' ')[0])) {
+                annualRate = value;
+                break;
+            }
+        }
+    }
+    
+    // 연간 수익률을 일일 수익률로 환산 (365일 기준)
+    return annualRate / 365;
 }
 
 // 회원 잔액 조회
