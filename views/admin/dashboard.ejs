@@ -200,77 +200,122 @@
         // 대시보드 통계 로드
         async function loadDashboardStats() {
             try {
+                console.log('📊 대시보드 통계 로드 시작');
+                
                 const response = await fetch('/api/admin/dashboard-stats', {
                     method: 'GET',
                     credentials: 'include'
                 });
                 
                 const result = await response.json();
+                console.log('📊 대시보드 응답:', result);
                 
                 if (result.success) {
                     const stats = result.stats;
                     
-                    // 총 회원수
-                    document.querySelector('.stat-card:nth-child(1) .stat-number').textContent = stats.totalMembers;
+                    // 총 회원수 (활성 회원수 표시)
+                    document.querySelector('.stat-card:nth-child(1) .stat-number').textContent = `${stats.activeMembers}명`;
                     
-                    // 총 투자금액
-                    document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = stats.totalInvestments.toLocaleString() + '원';
+                    // 총 투자금액 (승인된 투자만)
+                    document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = 
+                        `${stats.totalInvestmentAmount.toLocaleString()}원`;
                     
-                    // 미처리 문의 (현재는 미처리 트랜잭션으로 대체)
-                    document.querySelector('.stat-card:nth-child(3) .stat-number').textContent = stats.pendingTransactions;
+                    // 미처리 문의 → 대기중 투자로 변경
+                    document.querySelector('.stat-card:nth-child(3) .stat-info h3').textContent = '대기중 투자';
+                    document.querySelector('.stat-card:nth-child(3) .stat-number').textContent = `${stats.pendingInvestments}건`;
                     
-                    console.log('✅ 대시보드 통계 로드 성공:', stats);
+                    // 활성 공지 → 활성 공지 (임시로 0)
+                    document.querySelector('.stat-card:nth-child(4) .stat-number').textContent = '0';
+                    
+                    // 등록된 계좌 → 고유 투자자 수
+                    document.querySelector('.stat-card:nth-child(5) .stat-info h3').textContent = '투자자 수';
+                    document.querySelector('.stat-card:nth-child(5) .stat-number').textContent = `${stats.uniqueInvestors}명`;
+                    
+                    // 최근 투자 활동 업데이트
+                    updateRecentInvestments(stats.recentInvestmentList || []);
+                    
+                    console.log('✅ 대시보드 통계 로드 성공:', {
+                        활성회원: stats.activeMembers,
+                        총투자금액: stats.totalInvestmentAmount.toLocaleString(),
+                        대기중투자: stats.pendingInvestments,
+                        투자자수: stats.uniqueInvestors
+                    });
                 } else {
                     console.error('대시보드 통계 로드 실패:', result.message);
+                    showErrorMessage('대시보드 통계를 불러오는데 실패했습니다.');
                 }
             } catch (error) {
                 console.error('대시보드 통계 로드 중 오류:', error);
+                showErrorMessage('서버 연결 오류가 발생했습니다.');
+            }
+        }
+
+        // 최근 투자 활동 업데이트
+        function updateRecentInvestments(recentInvestments) {
+            const recentInvestmentsContainer = document.querySelector('.activity-section:nth-child(2) .activity-list');
+            
+            if (recentInvestments && recentInvestments.length > 0) {
+                recentInvestmentsContainer.innerHTML = recentInvestments.map(investment => {
+                    const statusText = {
+                        'pending': '승인 대기',
+                        'approved': '승인 완료',
+                        'rejected': '반려됨'
+                    }[investment.status] || investment.status;
+                    
+                    const statusClass = {
+                        'pending': 'status-pending',
+                        'approved': 'status-approved', 
+                        'rejected': 'status-rejected'
+                    }[investment.status] || '';
+                    
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>${investment.memberName}</strong>님이 투자 신청했습니다.</p>
+                                <span class="activity-time">
+                                    ${new Date(investment.createdAt).toLocaleDateString('ko-KR')} - 
+                                    ${investment.amount.toLocaleString()}원 
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                recentInvestmentsContainer.innerHTML = `
+                    <div class="activity-item" style="text-align: center; color: #666; padding: 20px;">
+                        <span>최근 투자 내역이 없습니다.</span>
+                    </div>
+                `;
             }
         }
 
         // 최근 활동 업데이트
         function updateRecentActivities() {
-            // 최근 회원 가입
+            // 최근 회원 가입은 임시로 비움 (API 추가 필요)
             const recentMembersContainer = document.querySelector('.activity-section:nth-child(1) .activity-list');
-            if (members.length > 0) {
-                const recentMembers = members.slice(-3).reverse();
-                recentMembersContainer.innerHTML = recentMembers.map(member => `
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p><strong>${member.name}</strong>님이 가입했습니다.</p>
-                            <span class="activity-time">${member.joinDate}</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // 최근 투자
-            const recentInvestmentsContainer = document.querySelector('.activity-section:nth-child(2) .activity-list');
-            if (investments.length > 0) {
-                const recentInvestments = investments.slice(-2).reverse(); // 최근 2개 투자만 표시
-                recentInvestmentsContainer.innerHTML = recentInvestments.map(investment => `
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p><strong>${investment.investor}</strong>님이 <strong>${investment.product}</strong>에 투자했습니다.</p>
-                            <span class="activity-time">${investment.applicationDate} - ${investment.amount.toLocaleString()}원</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            recentMembersContainer.innerHTML = `
+                <div class="activity-item" style="text-align: center; color: #666; padding: 20px;">
+                    <span>최근 가입한 회원이 없습니다.</span>
+                </div>
+            `;
         }
         
         function exportData() {
             alert('데이터 내보내기 기능은 준비 중입니다.');
         }
+        
+        function showErrorMessage(message) {
+            // 간단한 에러 메시지 표시
+            console.error('❌', message);
+        }
 
         // 페이지 초기화
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('📊 대시보드 페이지 로드 완료');
             loadDashboardStats(); // 실제 데이터 로드
             updateRecentActivities();
         });
@@ -324,6 +369,34 @@
         .activity-time {
             color: #7f8c8d;
             font-size: 12px;
+        }
+
+        /* 상태 배지 스타일 */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-approved {
+            background-color: #d1f2eb;
+            color: #0c5460;
+            border: 1px solid #00b894;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #e74c3c;
         }
 
         /* 관리자 정보 스타일 */

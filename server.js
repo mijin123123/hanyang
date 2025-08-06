@@ -2940,49 +2940,133 @@ app.get('/api/admin/dashboard-stats', requireAdmin, async (req, res) => {
     try {
         console.log('📊 관리자 대시보드 통계 조회 API 호출됨');
         
-        // 회원 수 조회
+        // 회원 수 조회 (관리자 제외)
         const { data: members, error: membersError } = await supabase
             .from('members')
-            .select('id')
+            .select('id, status')
             .neq('role', 'admin');
         
-        // 투자 데이터 조회
+        // 모든 투자 데이터 조회 (회원 정보 포함)
         const { data: investments, error: investmentsError } = await supabase
             .from('investments')
-            .select('*');
+            .select(`
+                *,
+                member:members!investments_member_id_fkey(name, username)
+            `);
         
-        // 트랜잭션 데이터 조회
+        // 트랜잭션 데이터 조회 (대기중인 것만)
         const { data: transactions, error: transactionsError } = await supabase
             .from('transactions')
             .select('*')
             .eq('status', 'pending');
         
-        if (membersError || investmentsError || transactionsError) {
-            console.error('대시보드 통계 조회 오류:', { membersError, investmentsError, transactionsError });
-            return res.status(500).json({ 
-                success: false, 
-                message: '통계 데이터 조회 중 오류가 발생했습니다.' 
-            });
+        if (membersError) {
+            console.error('회원 데이터 조회 오류:', membersError);
+        }
+        if (investmentsError) {
+            console.error('투자 데이터 조회 오류:', investmentsError);
+        }
+        if (transactionsError) {
+            console.error('트랜잭션 데이터 조회 오류:', transactionsError);
         }
         
-        // 통계 계산 (모든 가능한 컬럼명 시도)
+        // 회원 통계 계산
+        const totalMembers = members?.length || 0;
+        const activeMembers = members?.filter(m => m.status === 'approved').length || 0;
+        
+        // 투자 통계 계산
+        const allInvestments = investments || [];
+        const approvedInvestments = allInvestments.filter(inv => inv.status === 'approved');
+        const pendingInvestments = allInvestments.filter(inv => inv.status === 'pending');
+        const rejectedInvestments = allInvestments.filter(inv => inv.status === 'rejected');
+        
+        // 총 투자 금액 계산 (승인된 투자만)
+        const totalInvestmentAmount = approvedInvestments.reduce((sum, inv) => {
+            const amount = parseFloat(
+                inv.investment_amount || 
+                inv.amount || 
+                inv.invest_amount || 
+                0
+            );
+            return sum + amount;
+        }, 0);
+        
+        // 대기중인 투자 금액 계산
+        const pendingInvestmentAmount = pendingInvestments.reduce((sum, inv) => {
+            const amount = parseFloat(
+                inv.investment_amount || 
+                inv.amount || 
+                inv.invest_amount || 
+                0
+            );
+            return sum + amount;
+        }, 0);
+        
+        // 고유 투자자 수 계산 (승인된 투자 기준)
+        const uniqueInvestors = new Set(approvedInvestments.map(inv => inv.member_id)).size;
+        
+        // 최근 투자 활동 (최근 7일)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const recentInvestments = allInvestments.filter(inv => 
+            new Date(inv.created_at) >= sevenDaysAgo
+        );
+        
+        // 이번 달 투자 금액 계산
+        const currentMonth = new Date();
+        const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        const thisMonthInvestments = approvedInvestments.filter(inv => 
+            new Date(inv.created_at) >= startOfMonth
+        );
+        const thisMonthAmount = thisMonthInvestments.reduce((sum, inv) => {
+            const amount = parseFloat(
+                inv.investment_amount || 
+                inv.amount || 
+                inv.invest_amount || 
+                0
+            );
+            return sum + amount;
+        }, 0);
+        
         const stats = {
-            totalMembers: members?.length || 0,
-            totalInvestments: investments?.reduce((sum, inv) => {
-                const amount = parseFloat(
-                    inv.investment_amount || 
-                    inv.amount || 
-                    inv.invest_amount || 
-                    inv.money || 
-                    0
-                );
-                return sum + amount;
-            }, 0) || 0,
+            // 기본 통계
+            totalMembers: totalMembers,
+            activeMembers: activeMembers,
+            totalInvestmentAmount: totalInvestmentAmount,
+            uniqueInvestors: uniqueInvestors,
+            
+            // 투자 상태별 통계
+            totalInvestments: allInvestments.length,
+            approvedInvestments: approvedInvestments.length,
+            pendingInvestments: pendingInvestments.length,
+            rejectedInvestments: rejectedInvestments.length,
+            
+            // 금액 통계
+            pendingInvestmentAmount: pendingInvestmentAmount,
+            thisMonthAmount: thisMonthAmount,
+            
+            // 활동 통계
+            recentInvestments: recentInvestments.length,
             pendingTransactions: transactions?.length || 0,
-            pendingInvestments: investments?.filter(inv => inv.status === 'active' || inv.status === 'pending').length || 0
+            
+            // 상세 데이터 (최근 활동)
+            recentInvestmentList: recentInvestments.slice(0, 5).map(inv => ({
+                id: inv.id,
+                memberName: inv.member?.name || '알 수 없음',
+                amount: parseFloat(inv.investment_amount || inv.amount || 0),
+                status: inv.status,
+                createdAt: inv.created_at
+            }))
         };
         
-        console.log('✅ 관리자 대시보드 통계 조회 성공:', stats);
+        console.log('✅ 관리자 대시보드 통계 조회 성공:', {
+            총회원수: stats.totalMembers,
+            활성회원수: stats.activeMembers,
+            총투자금액: stats.totalInvestmentAmount.toLocaleString(),
+            승인된투자: stats.approvedInvestments,
+            대기중투자: stats.pendingInvestments
+        });
+        
         res.json({ 
             success: true, 
             stats: stats
