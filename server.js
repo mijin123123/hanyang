@@ -745,6 +745,102 @@ app.get('/api/check-session', (req, res) => {
     }
 });
 
+// 사용자 투자 데이터 매핑 수정 API (임시 디버깅용)
+app.get('/api/fix-user-mapping/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+        console.log(`🔧 ${username} 사용자의 투자 데이터 매핑 수정 시작...`);
+        
+        // 1. 사용자 정보 조회
+        const { data: user, error: userError } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', username)
+            .single();
+            
+        if (userError || !user) {
+            console.error(`❌ ${username} 사용자를 찾을 수 없습니다:`, userError);
+            return res.json({ success: false, error: 'User not found' });
+        }
+        
+        console.log(`✅ ${username} 사용자 정보:`, {
+            id: user.id,
+            username: user.username,
+            name: user.name
+        });
+        
+        // 2. 최근 생성된 모든 투자 데이터 조회 (허진주 관련)
+        const { data: allInvestments, error: investmentError } = await supabase
+            .from('investments')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+            
+        if (investmentError) {
+            console.error('❌ 투자 데이터 조회 오류:', investmentError);
+            return res.json({ success: false, error: 'Investment query failed' });
+        }
+        
+        console.log(`🔍 최근 투자 데이터 ${allInvestments.length}건 조회됨`);
+        
+        // 3. 허진주 관련 투자 찾기 및 수정
+        let updatedCount = 0;
+        const results = [];
+        
+        for (const investment of allInvestments) {
+            // 300kw 상품이고 5,000,000원인 투자 찾기
+            if (investment.product_name && 
+                investment.product_name.toLowerCase().includes('300kw') && 
+                parseFloat(investment.amount) === 5000000) {
+                
+                console.log(`🎯 대상 투자 발견:`, {
+                    id: investment.id,
+                    member_id: investment.member_id,
+                    product_name: investment.product_name,
+                    amount: investment.amount,
+                    status: investment.status
+                });
+                
+                // member_id를 현재 사용자로 업데이트
+                const { error: updateError } = await supabase
+                    .from('investments')
+                    .update({ member_id: user.id })
+                    .eq('id', investment.id);
+                    
+                if (updateError) {
+                    console.error(`❌ 투자 ${investment.id} 업데이트 실패:`, updateError);
+                    results.push({ id: investment.id, success: false, error: updateError.message });
+                } else {
+                    console.log(`✅ 투자 ${investment.id} member_id 업데이트 완료`);
+                    updatedCount++;
+                    results.push({ id: investment.id, success: true });
+                }
+            }
+        }
+        
+        // 4. 최종 확인
+        const { data: finalInvestments } = await supabase
+            .from('investments')
+            .select('*')
+            .eq('member_id', user.id);
+            
+        console.log(`🎉 매핑 수정 완료: ${updatedCount}건 업데이트`);
+        console.log(`✅ ${username}의 최종 투자 개수: ${finalInvestments ? finalInvestments.length : 0}건`);
+        
+        res.json({
+            success: true,
+            message: `${updatedCount}건의 투자 데이터 매핑 수정 완료`,
+            updatedCount,
+            finalInvestmentCount: finalInvestments ? finalInvestments.length : 0,
+            results
+        });
+        
+    } catch (error) {
+        console.error('❌ 매핑 수정 중 오류:', error);
+        res.json({ success: false, error: error.message });
+    }
+});
+
 // 마이페이지
 app.get('/mypage', requireLogin, async (req, res) => {
     try {
@@ -758,7 +854,7 @@ app.get('/mypage', requireLogin, async (req, res) => {
             .single();
             
         if (error) {
-            console.error('사용자 프로필 조회 오류:', error);
+            console.error('❌ 사용자 프로필 조회 오류:', error);
             // 오류 시 세션 정보만 사용
             return res.render('mypage', { 
                 user: req.session.user, 
@@ -771,7 +867,11 @@ app.get('/mypage', requireLogin, async (req, res) => {
             });
         }
         
-        console.log(`✅ 사용자 프로필 조회 성공: ID=${userProfile.id}, 이름=${userProfile.name}`);
+        console.log(`✅ 사용자 프로필 조회 성공:`);
+        console.log(`   - ID: ${userProfile.id}`);
+        console.log(`   - 이름: ${userProfile.name}`);
+        console.log(`   - 사용자명: ${userProfile.username}`);
+        console.log(`   - 이메일: ${userProfile.email}`);
         
         // 사용자의 모든 투자 데이터 조회 (모든 상태 포함)
         const { data: investments, error: investmentError } = await supabase
@@ -780,13 +880,29 @@ app.get('/mypage', requireLogin, async (req, res) => {
                 *,
                 created_at,
                 amount,
-                product_name,
                 product_type,
                 status
             `)
             .eq('member_id', userProfile.id);
         
-        console.log(`🔍 ${req.session.user.username} 투자 데이터 조회 결과:`, investments);
+        if (investmentError) {
+            console.error(`❌ ${req.session.user.username} 투자 데이터 조회 오류:`, investmentError);
+        } else {
+            console.log(`🔍 ${req.session.user.username} 투자 데이터 조회 결과:`);
+            console.log(`   - 총 투자 건수: ${investments ? investments.length : 0}건`);
+            if (investments && investments.length > 0) {
+                investments.forEach((inv, index) => {
+                    console.log(`   📋 투자 ${index + 1}:`);
+                    console.log(`      - ID: ${inv.id}`);
+                    console.log(`      - 상품타입: ${inv.product_type}`);
+                    console.log(`      - 출자금액: ₩${parseFloat(inv.amount || 0).toLocaleString()}`);
+                    console.log(`      - 상태: ${inv.status}`);
+                    console.log(`      - 신청일: ${new Date(inv.created_at).toLocaleString('ko-KR')}`);
+                });
+            } else {
+                console.log(`   ❌ 투자 데이터 없음`);
+            }
+        }
         
         let totalInvestment = 0;
         let productCount = 0;
@@ -811,10 +927,19 @@ app.get('/mypage', requireLogin, async (req, res) => {
                 const daysDiff = Math.floor((currentDate - investmentDate) / (1000 * 60 * 60 * 24));
                 
                 // 상품별 일일 수익률 적용
-                const dailyRate = getDailyRateByProduct(investment.product_name || investment.product_type);
+                const dailyRate = getDailyRateByProduct(investment.product_type);
+                
+                console.log(`💰 투자 상품 이자 계산:`);
+                console.log(`   - 상품타입: ${investment.product_type}`);
+                console.log(`   - 투자금액: ₩${investmentAmount.toLocaleString()}`);
+                console.log(`   - 투자일: ${investmentDate.toLocaleDateString('ko-KR')}`);
+                console.log(`   - 경과일수: ${daysDiff}일`);
+                console.log(`   - 일일수익률: ${(dailyRate * 100).toFixed(4)}%`);
+                console.log(`   - 예상일일수익: ₩${(investmentAmount * dailyRate).toLocaleString()}`);
                 
                 // 누적 이자 계산 (복리 아닌 단리로 계산)
                 const productInterest = investmentAmount * dailyRate * daysDiff;
+                console.log(`   - 누적이자: ₩${productInterest.toLocaleString()}`);
                 accumulatedInterest += productInterest;
             });
         }
@@ -828,11 +953,17 @@ app.get('/mypage', requireLogin, async (req, res) => {
         // 일일 수익 계산 (승인된 투자의 일일 수익 합계)
         let dailyProfit = 0;
         if (approvedInvestments && approvedInvestments.length > 0) {
+            console.log(`📊 일일 수익 계산 시작:`);
             dailyProfit = approvedInvestments.reduce((sum, investment) => {
                 const investmentAmount = parseFloat(investment.amount || 0);
-                const dailyRate = getDailyRateByProduct(investment.product_name || investment.product_type);
-                return sum + (investmentAmount * dailyRate);
+                const dailyRate = getDailyRateByProduct(investment.product_type);
+                const dailyAmount = investmentAmount * dailyRate;
+                
+                console.log(`   - ${investment.product_type}: ₩${investmentAmount.toLocaleString()} × ${(dailyRate * 100).toFixed(4)}% = ₩${dailyAmount.toLocaleString()}`);
+                
+                return sum + dailyAmount;
             }, 0);
+            console.log(`📊 총 일일 수익: ₩${dailyProfit.toLocaleString()}`);
         }
         
         console.log(`✅ ${req.session.user.username} 마이페이지 데이터 조회 성공`);
@@ -2580,24 +2711,32 @@ function getDailyRateByProduct(productName) {
     // 상품별 연간 수익률을 일일 수익률로 환산
     const annualRates = {
         'HANYANG GREEN STARTER': 0.05,    // 연 5%
+        'green_starter': 0.05,            // 연 5%
         'HANYANG LAON': 0.08,             // 연 8%
+        'laon': 0.08,                     // 연 8%
         'SIMPLE ECO': 0.06,               // 연 6%
-        '300KW 발전소': 0.07,             // 연 7%
+        'simple_eco': 0.06,               // 연 6%
+        '300KW 발전소': 0.219,            // 연 21.9% (일 3,000원 기준)
+        '300kw': 0.219,                   // 연 21.9% (일 3,000원 기준)
         '500KW 발전소': 0.09,             // 연 9%
+        '500kw': 0.09,                    // 연 9%
         '1MW 발전소': 0.10,               // 연 10%
-        '2MW 발전소': 0.12                // 연 12%
+        '1mw': 0.10,                      // 연 10%
+        '2MW 발전소': 0.12,               // 연 12%
+        '2mw': 0.12                       // 연 12%
     };
     
     // 기본값 설정 (알 수 없는 상품의 경우)
     const defaultRate = 0.06; // 연 6%
     
-    // 상품명으로 수익률 찾기
-    let annualRate = annualRates[productName] || defaultRate;
+    // 상품명으로 수익률 찾기 (대소문자 구분 없이)
+    const productKey = productName ? productName.toLowerCase() : '';
+    let annualRate = annualRates[productName] || annualRates[productKey] || defaultRate;
     
     // 상품명에 키워드가 포함된 경우 처리
-    if (!annualRates[productName]) {
+    if (!annualRates[productName] && !annualRates[productKey]) {
         for (const [key, value] of Object.entries(annualRates)) {
-            if (productName && productName.includes(key.split(' ')[0])) {
+            if (productName && (productName.includes(key.split(' ')[0]) || key.includes(productKey))) {
                 annualRate = value;
                 break;
             }
