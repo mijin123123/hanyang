@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -1015,9 +1015,7 @@
 
         // 고객센터 채팅 열기
         function openChat() {
-            if (typeof ChannelIO !== 'undefined') {
-                ChannelIO('openChat');
-            } else {
+             else {
                 alert('고객센터 채팅을 준비 중입니다. 잠시 후 다시 시도해주세요.');
             }
         }
@@ -1091,11 +1089,8 @@
 
     <!-- 채널톡 스크립트 -->
     <script>
-        (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
-
-        ChannelIO('boot', {
-            "pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
-        });
+        
     </script>
 </body>
 </html>
+
