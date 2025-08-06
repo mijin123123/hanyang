@@ -748,6 +748,8 @@ app.get('/api/check-session', (req, res) => {
 // 마이페이지
 app.get('/mypage', requireLogin, async (req, res) => {
     try {
+        console.log(`🔍 ${req.session.user.username} 마이페이지 접근`);
+        
         // 현재 로그인한 사용자의 상세 정보 조회
         const { data: userProfile, error } = await supabase
             .from('members')
@@ -769,7 +771,9 @@ app.get('/mypage', requireLogin, async (req, res) => {
             });
         }
         
-        // 사용자의 모든 투자 데이터 조회 (승인된 투자만)
+        console.log(`✅ 사용자 프로필 조회 성공: ID=${userProfile.id}, 이름=${userProfile.name}`);
+        
+        // 사용자의 모든 투자 데이터 조회 (모든 상태 포함)
         const { data: investments, error: investmentError } = await supabase
             .from('investments')
             .select(`
@@ -780,18 +784,24 @@ app.get('/mypage', requireLogin, async (req, res) => {
                 product_type,
                 status
             `)
-            .eq('member_id', userProfile.id)
-            .eq('status', 'approved');
+            .eq('member_id', userProfile.id);
+        
+        console.log(`🔍 ${req.session.user.username} 투자 데이터 조회 결과:`, investments);
         
         let totalInvestment = 0;
         let productCount = 0;
         let accumulatedInterest = 0;
+        let approvedInvestments = [];
         
         if (!investmentError && investments && investments.length > 0) {
-            productCount = investments.length; // 조합상품 개수
+            // 모든 투자 개수 (상태 무관)
+            productCount = investments.length;
             
-            // 각 투자별 누적 이자 계산
-            investments.forEach(investment => {
+            // 승인된 투자만 필터링
+            approvedInvestments = investments.filter(inv => inv.status === 'approved');
+            
+            // 승인된 투자의 누적 이자 계산
+            approvedInvestments.forEach(investment => {
                 const investmentAmount = parseFloat(investment.amount || 0);
                 totalInvestment += investmentAmount;
                 
@@ -815,10 +825,10 @@ app.get('/mypage', requireLogin, async (req, res) => {
         // 잔액에 누적 이자 추가 (실제로는 별도 테이블에서 관리해야 함)
         currentBalance += accumulatedInterest;
         
-        // 일일 수익 계산 (모든 투자의 일일 수익 합계)
+        // 일일 수익 계산 (승인된 투자의 일일 수익 합계)
         let dailyProfit = 0;
-        if (investments && investments.length > 0) {
-            dailyProfit = investments.reduce((sum, investment) => {
+        if (approvedInvestments && approvedInvestments.length > 0) {
+            dailyProfit = approvedInvestments.reduce((sum, investment) => {
                 const investmentAmount = parseFloat(investment.amount || 0);
                 const dailyRate = getDailyRateByProduct(investment.product_name || investment.product_type);
                 return sum + (investmentAmount * dailyRate);

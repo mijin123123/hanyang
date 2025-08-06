@@ -282,6 +282,90 @@
         }
 
         .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        /* 투자 현황 목록 스타일 */
+        .investment-summary-list {
+            margin-top: 15px;
+        }
+
+        .investment-item {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .investment-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .investment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .investment-header .product-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .investment-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-approved {
+            background-color: #d1edff;
+            color: #0066cc;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .no-investments {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-secondary {
             background-color: #6c757d;
         }
 
@@ -670,6 +754,38 @@
                     <label for="detailAddress">상세주소</label>
                     <input type="text" id="detailAddress" name="detailAddress" class="form-control" placeholder="상세주소를 입력하세요" value="<%= typeof userProfile !== 'undefined' && userProfile && userProfile.detail_address ? userProfile.detail_address : '' %>">
                 </div>
+                
+                <h2 class="section-title" style="margin-top: 30px;">나의 투자 현황</h2>
+                <% if (typeof investments !== 'undefined' && investments && investments.length > 0) { %>
+                    <div class="investment-summary-list">
+                        <% investments.forEach((investment, index) => { %>
+                            <div class="investment-item">
+                                <div class="investment-header">
+                                    <span class="product-name"><%= investment.product_name %></span>
+                                    <span class="status-badge status-<%= investment.status %>">
+                                        <%= investment.status === 'approved' ? '승인됨' : 
+                                            investment.status === 'rejected' ? '반려됨' : 
+                                            investment.status === 'completed' ? '완료됨' : '대기중' %>
+                                    </span>
+                                </div>
+                                <div class="investment-details">
+                                    <span>출자금액: ₩<%= parseFloat(investment.amount || 0).toLocaleString() %></span>
+                                    <span>신청일: <%= new Date(investment.created_at).toLocaleDateString('ko-KR') %></span>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                    <a href="/my_investments" class="btn btn-primary btn-block" style="margin-top: 15px;">
+                        <i class="fas fa-chart-line"></i> 상세 투자 현황 보기
+                    </a>
+                <% } else { %>
+                    <div class="no-investments">
+                        <p>아직 투자 내역이 없습니다.</p>
+                        <a href="/product_list" class="btn btn-primary btn-block">
+                            <i class="fas fa-plus"></i> 조합상품 신청하기
+                        </a>
+                    </div>
+                <% } %>
                 
                 <button type="button" class="btn btn-block" onclick="updateAccountInfo()">
                     <i class="fas fa-save"></i> 계좌/주소 정보 저장
