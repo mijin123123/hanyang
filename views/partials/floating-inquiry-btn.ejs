@@ -1,0 +1,88 @@
+<!-- 1:1 문의 플로팅 버튼 -->
+<div class="floating-inquiry-btn" id="floatingInquiryBtn">
+    <i class="fas fa-comments"></i>
+    <span>1:1 문의</span>
+</div>
+
+<style>
+    .floating-inquiry-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 15px 25px;
+        box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
+        cursor: pointer;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        animation: float 3s ease-in-out infinite;
+        text-decoration: none;
+    }
+
+    .floating-inquiry-btn:hover {
+        background: linear-gradient(135deg, #3f37c9 0%, #4361ee 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
+        color: white;
+    }
+
+    .floating-inquiry-btn i {
+        font-size: 20px;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* 모바일에서 버튼 크기 조정 */
+    @media (max-width: 768px) {
+        .floating-inquiry-btn {
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+        
+        .floating-inquiry-btn i {
+            font-size: 18px;
+        }
+    }
+</style>
+
+<script>
+    // 플로팅 1:1 문의 버튼 클릭 이벤트
+    document.addEventListener('DOMContentLoaded', function() {
+        const floatingBtn = document.getElementById('floatingInquiryBtn');
+        if (floatingBtn) {
+            floatingBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // 현재 페이지가 문의 페이지가 아니라면 이동
+                if (window.location.pathname !== '/inquiry_list') {
+                    window.location.href = '/inquiry_list';
+                } else {
+                    // 현재 페이지가 문의 페이지라면 폼으로 스크롤
+                    const inquiryForm = document.getElementById('inquiry-form');
+                    if (inquiryForm) {
+                        inquiryForm.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        }
+    });
+</script>

@@ -64,12 +64,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 헤더 사용자 정보 업데이트 함수
 function updateHeaderUserInfo() {
+    console.log('🔧 updateHeaderUserInfo 함수 호출됨');
+    
     const user = getCurrentUser();
+    console.log('🔧 getCurrentUser 결과:', user);
+    
     const authArea = document.querySelector('.hy-auth-area');
     const mobileAuth = document.querySelector('.hy-mobile-auth');
     const headerUsername = document.getElementById('headerUsername');
     
+    console.log('🔧 DOM 요소들:', {
+        authArea: !!authArea,
+        mobileAuth: !!mobileAuth,
+        headerUsername: !!headerUsername
+    });
+    
     if (user) {
+        console.log('✅ 사용자 로그인 상태 - 헤더 업데이트');
+        
         // 데스크탑 헤더 업데이트
         if (headerUsername) {
             headerUsername.textContent = user.name + '님';
@@ -78,13 +90,14 @@ function updateHeaderUserInfo() {
         if (authArea) {
             authArea.innerHTML = `
                 <span class="hy-username">${user.name}님</span>
-                <a href="mypage" class="hy-auth-link" style="background: #0056a3; color: white; border-color: #0056a3;">
+                <a href="/mypage" class="hy-auth-link" style="background: #0056a3; color: white; border-color: #0056a3;">
                     <i class="fas fa-user"></i> 마이페이지
                 </a>
                 <button onclick="logout()" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> 로그아웃
                 </button>
             `;
+            console.log('✅ 데스크탑 헤더 업데이트 완료');
         }
         
         // 모바일 헤더 업데이트
@@ -94,7 +107,7 @@ function updateHeaderUserInfo() {
                     <span class="user-name">
                         <i class="fas fa-user-circle"></i> ${user.name}님
                     </span>
-                    <a href="mypage" class="hy-mobile-auth-btn" style="background: #0056a3; color: white; border-color: #0056a3; margin-bottom: 8px;">
+                    <a href="/mypage" class="hy-mobile-auth-btn" style="background: #0056a3; color: white; border-color: #0056a3; margin-bottom: 8px;">
                         <i class="fas fa-user"></i> 마이페이지
                     </a>
                     <button onclick="logout()" class="logout-btn">
@@ -102,8 +115,11 @@ function updateHeaderUserInfo() {
                     </button>
                 </div>
             `;
+            console.log('✅ 모바일 헤더 업데이트 완료');
         }
     } else {
+        console.log('❌ 사용자 미로그인 상태 - 로그인/회원가입 버튼 표시');
+        
         // 로그인하지 않은 경우
         if (authArea) {
             authArea.innerHTML = `
@@ -114,6 +130,7 @@ function updateHeaderUserInfo() {
                     <i class="fas fa-user-plus"></i> 회원가입
                 </a>
             `;
+            console.log('✅ 데스크탑 헤더 로그인/회원가입 버튼 업데이트 완료');
         }
         
         if (mobileAuth) {
@@ -125,8 +142,11 @@ function updateHeaderUserInfo() {
                     <i class="fas fa-user-plus"></i> 회원가입
                 </a>
             `;
+            console.log('✅ 모바일 헤더 로그인/회원가입 버튼 업데이트 완료');
         }
     }
+    
+    console.log('🔧 updateHeaderUserInfo 함수 완료');
 }
 
 // 메뉴 외부 클릭 시 모바일 메뉴 닫기
@@ -154,3 +174,6 @@ window.addEventListener('scroll', function() {
         }
     }
 });
+
+// updateHeaderUserInfo 함수를 전역으로 노출
+window.updateHeaderUserInfo = updateHeaderUserInfo;
