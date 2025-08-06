@@ -1570,34 +1570,6 @@ app.get('/admin/transaction-management', requireAdmin, async (req, res) => {
 
 // API 엔드포인트들
 
-// 문의 데이터 (샘플)
-let inquiries = [
-    {
-        id: 1,
-        name: "김투자",
-        email: "investor@example.com",
-        phone: "010-1234-5678",
-        title: "투자 상품 문의",
-        content: "300KW 다함께 동행 뉴베이직 상품에 대해 자세히 알고 싶습니다. 투자 조건과 수익률, 그리고 투자 기간에 대해 상담받고 싶습니다.",
-        status: "pending",
-        createdAt: "2025-01-20",
-        reply: null,
-        replyDate: null
-    },
-    {
-        id: 2,
-        name: "이관리",
-        email: "manager@example.com", 
-        phone: "010-9876-5432",
-        title: "회원가입 관련 문의",
-        content: "회원가입 후 승인이 얼마나 걸리는지 궁금합니다. 또한 필요한 서류가 있다면 알려주세요.",
-        status: "replied",
-        createdAt: "2025-01-18",
-        reply: "회원가입 승인은 보통 1-2일 소요됩니다. 추가 서류는 필요하지 않으며, 가입 완료 후 바로 투자 상품을 확인하실 수 있습니다.",
-        replyDate: "2025-01-19"
-    }
-];
-
 // 공지사항 데이터 (샘플)
 let notices = [
     {
@@ -1699,39 +1671,281 @@ app.delete('/api/notices/:id', requireAdmin, (req, res) => {
     res.json({ success: true, message: '공지사항이 성공적으로 삭제되었습니다.' });
 });
 
-// 문의 목록 조회 (관리자용)
-app.get('/api/inquiries', requireAdmin, (req, res) => {
-    res.json({ success: true, data: inquiries });
+// 문의사항 작성 API
+app.post('/api/inquiries', async (req, res) => {
+    try {
+        const { name, email, phone, subject, message } = req.body;
+        
+        console.log('📝 새로운 문의 접수:', {
+            name,
+            email,
+            phone: phone || '미제공',
+            subject,
+            messageLength: message?.length || 0
+        });
+
+        // 필수 필드 검증
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '필수 정보를 모두 입력해주세요.' 
+            });
+        }
+
+        // 데이터베이스에 문의 저장
+        const { data, error } = await supabase
+            .from('inquiries')
+            .insert([
+                {
+                    member_id: req.session?.user?.id || null, // 로그인한 사용자의 ID
+                    name: name.trim(),
+                    email: email.trim(),
+                    subject: subject.trim(),
+                    message: message.trim(),
+                    status: 'pending'
+                }
+            ])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('❌ 문의 저장 실패:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '문의 저장 중 오류가 발생했습니다.' 
+            });
+        }
+
+        console.log('✅ 문의 저장 성공:', data.id);
+        
+        res.json({ 
+            success: true, 
+            message: '문의가 성공적으로 접수되었습니다.',
+            inquiryId: data.id
+        });
+
+    } catch (error) {
+        console.error('❌ 문의 접수 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 문의 목록 조회 (관리자용) - 데이터베이스에서 조회
+app.get('/api/inquiries', requireAdmin, async (req, res) => {
+    try {
+        console.log('📋 관리자 문의 목록 조회');
+        
+        const { data: inquiries, error } = await supabase
+            .from('inquiries')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('❌ 문의 목록 조회 실패:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '문의 목록 조회 중 오류가 발생했습니다.' 
+            });
+        }
+
+        // 프론트엔드 호환성을 위해 필드명 변환
+        const formattedInquiries = inquiries.map(inquiry => ({
+            id: inquiry.id,
+            name: inquiry.name,
+            email: inquiry.email,
+            phone: inquiry.phone || '미제공',
+            title: inquiry.subject, // subject -> title
+            content: inquiry.message, // message -> content
+            createdAt: new Date(inquiry.created_at).toLocaleDateString('ko-KR'), // created_at -> createdAt (한국 날짜 형식)
+            status: inquiry.status,
+            reply: inquiry.admin_reply,
+            replyDate: inquiry.replied_at ? new Date(inquiry.replied_at).toLocaleDateString('ko-KR') : null
+        }));
+
+        console.log(`✅ 문의 목록 조회 성공: ${formattedInquiries?.length || 0}건`);
+        
+        res.json({ 
+            success: true, 
+            data: formattedInquiries || []
+        });
+
+    } catch (error) {
+        console.error('❌ 문의 목록 조회 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
 });
 
 // 문의 답변 처리 (관리자용)
-app.post('/api/inquiries/:id/reply', requireAdmin, (req, res) => {
-    const { id } = req.params;
-    const { reply } = req.body;
-    
-    const inquiryIndex = inquiries.findIndex(i => i.id === parseInt(id));
-    if (inquiryIndex === -1) {
-        return res.json({ success: false, message: '문의를 찾을 수 없습니다.' });
+app.post('/api/inquiries/:id/reply', requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reply } = req.body;
+        
+        console.log(`💬 문의 답변 처리: ${id}`);
+
+        if (!reply || !reply.trim()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '답변 내용을 입력해주세요.' 
+            });
+        }
+
+        const { data, error } = await supabase
+            .from('inquiries')
+            .update({
+                admin_reply: reply.trim(),
+                status: 'answered',
+                replied_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('❌ 문의 답변 실패:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '답변 저장 중 오류가 발생했습니다.' 
+            });
+        }
+
+        if (!data) {
+            return res.status(404).json({ 
+                success: false, 
+                message: '문의를 찾을 수 없습니다.' 
+            });
+        }
+
+        console.log('✅ 문의 답변 완료:', data.id);
+        
+        res.json({ 
+            success: true, 
+            message: '답변이 성공적으로 전송되었습니다.' 
+        });
+
+    } catch (error) {
+        console.error('❌ 문의 답변 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
     }
-    
-    inquiries[inquiryIndex].reply = reply;
-    inquiries[inquiryIndex].status = 'replied';
-    inquiries[inquiryIndex].replyDate = new Date().toISOString().split('T')[0];
-    
-    res.json({ success: true, message: '답변이 성공적으로 전송되었습니다.' });
+});
+
+// 사용자별 문의 조회 API
+app.get('/api/my-inquiries', requireLogin, async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        
+        console.log(`📋 사용자 문의 조회: ${userId}`);
+
+        const { data, error } = await supabase
+            .from('inquiries')
+            .select('*')
+            .eq('member_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('❌ 사용자 문의 조회 실패:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '문의 조회 중 오류가 발생했습니다.' 
+            });
+        }
+
+        // 필드명 매핑 및 날짜 포맷팅
+        const mappedData = data.map(inquiry => {
+            const createdDate = new Date(inquiry.created_at);
+            const repliedDate = inquiry.replied_at ? new Date(inquiry.replied_at) : null;
+            
+            return {
+                id: inquiry.id,
+                title: inquiry.subject || '', // subject -> title
+                content: inquiry.message || '', // message -> content
+                category: inquiry.category || '일반 문의',
+                status: inquiry.status === 'answered' ? 'replied' : inquiry.status, // status 매핑
+                createdAt: createdDate.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).replace(/\. /g, '.').replace('.', ''), // 2024.03.15 형태
+                createdTime: createdDate.toLocaleTimeString('ko-KR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }),
+                adminReply: inquiry.admin_reply || null,
+                repliedAt: repliedDate ? repliedDate.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).replace(/\. /g, '.').replace('.', '') : null,
+                repliedTime: repliedDate ? repliedDate.toLocaleTimeString('ko-KR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }) : null,
+                phone: inquiry.phone || '',
+                email: inquiry.email || ''
+            };
+        });
+
+        console.log(`✅ 사용자 문의 조회 완료: ${mappedData.length}건`);
+        
+        res.json({ 
+            success: true, 
+            inquiries: mappedData
+        });
+
+    } catch (error) {
+        console.error('❌ 사용자 문의 조회 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
 });
 
 // 문의 삭제 (관리자용)
-app.delete('/api/inquiries/:id', requireAdmin, (req, res) => {
-    const { id } = req.params;
-    
-    const inquiryIndex = inquiries.findIndex(i => i.id === parseInt(id));
-    if (inquiryIndex === -1) {
-        return res.json({ success: false, message: '문의를 찾을 수 없습니다.' });
+app.delete('/api/inquiries/:id', requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        console.log(`🗑️ 문의 삭제: ${id}`);
+
+        const { error } = await supabase
+            .from('inquiries')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('❌ 문의 삭제 실패:', error);
+            return res.status(500).json({ 
+                success: false, 
+                message: '문의 삭제 중 오류가 발생했습니다.' 
+            });
+        }
+
+        console.log('✅ 문의 삭제 완료');
+        
+        res.json({ 
+            success: true, 
+            message: '문의가 성공적으로 삭제되었습니다.' 
+        });
+
+    } catch (error) {
+        console.error('❌ 문의 삭제 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
     }
-    
-    inquiries.splice(inquiryIndex, 1);
-    res.json({ success: true, message: '문의가 성공적으로 삭제되었습니다.' });
 });
 
 // 팝업 데이터 저장소 (Supabase에서 로드)

@@ -212,8 +212,8 @@
 
             data.forEach((inquiry, index) => {
                 const row = document.createElement('tr');
-                const statusClass = inquiry.status === 'replied' ? 'status-active' : 'status-pending';
-                const statusText = inquiry.status === 'replied' ? '답변완료' : '대기중';
+                const statusClass = inquiry.status === 'answered' ? 'status-active' : 'status-pending';
+                const statusText = inquiry.status === 'answered' ? '답변완료' : '대기중';
                 
                 row.innerHTML = `
                     <td>${inquiry.id}</td>
@@ -226,10 +226,10 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewInquiry(${inquiry.id})">
+                        <button class="btn btn-primary btn-sm" onclick="viewInquiry('${inquiry.id}')">
                             <i class="fas fa-eye"></i> 상세보기
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteInquiry(${inquiry.id})">
+                        <button class="btn btn-danger btn-sm" onclick="deleteInquiry('${inquiry.id}')">
                             <i class="fas fa-trash"></i> 삭제
                         </button>
                     </td>
@@ -240,14 +240,15 @@
 
         // 문의 상세 모달 표시
         function viewInquiry(id) {
-            currentInquiry = inquiries.find(i => i.id === id);
+            // UUID 문자열로 비교 (Supabase에서 UUID 타입 사용)
+            currentInquiry = inquiries.find(i => i.id === id || i.id === String(id));
             
             if (currentInquiry) {
-                document.getElementById('inquiryName').textContent = currentInquiry.name;
-                document.getElementById('inquiryEmail').textContent = currentInquiry.email;
-                document.getElementById('inquiryPhone').textContent = currentInquiry.phone;
-                document.getElementById('inquiryDate').textContent = currentInquiry.createdAt;
-                document.getElementById('inquiryContent').textContent = currentInquiry.content;
+                document.getElementById('inquiryName').textContent = currentInquiry.name || '정보 없음';
+                document.getElementById('inquiryEmail').textContent = currentInquiry.email || '정보 없음';
+                document.getElementById('inquiryPhone').textContent = currentInquiry.phone || '미제공';
+                document.getElementById('inquiryDate').textContent = currentInquiry.createdAt || '정보 없음';
+                document.getElementById('inquiryContent').textContent = currentInquiry.content || '내용 없음';
                 
                 // 기존 답변이 있으면 표시
                 if (currentInquiry.reply) {
@@ -257,6 +258,9 @@
                 }
                 
                 showModal();
+            } else {
+                console.error('문의를 찾을 수 없습니다. ID:', id);
+                showAlert('error', '문의 정보를 찾을 수 없습니다.');
             }
         }
 
@@ -300,8 +304,8 @@
                         const inquiryIndex = inquiries.findIndex(i => i.id === currentInquiry.id);
                         if (inquiryIndex !== -1) {
                             inquiries[inquiryIndex].reply = replyContent;
-                            inquiries[inquiryIndex].status = 'replied';
-                            inquiries[inquiryIndex].replyDate = new Date().toISOString().split('T')[0];
+                            inquiries[inquiryIndex].status = 'answered'; // 데이터베이스와 일치하도록 answered 사용
+                            inquiries[inquiryIndex].replyDate = new Date().toLocaleDateString('ko-KR');
                         }
                         
                         showAlert('success', '답변이 성공적으로 전송되었습니다.');
@@ -347,7 +351,16 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
             filteredInquiries = inquiries.filter(inquiry => {
-                const statusMatch = statusFilter === 'all' || inquiry.status === statusFilter;
+                // 상태 필터링 (데이터베이스 상태값에 맞춤)
+                let statusMatch = false;
+                if (statusFilter === 'all') {
+                    statusMatch = true;
+                } else if (statusFilter === 'pending') {
+                    statusMatch = inquiry.status === 'pending';
+                } else if (statusFilter === 'replied') {
+                    statusMatch = inquiry.status === 'answered'; // answered를 replied로 매핑
+                }
+                
                 const searchMatch = inquiry.title.toLowerCase().includes(searchTerm) || 
                                   inquiry.name.toLowerCase().includes(searchTerm);
                 

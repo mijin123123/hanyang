@@ -758,7 +758,7 @@
         }
 
         // 폼 제출 처리
-        document.getElementById('inquiry-form').addEventListener('submit', function(e) {
+        document.getElementById('inquiry-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const submitBtn = document.getElementById('submit-btn');
@@ -768,40 +768,73 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송 중...';
             
-            // 폼 데이터 수집
-            const formData = new FormData();
-            formData.append('category', document.getElementById('category').value);
-            formData.append('title', document.getElementById('title').value);
-            formData.append('message', document.getElementById('message').value);
-            formData.append('email', document.getElementById('email').value);
-            formData.append('phone', document.getElementById('phone').value);
-            
-            // 파일 추가
-            selectedFiles.forEach(file => {
-                formData.append('files[]', file);
-            });
-            
-            // 시뮬레이션 (실제로는 서버로 전송)
-            setTimeout(() => {
-                // 성공 메시지 표시
+            try {
+                // 폼 데이터 수집
+                const formData = {
+                    name: document.getElementById('email').value.split('@')[0] || '익명',
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value || null,
+                    subject: `[${document.getElementById('category').options[document.getElementById('category').selectedIndex].text}] ${document.getElementById('title').value}`,
+                    message: document.getElementById('message').value
+                };
+
+                console.log('📝 문의 전송 중:', formData);
+
+                // 서버로 문의 전송
+                const response = await fetch('/api/inquiries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 성공 메시지 표시
+                    successMessage.style.display = 'block';
+                    successMessage.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            ${result.message}
+                            <br><small>문의번호: ${result.inquiryId}</small>
+                        </div>
+                    `;
+                    successMessage.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // 폼 초기화
+                    document.getElementById('inquiry-form').reset();
+                    selectedFiles = [];
+                    fileList.innerHTML = '';
+                    
+                    console.log('✅ 문의 전송 성공:', result.inquiryId);
+                } else {
+                    throw new Error(result.message || '문의 전송에 실패했습니다.');
+                }
+                
+            } catch (error) {
+                console.error('❌ 문의 전송 실패:', error);
+                
+                // 오류 메시지 표시
                 successMessage.style.display = 'block';
+                successMessage.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        문의 전송 중 오류가 발생했습니다: ${error.message}
+                    </div>
+                `;
                 successMessage.scrollIntoView({ behavior: 'smooth' });
-                
-                // 폼 초기화
-                document.getElementById('inquiry-form').reset();
-                selectedFiles = [];
-                fileList.innerHTML = '';
-                
+            } finally {
                 // 버튼 복원
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 문의 보내기';
                 
-                // 3초 후 성공 메시지 숨기기
+                // 3초 후 메시지 숨기기
                 setTimeout(() => {
                     successMessage.style.display = 'none';
                 }, 3000);
-                
-            }, 2000);
+            }
         });
 
         // 채널톡 스크립트

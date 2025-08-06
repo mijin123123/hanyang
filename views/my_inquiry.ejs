@@ -678,10 +678,6 @@
             <div class="service-info">
                 <h2 class="service-title">한양에너지 고객센터</h2>
                 <p class="service-subtitle">평일 10:00 ~ 19:00 (점심시간 13:00 ~ 14:00)</p>
-                <p><i class="fas fa-phone-alt"></i> 1588-0000</p>
-            </div>
-            <div class="service-image">
-                <img src="img/announcements/question.png" alt="고객센터">
             </div>
         </div>
 
@@ -695,155 +691,20 @@
         </div>
 
         <!-- 문의 목록 -->
-        <div class="inquiry-list">
-            <!-- 문의 항목 1 -->
-            <div class="inquiry-item">
-                <div class="inquiry-header" onclick="toggleInquiry(1)">
-                    <div class="inquiry-left">
-                        <div class="inquiry-meta">
-                            <span class="inquiry-category">투자 관련</span>
-                            <span class="inquiry-date">2024.03.15</span>
-                            <span class="inquiry-status status-answered">답변완료</span>
-                        </div>
-                        <h3 class="inquiry-title">조합상품 수익률 문의드립니다</h3>
-                        <p class="inquiry-preview">안녕하세요. 조합상품 투자를 고려 중인데, 현재 수익률이 어느 정도인지 궁금합니다. 또한 투자 기간과 최소 투자 금액에 대해서도...</p>
-                    </div>
-                    <div class="inquiry-toggle" id="toggle-1">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-                <div class="inquiry-content" id="content-1">
-                    <div class="inquiry-message">
-                        <div class="message-header">
-                            <div class="message-label">
-                                <i class="fas fa-user"></i> 문의 내용
-                            </div>
-                            <div class="message-date">2024.03.15 14:30</div>
-                        </div>
-                        <div class="message-content">안녕하세요. 조합상품 투자를 고려 중인데, 현재 수익률이 어느 정도인지 궁금합니다.
-
-또한 투자 기간과 최소 투자 금액에 대해서도 알려주시면 감사하겠습니다.
-
-그리고 투자 후 중도 해지가 가능한지, 가능하다면 어떤 절차를 거쳐야 하는지도 문의드립니다.</div>
-                        <div class="attached-files">
-                            <div class="files-label">
-                                <i class="fas fa-paperclip"></i> 첨부파일
-                            </div>
-                            <div class="file-list">
-                                <a href="#" class="file-item">
-                                    <i class="fas fa-file-pdf"></i>
-                                    <span>투자계획서.pdf</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="inquiry-response">
-                        <div class="response-header">
-                            <div class="response-label">
-                                <i class="fas fa-headset"></i> 고객센터 답변
-                            </div>
-                            <div class="response-date">2024.03.16 10:15</div>
-                        </div>
-                        <div class="response-content">안녕하세요. 한양에너지 고객센터입니다.
-
-문의해주신 조합상품에 대해 답변드리겠습니다.
-
-1. 현재 수익률: 연 12-15% (세전 기준)
-2. 투자 기간: 20년 (한전과의 장기계약)
-3. 최소 투자 금액: 1,000만원
-
-중도 해지의 경우, 투자 후 3년 경과 시점부터 가능하며, 별도의 해지 수수료가 발생할 수 있습니다.
-
-더 자세한 상담을 원하시면 고객센터(1588-0000)로 연락주시기 바랍니다.
-
-감사합니다.</div>
-                    </div>
+        <div class="inquiry-list" id="inquiryList">
+            <!-- 로딩 상태 -->
+            <div class="loading-state" id="loadingState">
+                <div style="text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <p>문의 내역을 불러오는 중입니다...</p>
                 </div>
             </div>
-
-            <!-- 문의 항목 2 -->
-            <div class="inquiry-item">
-                <div class="inquiry-header" onclick="toggleInquiry(2)">
-                    <div class="inquiry-left">
-                        <div class="inquiry-meta">
-                            <span class="inquiry-category">계정 관련</span>
-                            <span class="inquiry-date">2024.03.10</span>
-                            <span class="inquiry-status status-waiting">답변대기</span>
-                        </div>
-                        <h3 class="inquiry-title">로그인이 안 됩니다</h3>
-                        <p class="inquiry-preview">회원가입은 정상적으로 완료했는데 로그인이 되지 않습니다. 비밀번호를 여러 번 확인해봤는데도 계속 로그인 실패 메시지가...</p>
-                    </div>
-                    <div class="inquiry-toggle" id="toggle-2">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-                <div class="inquiry-content" id="content-2">
-                    <div class="inquiry-message">
-                        <div class="message-header">
-                            <div class="message-label">
-                                <i class="fas fa-user"></i> 문의 내용
-                            </div>
-                            <div class="message-date">2024.03.10 16:45</div>
-                        </div>
-                        <div class="message-content">회원가입은 정상적으로 완료했는데 로그인이 되지 않습니다.
-
-비밀번호를 여러 번 확인해봤는데도 계속 로그인 실패 메시지가 나옵니다.
-
-혹시 계정에 문제가 있는 건 아닌지 확인 부탁드립니다.
-
-등록한 이메일: minj0010@example.com</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 문의 항목 3 -->
-            <div class="inquiry-item">
-                <div class="inquiry-header" onclick="toggleInquiry(3)">
-                    <div class="inquiry-left">
-                        <div class="inquiry-meta">
-                            <span class="inquiry-category">결제/정산 관련</span>
-                            <span class="inquiry-date">2024.03.05</span>
-                            <span class="inquiry-status status-completed">처리완료</span>
-                        </div>
-                        <h3 class="inquiry-title">이번 달 수익금 지급 관련 문의</h3>
-                        <p class="inquiry-preview">안녕하세요. 이번 달 수익금이 아직 입금되지 않아서 문의드립니다. 보통 매월 몇 일경에 입금되는지...</p>
-                    </div>
-                    <div class="inquiry-toggle" id="toggle-3">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-                <div class="inquiry-content" id="content-3">
-                    <div class="inquiry-message">
-                        <div class="message-header">
-                            <div class="message-label">
-                                <i class="fas fa-user"></i> 문의 내용
-                            </div>
-                            <div class="message-date">2024.03.05 11:20</div>
-                        </div>
-                        <div class="message-content">안녕하세요. 이번 달 수익금이 아직 입금되지 않아서 문의드립니다.
-
-보통 매월 몇 일경에 입금되는지, 그리고 혹시 입금이 지연되는 특별한 사유가 있는지 궁금합니다.
-
-투자 계좌: 국민은행 123-456-789012</div>
-                    </div>
-                    <div class="inquiry-response">
-                        <div class="response-header">
-                            <div class="response-label">
-                                <i class="fas fa-headset"></i> 고객센터 답변
-                            </div>
-                            <div class="response-date">2024.03.05 15:30</div>
-                        </div>
-                        <div class="response-content">안녕하세요. 한양에너지 고객센터입니다.
-
-수익금은 매월 말일에 일괄 지급되며, 은행 업무 시간에 따라 1-2일 정도 지연될 수 있습니다.
-
-고객님의 계좌로 오늘 오후에 입금 예정이니 조금만 기다려주시기 바랍니다.
-
-확인해보시고 문제가 있으시면 다시 연락 부탁드립니다.
-
-감사합니다.</div>
-                    </div>
-                </div>
+            
+            <!-- 문의가 없을 때 -->
+            <div class="no-inquiries" id="noInquiries" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h3>아직 문의 내역이 없습니다</h3>
+                <p>궁금한 사항이 있으시면 언제든지 문의해 주세요.</p>
             </div>
         </div>
 
@@ -858,67 +719,135 @@
     </div>
 
     <!-- 푸터 -->
-    <footer class="modern-footer">
-        <div class="footer-container">
-            <!-- 왼쪽: 로고 및 SNS -->
-            <div class="footer-section logo-section">
-                <div class="footer-logo">
-                    <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: 0.5px; font-family: 'Arial', sans-serif; display: flex; align-items: center;">
-                        HANYANG ENERGY<span style="width: 8px; height: 8px; background-color: #ff6600; border-radius: 50%; display: inline-block; margin-left: 0px; margin-top: 10px;"></span>
-                    </div>
-                </div>
-                <p>청정에너지로 만드는 지속가능한 미래</p>
-                
-                <div class="sns-links">
-                    <a href="#" aria-label="페이스북"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="인스타그램"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
-                    <a href="#" aria-label="블로그"><i class="fab fa-blogger-b"></i></a>
-                </div>
-            </div>
+    <%- include('partials/footer') %>
 
-            <!-- 중앙: 통합 링크 섹션 -->
-            <div class="footer-section links-section">
-                <h4>바로가기</h4>
-                <ul class="footer-links">
-                    <li><a href="/ceo_message">인사말</a></li>
-                    <li><a href="/history">연혁</a></li>
-                    <li><a href="/introduce_service">서비스 소개</a></li>
-                    <li><a href="/announcements">공지사항</a></li>
-                    <li><a href="/faq">자주 묻는 질문</a></li>
-                </ul>
-            </div>
-
-            <!-- 오른쪽: 연락처 섹션 -->
-            <div class="footer-section contact-section">
-                <h4>연락처</h4>
-                
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-                        <div class="contact-text">
-                            전라남도 보성군 보성읍 구교길2-1
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-                        <div class="contact-text">
-                            hanenergy@example.com
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>대표자: 정용우 / 정우영 (Co-Owner) | 사업자등록번호: 257-88-01409 | © 2023 주식회사 한양에너지. All Rights Reserved.</p>
-        </div>
-    </footer>
+    
 
     <!-- JavaScript -->
     <script src="js/header.js"></script>
     <script>
+        let inquiryData = [];
+
+        // 문의 목록 로드
+        async function loadInquiries() {
+            try {
+                console.log('📋 문의 목록 로딩 시작');
+                
+                const response = await fetch('/api/my-inquiries');
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || '문의 목록을 불러올 수 없습니다.');
+                }
+                
+                inquiryData = result.inquiries;
+                console.log(`✅ 문의 목록 로드 완료: ${inquiryData.length}건`);
+                
+                renderInquiries();
+                
+            } catch (error) {
+                console.error('❌ 문의 목록 로드 실패:', error);
+                showError('문의 목록을 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+        
+        // 문의 목록 렌더링
+        function renderInquiries() {
+            const inquiryList = document.getElementById('inquiryList');
+            const loadingState = document.getElementById('loadingState');
+            const noInquiries = document.getElementById('noInquiries');
+            
+            // 로딩 상태 숨기기
+            loadingState.style.display = 'none';
+            
+            if (inquiryData.length === 0) {
+                // 문의가 없는 경우
+                noInquiries.style.display = 'block';
+                return;
+            }
+            
+            // 문의 목록 HTML 생성
+            let html = '';
+            inquiryData.forEach((inquiry, index) => {
+                const statusClass = inquiry.status === 'replied' ? 'status-answered' : 
+                                  inquiry.status === 'completed' ? 'status-completed' : 'status-waiting';
+                const statusText = inquiry.status === 'replied' ? '답변완료' : 
+                                 inquiry.status === 'completed' ? '처리완료' : '답변대기';
+                
+                // 내용 미리보기 (첫 100자)
+                const preview = inquiry.content.length > 100 ? 
+                              inquiry.content.substring(0, 100) + '...' : inquiry.content;
+                
+                html += `
+                    <div class="inquiry-item">
+                        <div class="inquiry-header" onclick="toggleInquiry('${inquiry.id}')">
+                            <div class="inquiry-left">
+                                <div class="inquiry-meta">
+                                    <span class="inquiry-category">${inquiry.category}</span>
+                                    <span class="inquiry-date">${inquiry.createdAt}</span>
+                                    <span class="inquiry-status ${statusClass}">${statusText}</span>
+                                </div>
+                                <h3 class="inquiry-title">${escapeHtml(inquiry.title)}</h3>
+                                <p class="inquiry-preview">${escapeHtml(preview)}</p>
+                            </div>
+                            <div class="inquiry-toggle" id="toggle-${inquiry.id}">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="inquiry-content" id="content-${inquiry.id}">
+                            <div class="inquiry-message">
+                                <div class="message-header">
+                                    <div class="message-label">
+                                        <i class="fas fa-user"></i> 문의 내용
+                                    </div>
+                                    <div class="message-date">${inquiry.createdAt} ${inquiry.createdTime}</div>
+                                </div>
+                                <div class="message-content">${escapeHtml(inquiry.content)}</div>
+                            </div>
+                            ${inquiry.adminReply ? `
+                                <div class="inquiry-response">
+                                    <div class="response-header">
+                                        <div class="response-label">
+                                            <i class="fas fa-headset"></i> 고객센터 답변
+                                        </div>
+                                        <div class="response-date">${inquiry.repliedAt} ${inquiry.repliedTime}</div>
+                                    </div>
+                                    <div class="response-content">${escapeHtml(inquiry.adminReply)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            inquiryList.innerHTML = html;
+        }
+        
+        // HTML 이스케이프 함수
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+        
+        // 에러 표시
+        function showError(message) {
+            const inquiryList = document.getElementById('inquiryList');
+            const loadingState = document.getElementById('loadingState');
+            
+            loadingState.style.display = 'none';
+            
+            inquiryList.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; background-color: var(--white); border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
+                    <h3 style="color: var(--dark); margin-bottom: 10px;">오류가 발생했습니다</h3>
+                    <p style="color: var(--gray); margin-bottom: 30px;">${message}</p>
+                    <button onclick="loadInquiries()" style="background-color: var(--primary); color: var(--white); padding: 12px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-redo"></i> 다시 시도
+                    </button>
+                </div>
+            `;
+        }
 
         // 문의 토글 기능
         function toggleInquiry(id) {
@@ -951,18 +880,24 @@
             }
         }
 
-        // 페이지 로드 시 첫 번째 문의 펼치기
+        // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                toggleInquiry(1);
-            }, 500);
+            loadInquiries();
         });
+    </script>
 
+    <script>
         // 채널톡 스크립트
         (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
         
         ChannelIO('boot', {
             "pluginKey": "42621fdb-9a63-4335-9f53-bbbff11a34e5"
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHeaderUserInfo();
         });
     </script>
 </body>

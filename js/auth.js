@@ -609,6 +609,16 @@ function updateHeaderUserInfo() {
     }
 }
 
+// 로그인 필수 체크 함수
+function requireLogin() {
+    if (!isLoggedIn()) {
+        alert('로그인이 필요한 서비스입니다.');
+        window.location.href = '/login';
+        return false;
+    }
+    return true;
+}
+
 window.login = login;
 window.logout = logout;
 window.handleLoginSuccess = handleLoginSuccess;
@@ -616,6 +626,7 @@ window.handleLoginRedirect = handleLoginRedirect;
 window.checkAdminAccess = checkAdminAccess;
 window.isAdmin = isAdmin;
 window.updateHeaderUserInfo = updateHeaderUserInfo;
+window.requireLogin = requireLogin;
 
 // 투자 관리 페이지에서 사용하는 함수들 추가
 window.checkAdminAuth = checkAdminAccess; // checkAdminAccess와 동일한 기능
@@ -626,6 +637,7 @@ console.log('전역 함수들이 설정되었습니다:', {
     getCurrentUser: typeof window.getCurrentUser,
     getCurrentAdmin: typeof window.getCurrentAdmin,
     checkAdminAuth: typeof window.checkAdminAuth,
+    requireLogin: typeof window.requireLogin,
     login: typeof window.login,
     logout: typeof window.logout,
     handleLoginSuccess: typeof window.handleLoginSuccess,
