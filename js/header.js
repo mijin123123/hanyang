@@ -5,13 +5,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileMenu = document.querySelector('.hy-mobile-menu');
     const mobileClose = document.querySelector('.hy-mobile-close');
     
+    console.log('📱 모바일 메뉴 요소들:', {
+        toggle: !!mobileToggle,
+        menu: !!mobileMenu,
+        close: !!mobileClose
+    });
+    
     if (mobileToggle && mobileMenu && mobileClose) {
         mobileToggle.addEventListener('click', function() {
+            console.log('📱 모바일 토글 클릭됨');
             mobileMenu.classList.add('hy-show');
             document.body.style.overflow = 'hidden';
         });
         
         mobileClose.addEventListener('click', function() {
+            console.log('📱 모바일 닫기 클릭됨');
             mobileMenu.classList.remove('hy-show');
             document.body.style.overflow = '';
         });
@@ -19,26 +27,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 모바일 서브메뉴 토글
     const mobileMenuBtns = document.querySelectorAll('.hy-mobile-menu-btn');
-    mobileMenuBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+    console.log('📱 모바일 메뉴 버튼 개수:', mobileMenuBtns.length);
+    
+    mobileMenuBtns.forEach((btn, index) => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log(`📱 모바일 메뉴 버튼 ${index} 클릭됨`);
+            
             const submenu = this.nextElementSibling;
-            const isOpen = submenu.style.maxHeight;
+            console.log('📱 서브메뉴 요소:', submenu);
+            
+            if (!submenu) {
+                console.error('📱 서브메뉴를 찾을 수 없습니다');
+                return;
+            }
+            
+            const isOpen = submenu.style.maxHeight && submenu.style.maxHeight !== '0px';
+            console.log('📱 현재 열림 상태:', isOpen, '현재 maxHeight:', submenu.style.maxHeight);
             
             // 모든 서브메뉴 닫기
             document.querySelectorAll('.hy-mobile-submenu').forEach(menu => {
                 if (menu !== submenu) {
-                    menu.style.maxHeight = null;
+                    menu.style.maxHeight = '0px';
                     menu.previousElementSibling.classList.remove('hy-open');
                 }
             });
             
             // 현재 서브메뉴 토글
             if (isOpen) {
-                submenu.style.maxHeight = null;
+                submenu.style.maxHeight = '0px';
                 this.classList.remove('hy-open');
+                console.log('📱 서브메뉴 닫음');
             } else {
-                submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                const scrollHeight = submenu.scrollHeight;
+                submenu.style.maxHeight = scrollHeight + 'px';
                 this.classList.add('hy-open');
+                console.log('📱 서브메뉴 열음, scrollHeight:', scrollHeight);
             }
         });
     });
