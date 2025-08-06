@@ -2849,7 +2849,16 @@ app.get('/api/admin/investments', requireAdmin, async (req, res) => {
             .from('investments')
             .select(`
                 *,
-                member:members!investments_member_id_fkey(name, username, email, phone)
+                member:members!investments_member_id_fkey(
+                    name, 
+                    username, 
+                    email, 
+                    phone, 
+                    bank_name, 
+                    account_number, 
+                    address, 
+                    detail_address
+                )
             `)
             .order('created_at', { ascending: false });
         
@@ -2869,6 +2878,56 @@ app.get('/api/admin/investments', requireAdmin, async (req, res) => {
         
     } catch (error) {
         console.error('관리자 투자 조회 중 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '서버 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 관리자: 투자 상세보기 API
+app.get('/api/admin/investment/:id', requireAdmin, async (req, res) => {
+    try {
+        const investmentId = req.params.id;
+        console.log('🔍 관리자 투자 상세보기 API 호출됨:', investmentId);
+        
+        const { data: investment, error } = await supabase
+            .from('investments')
+            .select(`
+                *,
+                member:members!investments_member_id_fkey(
+                    id,
+                    name, 
+                    username, 
+                    email, 
+                    phone, 
+                    bank_name, 
+                    account_number, 
+                    address, 
+                    detail_address,
+                    created_at,
+                    updated_at
+                )
+            `)
+            .eq('id', investmentId)
+            .single();
+        
+        if (error) {
+            console.error('투자 상세보기 조회 오류:', error);
+            return res.status(404).json({ 
+                success: false, 
+                message: '투자 정보를 찾을 수 없습니다.' 
+            });
+        }
+        
+        console.log('✅ 투자 상세보기 조회 성공:', investment.id);
+        res.json({ 
+            success: true, 
+            investment: investment 
+        });
+        
+    } catch (error) {
+        console.error('투자 상세보기 중 오류:', error);
         res.status(500).json({ 
             success: false, 
             message: '서버 오류가 발생했습니다.' 

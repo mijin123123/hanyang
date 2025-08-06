@@ -357,14 +357,59 @@
         }
 
         // 투자 상세보기
-        function viewInvestment(id) {
+        async function viewInvestment(id) {
             console.log('🔍 투자 상세보기 요청:', id);
-            const investment = investments.find(i => i.id === id);
-            if (investment) {
-                alert(`투자 상세 정보:\n\n투자자: ${investment.investor}\n이메일: ${investment.email || 'N/A'}\n연락처: ${investment.phone || 'N/A'}\n상품명: ${investment.product}\n투자금액: ${investment.amount.toLocaleString()}원\n은행: ${investment.bankName || 'N/A'}\n계좌번호: ${investment.accountNumber || 'N/A'}\n신청일: ${investment.applicationDate}\n상태: ${getStatusText(investment.status)}`);
-            } else {
-                console.error('❌ 투자 정보를 찾을 수 없음:', id);
-                alert('투자 정보를 찾을 수 없습니다.');
+            
+            try {
+                const response = await fetch(`/api/admin/investment/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('📡 투자 상세정보 응답:', result);
+
+                if (result.success && result.investment) {
+                    const inv = result.investment;
+                    const member = inv.member;
+                    
+                    // 상세 정보 표시 (최신 계좌 정보 포함)
+                    const detailInfo = `투자 상세 정보:
+
+투자자 정보:
+- 성명: ${member.name || 'N/A'}
+- 아이디: ${member.username || 'N/A'}
+- 이메일: ${member.email || 'N/A'}
+- 연락처: ${member.phone || 'N/A'}
+- 주소: ${member.address || 'N/A'} ${member.detail_address || ''}
+
+투자 정보:
+- 상품명: ${inv.product_name || inv.product_type || 'N/A'}
+- 투자금액: ${parseInt(inv.amount || inv.investment_amount || 0).toLocaleString()}원
+- 신청일: ${new Date(inv.created_at).toLocaleString('ko-KR')}
+- 상태: ${getStatusText(inv.status)}
+
+계좌 정보:
+- 은행명: ${member.bank_name || 'N/A'}
+- 계좌번호: ${member.account_number || 'N/A'}
+
+회원 정보 업데이트: ${member.updated_at ? new Date(member.updated_at).toLocaleString('ko-KR') : 'N/A'}`;
+
+                    alert(detailInfo);
+                } else {
+                    console.error('❌ 투자 정보 조회 실패:', result.message);
+                    alert('투자 정보를 가져오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('❌ 투자 상세보기 오류:', error);
+                alert('투자 정보를 불러오는 중 오류가 발생했습니다.');
             }
         }
 
